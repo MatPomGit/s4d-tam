@@ -1,6 +1,11 @@
 name: marsim
-adapter: manifest
+type: marsim
 root: data/normalized/marsim
+input_root: data/raw/marsim
+axis_convention: enu
+timestamp_unit: s
+position_unit: m
+random_seed: 7
+required_version: pinned-simulator-commit
 source: https://github.com/hku-mars/MARSIM
-recommended_capabilities: [trajectory, lidar, dynamics, closed_loop]
-license_review_required: true
+license_id: GPL-2.0

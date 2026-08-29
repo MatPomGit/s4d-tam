@@ -51,3 +51,40 @@ and calibration checks must be documented in the manifest.
 - Fit normalization, thresholds, and calibration only on the training/development split.
 - Report tuning compute separately from benchmark compute.
 - Keep paired seeds and identical sensor-degradation schedules across algorithms.
+
+## Conversion adapters
+
+The adapter kind is selected with `type` in the dataset YAML. Paths, release identifiers,
+axis conventions, units, ROS topics, and synchronization tolerances are deliberately explicit;
+do not infer these values from filenames. The following Python commands show the reproducible
+conversion entry points (replace paths and the pinned version with values from the YAML):
+
+```bash
+python -c 'from s4dtam_benchmark.datasets import TartanAirDataset; list(TartanAirDataset("data/raw/tartanair", axis_convention="tartanair_ned_to_enu").sequences())'
+python -c 'from s4dtam_benchmark.datasets import BlackbirdDataset; print("configure topics and sync_tolerance_s from configs/datasets/blackbird.yaml")'
+python -c 'from s4dtam_benchmark.datasets import MARSIMExporter; MARSIMExporter("data/normalized/marsim", seed=7).export([{"timestamp": 0.0, "position_m": [0, 0, 0]}], simulator_version="PINNED_COMMIT")'
+python -c 'from s4dtam_benchmark.datasets import AeroVerseDataset; list(AeroVerseDataset("data/normalized/aeroverse", required_version="paper-release-v1", accepted_license="AeroVerse-release-terms").sequences())'
+```
+
+TartanAir consumes a `sequence.json` per trajectory and rejects missing/out-of-order image
+indices, absent files or calibration fields, non-increasing time, wrong units, and unknown frame
+transforms. Blackbird consumes ROS bags through a configured reader (or dependency-free
+`.bag.json` extractions), requires camera/IMU/ground-truth topics, and accepts exactly one match
+inside `sync_tolerance_s`. MARSIM sorting and filenames are deterministic for the explicit seed.
+AeroVerse produces no partial sequence: its complete manifest, exact release, and explicit
+license acceptance must all pass before iteration starts.
+
+## Manifest provenance and license fields
+
+Every generated manifest records `dataset`, `dataset_version`, `timestamp_unit`,
+`position_unit`, and `axis_convention`. Simulator exports additionally record `random_seed`.
+AeroVerse manifests must contain `"license": {"id": "...", "accepted": true}`. Sequence entries
+remain `id`, `file`, optional task horizons, and `metadata`; stable IDs and ordering are part of
+the reproducibility contract.
+
+| Dataset | Origin | License/provenance gate |
+|---|---|---|
+| TartanAir | Carnegie Mellon AirLab synthetic environments (`tartanair.org`) | Record the downloaded release and applicable TartanAir terms. |
+| Blackbird | MIT AERA aggressive-flight ROS bags | Record the selected trajectory release and CC BY-NC-SA 3.0 terms. |
+| MARSIM | HKU MARS LiDAR simulator | Record the exact simulator commit, GPL-2.0 terms, configuration, and random seed. |
+| AeroVerse | AI4CE AeroVerse release | Pin the release identifier and record affirmative acceptance of its release terms before use. |

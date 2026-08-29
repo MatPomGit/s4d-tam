@@ -9,14 +9,36 @@ from s4dtam_benchmark.algorithms.external import ExternalArtifactAlgorithm
 from s4dtam_benchmark.algorithms.s4dtam import S4DTAMReference
 from s4dtam_benchmark.config import load_yaml
 from s4dtam_benchmark.contracts import RunContext
-from s4dtam_benchmark.datasets import ManifestDataset, SyntheticDataset
+from s4dtam_benchmark.datasets import (
+    AeroVerseDataset,
+    BlackbirdDataset,
+    MARSIMDataset,
+    ManifestDataset,
+    SyntheticDataset,
+    TartanAirDataset,
+)
 from s4dtam_benchmark.evaluation import evaluate_result
 from s4dtam_benchmark.reporting import write_paper_assets
 
 
 def _dataset(spec: dict[str, Any], seed: int):
-    if spec["type"] == "synthetic":
+    kind = spec.get("type", spec.get("adapter", "manifest"))
+    if kind == "synthetic":
         return SyntheticDataset(seed=seed, length=int(spec.get("length", 240)))
+    if kind == "tartanair":
+        return TartanAirDataset(spec["root"], axis_convention=spec["axis_convention"])
+    if kind == "blackbird":
+        return BlackbirdDataset(spec["root"], topics=spec["topics"],
+                                sync_tolerance_s=float(spec["sync_tolerance_s"]),
+                                axis_convention=spec["axis_convention"])
+    if kind == "marsim":
+        return MARSIMDataset(spec["root"], spec.get("manifest"))
+    if kind == "aeroverse":
+        return AeroVerseDataset(spec["root"], required_version=spec["required_version"],
+                                accepted_license=spec["accepted_license"],
+                                manifest=spec.get("manifest"))
+    if kind != "manifest":
+        raise ValueError(f"Unknown dataset type: {kind}")
     return ManifestDataset(spec["name"], spec["root"], spec.get("manifest"))
 
 
