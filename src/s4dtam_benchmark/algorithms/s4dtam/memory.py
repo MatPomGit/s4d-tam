@@ -14,6 +14,7 @@ from .association import (
 )
 from .attention import HierarchicalAttention
 from .proposal import TokenCandidate, TokenProposalModule
+from .telemetry import EventSink
 from .token import Token4D, TokenState
 
 
@@ -93,6 +94,8 @@ class TokenMemory:
         max_tokens: Convenience alias for ``ResourceBudgets.max_tokens``.
         max_memory_bytes: Convenience alias for ``ResourceBudgets.max_memory_bytes``.
         max_update_time_ms: Convenience alias for the update latency objective.
+        event_sink: Optional structured event collector.
+        log_attention_components: Include attention levels in pruning events.
 
     Raises:
         ValueError: If configuration values are invalid or conflicting.
@@ -113,6 +116,8 @@ class TokenMemory:
         max_tokens: int | None = None,
         max_memory_bytes: int | None = None,
         max_update_time_ms: float | None = None,
+        event_sink: EventSink | None = None,
+        log_attention_components: bool = True,
     ) -> None:
         if not np.isfinite(association_radius_m) or association_radius_m <= 0:
             raise ValueError("association_radius_m must be finite and positive")
@@ -136,6 +141,8 @@ class TokenMemory:
         self.attention = attention or HierarchicalAttention(local_radius_m=association_radius_m)
         self.last_update_ms = 0.0
         self.time_budget_exceeded = False
+        self.event_sink = event_sink
+        self.log_attention_components = log_attention_components
         if associator is not None:
             self.associator = associator
         elif association_mode == "feature":
@@ -161,6 +168,19 @@ class TokenMemory:
             "radial_fallback_used": False,
         }
         self.proposals = TokenProposalModule()
+        self._emit(
+            "memory_initialized",
+            None,
+            association_mode=association_mode,
+            max_tokens=self.budgets.max_tokens,
+            max_memory_bytes=self.budgets.max_memory_bytes,
+            max_history_entries=self.budgets.max_history_entries,
+        )
+
+    def _emit(self, event: str, sequence_time_s: float | None, **fields: object) -> None:
+        """Forward one structured event when collection is enabled."""
+        if self.event_sink is not None:
+            self.event_sink.emit(event, sequence_time_s, **fields)
 
     def update(
         self, position: np.ndarray, timestamp: float, semantic_class: int | None = None
@@ -213,6 +233,12 @@ class TokenMemory:
             raise ValueError("all candidates in a frame must share one finite timestamp")
         now_s = float(timestamps[0])
         self._validate_timestamp(now_s)
+        self._emit(
+            "frame_started",
+            now_s,
+            candidate_count=len(candidates),
+            resident_token_count=len(self.tokens),
+        )
         self._advance_lifecycle(now_s)
         result = self.associator.associate(self.tokens, candidates)
         self.last_association = result
@@ -220,6 +246,14 @@ class TokenMemory:
         for match in result.matches:
             token = self.tokens[match.token_index]
             self._merge(token, candidates[match.candidate_index])
+            self._emit(
+                "token_matched",
+                now_s,
+                token_id=token.token_id,
+                candidate_index=match.candidate_index,
+                confidence=float(match.confidence),
+                evidence={key: float(value) for key, value in match.features.items()},
+            )
             output[match.candidate_index] = token
         new_ids = {id(candidate) for candidate in result.new_candidates}
         for index, candidate in enumerate(candidates):
@@ -228,6 +262,13 @@ class TokenMemory:
                     output[index] = self._create(candidate)
                 else:
                     result.discarded_candidates.append(candidate)
+                    self._emit(
+                        "proposal_discarded",
+                        now_s,
+                        candidate_index=index,
+                        confidence=float(candidate.confidence),
+                        threshold=float(self.new_token_threshold),
+                    )
         result.metadata["discarded_proposals"] = len(result.discarded_candidates)
         self._record_association(result, new_tokens=len(output) - len(result.matches))
         merged_into = self._merge_duplicates()
@@ -236,6 +277,16 @@ class TokenMemory:
         }
         self._apply_budgets(now_s)
         self._finish_timing(started)
+        self._emit(
+            "frame_completed",
+            now_s,
+            matched_count=len(result.matches),
+            output_count=len(output),
+            resident_token_count=len(self.tokens),
+            map_bytes=self.map_bytes,
+            update_time_ms=self.last_update_ms,
+            time_budget_exceeded=self.time_budget_exceeded,
+        )
         return [output[index] for index in sorted(output)]
 
     def advance(self, timestamp: float) -> None:
@@ -262,6 +313,13 @@ class TokenMemory:
         self.last_update_ms = (perf_counter() - started) * 1000.0
         limit = self.budgets.max_update_time_ms
         self.time_budget_exceeded = limit is not None and self.last_update_ms > limit
+        if self.time_budget_exceeded:
+            self._emit(
+                "time_budget_exceeded",
+                self._current_timestamp_s,
+                measured_ms=self.last_update_ms,
+                budget_ms=limit,
+            )
 
     def _record_association(self, result: AssociationResult, *, new_tokens: int) -> None:
         """Accumulate run-level diagnostics so an earlier fallback is never hidden."""
@@ -298,6 +356,13 @@ class TokenMemory:
         )
         self._next_token_id += 1
         self.tokens.append(token)
+        self._emit(
+            "token_created",
+            candidate.timestamp,
+            token_id=token.token_id,
+            state=token.state.value,
+            confidence=float(candidate.confidence),
+        )
         return token
 
     def _merge(self, token: Token4D, candidate: TokenCandidate) -> None:
@@ -318,6 +383,14 @@ class TokenMemory:
         if token.state == TokenState.SLEEPING and self.lifecycle.reactivate_on_match:
             token.state = TokenState.ACTIVE
             token.activated_at_s = candidate.timestamp
+            self._emit(
+                "token_state_changed",
+                candidate.timestamp,
+                token_id=token.token_id,
+                previous_state=TokenState.SLEEPING.value,
+                new_state=TokenState.ACTIVE.value,
+                reason="matched_observation",
+            )
         token.history.append(candidate.position.copy())
         self._trim_history(token)
         token.semantic_logits = 0.95 * token.semantic_logits + candidate.semantic_logits
@@ -325,7 +398,17 @@ class TokenMemory:
             token.sensory_descriptor = candidate.sensory_descriptor.copy()
             token.embedding = candidate.sensory_descriptor.copy()
         if token.hit_count >= self.lifecycle.activation_hits:
+            previous_state = token.state
             token.state = TokenState.ACTIVE
+            if previous_state != token.state:
+                self._emit(
+                    "token_state_changed",
+                    candidate.timestamp,
+                    token_id=token.token_id,
+                    previous_state=previous_state.value,
+                    new_state=token.state.value,
+                    reason="activation_hit_threshold",
+                )
 
     def _advance_lifecycle(self, now_s: float) -> None:
         """Sleep or remove inactive tokens at ``now_s``."""
@@ -333,9 +416,26 @@ class TokenMemory:
         for token in self.tokens:
             age = now_s - token.last_seen_s
             if age >= self.lifecycle.remove_after_s:
+                self._emit(
+                    "token_removed",
+                    now_s,
+                    token_id=token.token_id,
+                    previous_state=token.state.value,
+                    reason="inactivity_timeout",
+                    inactive_for_s=float(age),
+                )
                 continue
-            if age >= self.lifecycle.sleep_after_s:
+            if age >= self.lifecycle.sleep_after_s and token.state != TokenState.SLEEPING:
+                previous_state = token.state
                 token.state = TokenState.SLEEPING
+                self._emit(
+                    "token_state_changed",
+                    now_s,
+                    token_id=token.token_id,
+                    previous_state=previous_state.value,
+                    new_state=token.state.value,
+                    reason="inactivity_timeout",
+                )
             retained.append(token)
         self.tokens = retained
 
@@ -367,6 +467,13 @@ class TokenMemory:
                 self._trim_history(survivor)
                 merged_into[duplicate.token_id] = survivor
                 self.tokens.remove(duplicate)
+                self._emit(
+                    "tokens_merged",
+                    self._current_timestamp_s,
+                    survivor_token_id=survivor.token_id,
+                    removed_token_id=duplicate.token_id,
+                    survivor_hit_count=survivor.hit_count,
+                )
         return merged_into
 
     def _trim_history(self, token: Token4D) -> None:
@@ -404,9 +511,11 @@ class TokenMemory:
 
     def _apply_budgets(self, now_s: float) -> None:
         """Update importance and prune until every hard capacity limit is met."""
-        scores = self.attention.score(self.tokens, now_s)
+        score_set = self.attention.score_components(self.tokens, now_s)
+        scores = score_set.combined
         for token in self.tokens:
             token.attention_score = scores[token.token_id]
+
         def over_budget() -> bool:
             """Return whether a hard capacity limit is currently exceeded."""
             return (
@@ -419,6 +528,20 @@ class TokenMemory:
         # score then token id gives deterministic resolution of equal scores.
         while self.tokens and over_budget():
             victim = min(self.tokens, key=lambda token: (token.attention_score, token.token_id))
+            fields: dict[str, object] = {
+                "token_id": victim.token_id,
+                "attention_score": victim.attention_score,
+                "resident_token_count_before": len(self.tokens),
+                "map_bytes_before": self.map_bytes,
+                "reason": "capacity_budget",
+            }
+            if self.log_attention_components:
+                fields.update(
+                    local_attention=score_set.local[victim.token_id],
+                    temporal_attention=score_set.temporal[victim.token_id],
+                    global_attention=score_set.global_[victim.token_id],
+                )
+            self._emit("token_pruned", now_s, **fields)
             self.tokens.remove(victim)
 
     def _nearest(self, position: np.ndarray) -> Token4D | None:

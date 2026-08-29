@@ -7,6 +7,7 @@ from typing import Any
 from s4dtam_benchmark.algorithms.dead_reckoning import DeadReckoning
 from s4dtam_benchmark.algorithms.external import ExternalArtifactAlgorithm
 from s4dtam_benchmark.algorithms.s4dtam import (
+    EventLogConfig,
     LifecycleRules,
     ResourceBudgets,
     S4DTAMReference,
@@ -58,6 +59,7 @@ def _algorithm(spec: dict[str, Any]):
         encoders = spec.get("encoders", {})
         lifecycle = spec.get("lifecycle", {})
         budgets = spec.get("budgets", {})
+        event_logging = spec.get("event_logging", {})
         return S4DTAMReference(
             float(spec.get("association_radius_m", 0.35)),
             int(encoders.get("output_dim", 3)),
@@ -86,6 +88,14 @@ def _algorithm(spec: dict[str, Any]):
                 max_memory_bytes=budgets.get("max_memory_bytes"),
                 max_update_time_ms=budgets.get("max_update_time_ms"),
                 max_history_entries=budgets.get("max_history_entries", 64),
+            ),
+            event_logging=EventLogConfig(
+                enabled=bool(event_logging.get("enabled", True)),
+                directory=str(event_logging.get("directory", "logs")),
+                flush_each_event=bool(event_logging.get("flush_each_event", False)),
+                include_attention_components=bool(
+                    event_logging.get("include_attention_components", True)
+                ),
             ),
         )
     if kind == "dead_reckoning":

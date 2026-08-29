@@ -15,6 +15,11 @@ budgets:
   max_memory_bytes: 268435456
   max_update_time_ms: 50.0
   max_history_entries: 64
+event_logging:
+  enabled: true
+  directory: logs
+  flush_each_event: false
+  include_attention_components: true
 encoders:
   output_dim: 3
   rgb: {scale: 0.00392156862745098}

@@ -1,3 +1,4 @@
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -35,6 +36,11 @@ class SmokeExperimentTest(unittest.TestCase):
                 "failures.json",
             ):
                 self.assertTrue((output / name).exists(), name)
+            event_logs = list((output / "logs").rglob("*.jsonl"))
+            self.assertEqual(len(event_logs), 1)
+            events = [json.loads(line) for line in event_logs[0].read_text().splitlines()]
+            self.assertEqual(events[0]["event"], "log_started")
+            self.assertEqual(events[-1]["event"], "run_completed")
 
 
 if __name__ == "__main__":

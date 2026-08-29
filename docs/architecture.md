@@ -31,6 +31,10 @@ flowchart TD
 The reference implementation intentionally favors traceability over speed. Optimized
 PyTorch/CUDA kernels may be added behind the same adapter after numerical parity tests.
 
+Token lifecycle, association, attention, and pruning decisions are captured in a versioned
+per-sequence JSONL audit trail. See [S4D-TAM token event logging](token-event-logging.md) for
+the schema, exact emission sequence, configuration, durability trade-offs, and reader example.
+
 ## External baseline contract
 
 For sequence `<dataset>/<sequence>.npz`, a baseline artifact uses
