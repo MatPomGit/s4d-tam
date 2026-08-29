@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import re
 from time import perf_counter
 
 import numpy as np
@@ -21,11 +23,27 @@ from .encoders import (
     RGBEncoder,
     ThermalEncoder,
 )
-from .memory import TokenMemory
+from .memory import LifecycleRules, ResourceBudgets, TokenMemory
+from .telemetry import EventLogConfig, JsonlEventLogger
 
 
 class S4DTAMReference(AlgorithmAdapter):
-    """Transparent CPU reference for the proposed token lifecycle and interfaces."""
+    """Transparent CPU reference for the token lifecycle and sensor interfaces.
+
+    Args:
+        association_radius_m: Radial fallback association threshold in metres.
+        encoder_dim: Common encoder feature dimension. The reference map requires three.
+        encoder_scales: Optional per-modality input scaling factors.
+        fusion_weights: Optional per-modality confidence multipliers.
+        association_mode: Built-in primary association mode.
+        association_rejection_threshold: Maximum accepted feature-association cost.
+        lifecycle: Optional token lifecycle policy.
+        budgets: Optional token, memory, history and update-time budgets.
+        event_logging: Structured per-sequence event log configuration.
+
+    Raises:
+        ValueError: If ``encoder_dim`` is incompatible with XYZ token positions.
+    """
 
     name = "s4d_tam_reference"
 
@@ -37,12 +55,18 @@ class S4DTAMReference(AlgorithmAdapter):
         fusion_weights: dict[str, float] | None = None,
         association_mode: str = "feature",
         association_rejection_threshold: float = 0.35,
-    ):
+        lifecycle: LifecycleRules | None = None,
+        budgets: ResourceBudgets | None = None,
+        event_logging: EventLogConfig | None = None,
+    ) -> None:
         if encoder_dim != 3:
             raise ValueError("S4DTAMReference requires encoder_dim=3 for TokenMemory positions")
         self.association_radius_m = association_radius_m
         self.association_mode = association_mode
         self.association_rejection_threshold = association_rejection_threshold
+        self.lifecycle = lifecycle
+        self.budgets = budgets
+        self.event_logging = event_logging or EventLogConfig()
         scales = encoder_scales or {}
         encoder_types = {
             "rgb": RGBEncoder,
@@ -57,16 +81,51 @@ class S4DTAMReference(AlgorithmAdapter):
         self.fusion = MaskedFusion(encoder_dim, fusion_weights)
 
     def run(self, sequence: SequenceData, context: RunContext) -> AlgorithmResult:
+        """Process one sequence and return trajectory, semantics and resource metrics.
+
+        Args:
+            sequence: Validated synchronized sensor or legacy observation sequence.
+            context: Experiment output, seed and configuration context.
+
+        Returns:
+            Reference estimates and diagnostics in the benchmark result contract.
+
+        Raises:
+            ValueError: If the sequence has neither usable modalities nor valid
+                three-dimensional legacy observations.
+        """
         has_modalities = any(getattr(sequence, name) is not None for name in MODALITIES)
         reference_mode = not has_modalities
         if reference_mode and sequence.observations is None:
             raise ValueError("S4D-TAM requires a modality stream or legacy normalized observations")
         if reference_mode and np.shape(sequence.observations) != (len(sequence.timestamps), 3):
             raise ValueError("legacy normalized observations must have shape (samples, 3)")
+        event_logger = None
+        event_log_path = None
+        if self.event_logging.enabled:
+            dataset = _safe_path_component(sequence.dataset)
+            sequence_id = _safe_path_component(sequence.sequence_id)
+            event_log_path = (
+                context.output_dir
+                / self.event_logging.directory
+                / dataset
+                / f"{sequence_id}_{self.name}.jsonl"
+            )
+            event_logger = JsonlEventLogger(
+                event_log_path,
+                dataset=sequence.dataset,
+                sequence=sequence.sequence_id,
+                algorithm=self.name,
+                flush_each_event=self.event_logging.flush_each_event,
+            )
         memory = TokenMemory(
             self.association_radius_m,
             association_mode=self.association_mode,
             rejection_threshold=self.association_rejection_threshold,
+            lifecycle=self.lifecycle,
+            budgets=self.budgets,
+            event_sink=event_logger,
+            log_attention_components=self.event_logging.include_attention_components,
         )
         estimates, semantics, latency = [], [], []
         fused_states: list[int] = []
@@ -116,6 +175,22 @@ class S4DTAMReference(AlgorithmAdapter):
                     0.0,
                     1.0,
                 )
+        resource = {
+            "token_count": float(len(memory.tokens)),
+            "map_bytes": float(memory.map_bytes),
+            "last_update_ms": float(memory.last_update_ms),
+            "time_budget_exceeded": float(memory.time_budget_exceeded),
+        }
+        if memory.budgets.max_update_time_ms is not None:
+            resource["update_time_budget_ms"] = float(memory.budgets.max_update_time_ms)
+        if event_logger is not None:
+            event_logger.emit(
+                "run_completed",
+                float(sequence.timestamps[-1]) if len(sequence.timestamps) else None,
+                token_count=len(memory.tokens),
+                map_bytes=memory.map_bytes,
+                sample_count=len(sequence.timestamps),
+            )
         return AlgorithmResult(
             algorithm=self.name,
             timestamps=sequence.timestamps,
@@ -123,23 +198,24 @@ class S4DTAMReference(AlgorithmAdapter):
             semantic_pred=np.asarray(semantics),
             occupancy_pred=occupancy_pred,
             latency_ms=np.asarray(latency),
-            resource={
-                "token_count": float(len(memory.tokens)),
-                "map_bytes": float(
-                    sum(
-                        token.position.nbytes
-                        + token.covariance.nbytes
-                        + token.velocity.nbytes
-                        + token.semantic_logits.nbytes
-                        for token in memory.tokens
-                    )
-                ),
-            },
+            resource=resource,
             metadata={
                 "implementation": "reference_cpu",
                 "input_mode": "legacy_reference" if reference_mode else "multimodal_encoded",
                 "fused_availability_states": fused_states,
                 "not_flight_certified": True,
                 "association": memory.association_summary,
+                "event_log": (
+                    str(event_log_path.relative_to(context.output_dir))
+                    if event_log_path is not None
+                    else None
+                ),
             },
         )
+
+
+def _safe_path_component(value: str) -> str:
+    """Convert an external identifier into a portable, traversal-safe file component."""
+    cleaned = re.sub(r"[^A-Za-z0-9_.-]+", "_", value).strip("._")
+    digest = hashlib.sha256(value.encode("utf-8")).hexdigest()[:8]
+    return f"{cleaned or 'unnamed'}-{digest}"

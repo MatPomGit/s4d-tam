@@ -6,7 +6,12 @@ from typing import Any
 
 from s4dtam_benchmark.algorithms.dead_reckoning import DeadReckoning
 from s4dtam_benchmark.algorithms.external import ExternalArtifactAlgorithm
-from s4dtam_benchmark.algorithms.s4dtam import S4DTAMReference
+from s4dtam_benchmark.algorithms.s4dtam import (
+    EventLogConfig,
+    LifecycleRules,
+    ResourceBudgets,
+    S4DTAMReference,
+)
 from s4dtam_benchmark.config import load_yaml
 from s4dtam_benchmark.contracts import RunContext
 from s4dtam_benchmark.datasets import (
@@ -52,6 +57,9 @@ def _algorithm(spec: dict[str, Any]):
     kind = spec["type"]
     if kind == "s4dtam_reference":
         encoders = spec.get("encoders", {})
+        lifecycle = spec.get("lifecycle", {})
+        budgets = spec.get("budgets", {})
+        event_logging = spec.get("event_logging", {})
         return S4DTAMReference(
             float(spec.get("association_radius_m", 0.35)),
             int(encoders.get("output_dim", 3)),
@@ -64,6 +72,31 @@ def _algorithm(spec: dict[str, Any]):
                 name: float(weight)
                 for name, weight in spec.get("fusion", {}).get("weights", {}).items()
             },
+            association_mode=str(spec.get("association_mode", "feature")),
+            association_rejection_threshold=float(
+                spec.get("association_rejection_threshold", 0.35)
+            ),
+            lifecycle=LifecycleRules(
+                activation_hits=int(lifecycle.get("activation_hits", 1)),
+                sleep_after_s=float(lifecycle.get("sleep_after_s", 10.0)),
+                reactivate_on_match=bool(lifecycle.get("reactivate_on_match", True)),
+                merge_distance_m=float(lifecycle.get("merge_distance_m", 0.0)),
+                remove_after_s=float(lifecycle.get("remove_after_s", 60.0)),
+            ),
+            budgets=ResourceBudgets(
+                max_tokens=budgets.get("max_tokens"),
+                max_memory_bytes=budgets.get("max_memory_bytes"),
+                max_update_time_ms=budgets.get("max_update_time_ms"),
+                max_history_entries=budgets.get("max_history_entries", 64),
+            ),
+            event_logging=EventLogConfig(
+                enabled=bool(event_logging.get("enabled", True)),
+                directory=str(event_logging.get("directory", "logs")),
+                flush_each_event=bool(event_logging.get("flush_each_event", False)),
+                include_attention_components=bool(
+                    event_logging.get("include_attention_components", True)
+                ),
+            ),
         )
     if kind == "dead_reckoning":
         return DeadReckoning(float(spec.get("drift_per_step", 0.002)))
