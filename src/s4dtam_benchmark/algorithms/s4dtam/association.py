@@ -27,6 +27,7 @@ class AssociationResult:
     rejected_pairs: list[tuple[int, int, float]] = field(default_factory=list)
     metadata: dict[str, object] = field(default_factory=dict)
     discarded_candidates: list[TokenCandidate] = field(default_factory=list)
+    suppressed_candidates: list[TokenCandidate] = field(default_factory=list)
 
 
 class TokenAssociator(Protocol):
@@ -63,7 +64,7 @@ class FeatureAssociator:
             for ci, candidate in enumerate(candidates):
                 values = self._features(token, candidate)
                 row.append(values)
-                confidence[ti, ci] = self._confidence(values)
+                confidence[ti, ci] = candidate.confidence * self._confidence(values)
             feature_grid.append(row)
 
         token_indices, candidate_indices = linear_sum_assignment(1.0 - confidence)
@@ -81,11 +82,19 @@ class FeatureAssociator:
             "many_to_one": int(np.sum(np.sum(plausible, axis=0) > 1)),
             "one_to_many": int(np.sum(np.sum(plausible, axis=1) > 1)),
         }
+        unmatched = set(range(len(candidates))) - matched_candidates
+        # An unmatched observation that still gates to a token lost a one-to-many
+        # conflict. Suppress it instead of incorrectly creating a duplicate token.
+        suppressed = {index for index in unmatched if np.any(plausible[:, index])}
+        new_indices = unmatched - suppressed
+        metadata = self._metadata(conflicts, confidence)
+        metadata["suppressed_conflict_candidates"] = len(suppressed)
         return AssociationResult(
             matches,
-            [candidate for i, candidate in enumerate(candidates) if i not in matched_candidates],
+            [candidates[index] for index in sorted(new_indices)],
             rejected,
-            self._metadata(conflicts, confidence),
+            metadata,
+            suppressed_candidates=[candidates[index] for index in sorted(suppressed)],
         )
 
     def _features(self, token: Token4D, candidate: TokenCandidate) -> dict[str, float]:
@@ -122,11 +131,13 @@ class FeatureAssociator:
         )
 
     def _metadata(self, conflicts: object, confidence: object) -> dict[str, object]:
+        scores = np.asarray(confidence, dtype=float)
         return {
             "associator": "feature_global",
             "radial_fallback_used": False,
             "rejection_threshold": self.rejection_threshold,
             "conflicts": conflicts or {"many_to_one": 0, "one_to_many": 0},
+            "max_confidence": float(np.max(scores)) if scores.size else None,
         }
 
 
@@ -134,6 +145,8 @@ class RadialAssociator:
     """Simple radius-gated global association baseline and fallback."""
 
     def __init__(self, radius_m: float = 0.35):
+        if not np.isfinite(radius_m) or radius_m <= 0:
+            raise ValueError("radius_m must be finite and positive")
         self.radius_m = radius_m
 
     def associate(
@@ -163,3 +176,21 @@ class RadialAssociator:
 
     def _metadata(self) -> dict[str, object]:
         return {"associator": "radial", "radial_fallback_used": True, "radius_m": self.radius_m}
+
+
+class FallbackAssociator:
+    """Run a feature associator and fall back to the radial baseline on numerical failure."""
+
+    def __init__(self, primary: TokenAssociator, fallback: RadialAssociator):
+        self.primary = primary
+        self.fallback = fallback
+
+    def associate(
+        self, tokens: list[Token4D], candidates: list[TokenCandidate]
+    ) -> AssociationResult:
+        try:
+            return self.primary.associate(tokens, candidates)
+        except (FloatingPointError, np.linalg.LinAlgError, ValueError) as error:
+            result = self.fallback.associate(tokens, candidates)
+            result.metadata["fallback_reason"] = type(error).__name__
+            return result

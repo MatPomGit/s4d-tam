@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import numpy as np
 
-from .association import AssociationResult, FeatureAssociator, RadialAssociator, TokenAssociator
+from .association import (
+    AssociationResult,
+    FallbackAssociator,
+    FeatureAssociator,
+    RadialAssociator,
+    TokenAssociator,
+)
 from .proposal import TokenCandidate, TokenProposalModule
 from .token import Token4D
 
@@ -26,7 +32,10 @@ class TokenMemory:
         if associator is not None:
             self.associator = associator
         elif association_mode == "feature":
-            self.associator = FeatureAssociator(rejection_threshold=rejection_threshold)
+            self.associator = FallbackAssociator(
+                FeatureAssociator(rejection_threshold=rejection_threshold),
+                RadialAssociator(association_radius_m),
+            )
         elif association_mode == "radial":
             self.associator = RadialAssociator(association_radius_m)
         else:
@@ -34,6 +43,15 @@ class TokenMemory:
         self.tokens: list[Token4D] = []
         self._next_token_id = 0
         self.last_association: AssociationResult | None = None
+        self.association_summary: dict[str, object] = {
+            "frames": 0,
+            "matches": 0,
+            "new_tokens": 0,
+            "rejected_pairs": 0,
+            "suppressed_conflict_candidates": 0,
+            "discarded_proposals": 0,
+            "radial_fallback_used": False,
+        }
         self.proposals = TokenProposalModule()
 
     def update(
@@ -51,6 +69,7 @@ class TokenMemory:
         """Associate a frame jointly, resolving both directions of assignment conflict."""
         if not candidates:
             self.last_association = self.associator.associate(self.tokens, [])
+            self._record_association(self.last_association, new_tokens=0)
             return []
         result = self.associator.associate(self.tokens, candidates)
         self.last_association = result
@@ -67,7 +86,26 @@ class TokenMemory:
                 else:
                     result.discarded_candidates.append(candidate)
         result.metadata["discarded_proposals"] = len(result.discarded_candidates)
+        self._record_association(result, new_tokens=len(output) - len(result.matches))
         return [output[index] for index in sorted(output)]
+
+    def _record_association(self, result: AssociationResult, *, new_tokens: int) -> None:
+        """Accumulate run-level diagnostics so an earlier fallback is never hidden."""
+        increments = {
+            "frames": 1,
+            "matches": len(result.matches),
+            "new_tokens": new_tokens,
+            "rejected_pairs": len(result.rejected_pairs),
+            "suppressed_conflict_candidates": len(result.suppressed_candidates),
+            "discarded_proposals": len(result.discarded_candidates),
+        }
+        for key, value in increments.items():
+            self.association_summary[key] = int(self.association_summary[key]) + value
+        self.association_summary["radial_fallback_used"] = bool(
+            self.association_summary["radial_fallback_used"]
+            or result.metadata.get("radial_fallback_used", False)
+        )
+        self.association_summary["last_frame"] = dict(result.metadata)
 
     def _create(self, candidate: TokenCandidate) -> Token4D:
         token = Token4D(

@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import numpy as np
 
-from s4dtam_benchmark.algorithms.s4dtam.association import FeatureAssociator, RadialAssociator
+from s4dtam_benchmark.algorithms.s4dtam.association import (
+    FallbackAssociator,
+    FeatureAssociator,
+    RadialAssociator,
+)
 from s4dtam_benchmark.algorithms.s4dtam.memory import TokenMemory
 from s4dtam_benchmark.algorithms.s4dtam.proposal import TokenProposalModule
 
@@ -57,3 +61,34 @@ def test_global_assignment_reports_conflicts_and_radial_fallback() -> None:
     radial.update_candidates(candidates([[0, 0, 0]], 0, [[1, 0]]))
     radial.update_candidates(candidates([[0.1, 0, 0]], 1, [[1, 0]]))
     assert radial.last_association.metadata["radial_fallback_used"] is True
+
+
+def test_one_to_many_duplicate_is_suppressed_instead_of_born() -> None:
+    memory = TokenMemory(associator=FeatureAssociator(rejection_threshold=0.3))
+    memory.update_candidates(candidates([[0, 0, 0]], 0, [[1, 0]]))
+    memory.update_candidates(candidates([[0.01, 0, 0], [0.02, 0, 0]], 0.1, [[1, 0], [1, 0]]))
+    assert len(memory.tokens) == 1
+    assert len(memory.last_association.suppressed_candidates) == 1
+    assert memory.last_association.metadata["suppressed_conflict_candidates"] == 1
+
+
+def test_proposal_validation_and_integer_semantic_labels() -> None:
+    proposal = TokenProposalModule(semantic_classes=2)
+    result = proposal.propose(np.array([[0, 0, 0], [1, 0, 0]]), 0, semantic_logits=np.array([1, 0]))
+    np.testing.assert_array_equal(result[0].semantic_logits, [0, 1])
+    np.testing.assert_array_equal(result[1].semantic_logits, [1, 0])
+    with np.testing.assert_raises_regex(ValueError, "positive semidefinite"):
+        proposal.propose(np.array([0, 0, 0]), 0, uncertainty=np.diag([-1.0, 1.0, 1.0]))
+
+
+def test_radial_associator_is_used_after_primary_numerical_failure() -> None:
+    class BrokenAssociator:
+        def associate(self, tokens, observations):
+            raise np.linalg.LinAlgError("synthetic numerical failure")
+
+    associator = FallbackAssociator(BrokenAssociator(), RadialAssociator(0.5))
+    memory = TokenMemory(associator=associator)
+    memory.update_candidates(candidates([[0, 0, 0]], 0, [[1, 0]]))
+    assert memory.last_association.metadata["radial_fallback_used"] is True
+    assert memory.last_association.metadata["fallback_reason"] == "LinAlgError"
+    assert memory.association_summary["radial_fallback_used"] is True

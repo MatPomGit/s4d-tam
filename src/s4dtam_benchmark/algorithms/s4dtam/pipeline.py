@@ -140,8 +140,6 @@ class S4DTAMReference(AlgorithmAdapter):
                 "input_mode": "legacy_reference" if reference_mode else "multimodal_encoded",
                 "fused_availability_states": fused_states,
                 "not_flight_certified": True,
-                "association": (
-                    memory.last_association.metadata if memory.last_association is not None else {}
-                ),
+                "association": memory.association_summary,
             },
         )
