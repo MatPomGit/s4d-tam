@@ -10,6 +10,7 @@ from s4dtam_benchmark.algorithms.s4dtam import (
     EventLogConfig,
     LifecycleRules,
     ResourceBudgets,
+    ReferenceMap,
     S4DTAMReference,
     ModalityNoiseModel,
 )
@@ -57,6 +58,11 @@ def _dataset(spec: dict[str, Any], seed: int):
 def _algorithm(spec: dict[str, Any]):
     kind = spec["type"]
     if kind == "s4dtam_reference":
+        reference_map = (
+            ReferenceMap.load(spec["reference_map"])
+            if spec.get("reference_map") is not None
+            else None
+        )
         encoders = spec.get("encoders", {})
         lifecycle = spec.get("lifecycle", {})
         budgets = spec.get("budgets", {})
@@ -107,6 +113,8 @@ def _algorithm(spec: dict[str, Any]):
                 quality_power=float(noise.get("quality_power", 2.0)),
                 minimum_quality=float(noise.get("minimum_quality", 0.05)),
             ),
+            reference_map=reference_map,
+            map_enabled=bool(spec.get("map_enabled", True)),
         )
     if kind == "dead_reckoning":
         return DeadReckoning(float(spec.get("drift_per_step", 0.002)))
