@@ -28,15 +28,21 @@ def _dataset(spec: dict[str, Any], seed: int):
     if kind == "tartanair":
         return TartanAirDataset(spec["root"], axis_convention=spec["axis_convention"])
     if kind == "blackbird":
-        return BlackbirdDataset(spec["root"], topics=spec["topics"],
-                                sync_tolerance_s=float(spec["sync_tolerance_s"]),
-                                axis_convention=spec["axis_convention"])
+        return BlackbirdDataset(
+            spec["root"],
+            topics=spec["topics"],
+            sync_tolerance_s=float(spec["sync_tolerance_s"]),
+            axis_convention=spec["axis_convention"],
+        )
     if kind == "marsim":
         return MARSIMDataset(spec["root"], spec.get("manifest"))
     if kind == "aeroverse":
-        return AeroVerseDataset(spec["root"], required_version=spec["required_version"],
-                                accepted_license=spec["accepted_license"],
-                                manifest=spec.get("manifest"))
+        return AeroVerseDataset(
+            spec["root"],
+            required_version=spec["required_version"],
+            accepted_license=spec["accepted_license"],
+            manifest=spec.get("manifest"),
+        )
     if kind != "manifest":
         raise ValueError(f"Unknown dataset type: {kind}")
     return ManifestDataset(spec["name"], spec["root"], spec.get("manifest"))
@@ -45,7 +51,20 @@ def _dataset(spec: dict[str, Any], seed: int):
 def _algorithm(spec: dict[str, Any]):
     kind = spec["type"]
     if kind == "s4dtam_reference":
-        return S4DTAMReference(float(spec.get("association_radius_m", 0.35)))
+        encoders = spec.get("encoders", {})
+        return S4DTAMReference(
+            float(spec.get("association_radius_m", 0.35)),
+            int(encoders.get("output_dim", 3)),
+            {
+                name: float(values.get("scale", 1.0))
+                for name, values in encoders.items()
+                if isinstance(values, dict)
+            },
+            {
+                name: float(weight)
+                for name, weight in spec.get("fusion", {}).get("weights", {}).items()
+            },
+        )
     if kind == "dead_reckoning":
         return DeadReckoning(float(spec.get("drift_per_step", 0.002)))
     if kind == "external_artifact":
@@ -72,10 +91,14 @@ def run_experiment(config_path: str | Path) -> Path:
             for algorithm in algorithms:
                 try:
                     result = algorithm.run(sequence, context)
-                    executions.append({
-                        "dataset": sequence.dataset, "sequence": sequence.sequence_id,
-                        "algorithm": result.algorithm, **result.metadata,
-                    })
+                    executions.append(
+                        {
+                            "dataset": sequence.dataset,
+                            "sequence": sequence.sequence_id,
+                            "algorithm": result.algorithm,
+                            **result.metadata,
+                        }
+                    )
                     metrics, missing = evaluate_result(sequence, result)
                     records.extend(
                         {
@@ -96,7 +119,9 @@ def run_experiment(config_path: str | Path) -> Path:
                         }
                         for reason in missing
                     )
-                except Exception as error:  # isolate baseline failures and keep the benchmark auditable
+                except (
+                    Exception
+                ) as error:  # isolate baseline failures and keep the benchmark auditable
                     failures.append(
                         {
                             "dataset": sequence.dataset,
