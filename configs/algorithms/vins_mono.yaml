@@ -1,5 +1,26 @@
 name: vins_mono
 type: external_artifact
 upstream: https://github.com/HKUST-Aerial-Robotics/VINS-Mono
+revision: 90dabb5d09c326d23f83a1c2aa0e81f6f3f5ed12
+container: ghcr.io/s4d-tam/vins-mono@sha256:894f4600e68a7bc4a7821078b5e6758a421982daf99894d505ef474017efd648
 result_root: outputs/baselines/vins_mono
-pin_commit_before_benchmark: true
+artifact_format: s4dtam-algorithm-result-npz/v1
+input_mapping:
+  camera: /cam0/image_raw
+  imu: /imu0
+calibration_required:
+- camera_intrinsics
+- camera_distortion
+- T_camera_imu
+- imu_noise
+hardware:
+  cpu: x86_64, record model in run manifest
+  gpu: NVIDIA CUDA, record model and driver in run manifest
+  ram_gb: 32
+warm_up:
+  discard_sequences: 1
+  discard_seconds: 10
+loop_closure:
+  enabled: true
+  pose_graph: true
+  min_keyframes: 10

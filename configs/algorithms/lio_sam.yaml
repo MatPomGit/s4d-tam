@@ -1,5 +1,27 @@
 name: lio_sam
 type: external_artifact
 upstream: https://github.com/TixiaoShan/LIO-SAM
+revision: a4f2af6c7b6f61d8c4b5176d81e9cafe22b72cc8
+container: ghcr.io/s4d-tam/lio-sam@sha256:21d018ffd37a6480b427ec8267fd8d42219298b059536991a927adcc42ebc9a7
 result_root: outputs/baselines/lio_sam
-pin_commit_before_benchmark: true
+artifact_format: s4dtam-algorithm-result-npz/v1
+input_mapping:
+  lidar: /points_raw
+  imu: /imu
+  gps: /gps/odom
+calibration_required:
+- T_lidar_imu
+- T_gps_imu
+- imu_noise
+- lidar_model
+hardware:
+  cpu: x86_64, record model in run manifest
+  gpu: NVIDIA CUDA, record model and driver in run manifest
+  ram_gb: 32
+warm_up:
+  discard_sequences: 1
+  discard_seconds: 10
+loop_closure:
+  enabled: true
+  frequency_hz: 1.0
+  search_radius_m: 15.0

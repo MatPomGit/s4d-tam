@@ -1,5 +1,25 @@
 name: fast_lio2
 type: external_artifact
 upstream: https://github.com/hku-mars/FAST_LIO
+revision: 7a7cf9b0df52c25f69e4c4f8e92d3552cbe59c29
+container: ghcr.io/s4d-tam/fast-lio2@sha256:29187acbe2282620ff673b241b3d2b5169279d53275aa000e791656c4fc95f10
 result_root: outputs/baselines/fast_lio2
-pin_commit_before_benchmark: true
+artifact_format: s4dtam-algorithm-result-npz/v1
+input_mapping:
+  lidar: /points_raw
+  imu: /imu
+calibration_required:
+- T_lidar_imu
+- imu_noise
+- lidar_model
+- scan_period
+hardware:
+  cpu: x86_64, record model in run manifest
+  gpu: NVIDIA CUDA, record model and driver in run manifest
+  ram_gb: 32
+warm_up:
+  discard_sequences: 1
+  discard_seconds: 10
+loop_closure:
+  enabled: false
+  reason: upstream FAST-LIO2 has no loop-closure module
