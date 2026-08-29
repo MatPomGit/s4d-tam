@@ -24,7 +24,7 @@ jobs:
       - run: ruff check src tests
       - run: pytest --cov=s4dtam_benchmark --cov-report=term-missing
       - run: s4dtam-bench run configs/experiments/smoke.yaml
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: smoke-results-py${{ matrix.python-version }}
           path: outputs/smoke/
