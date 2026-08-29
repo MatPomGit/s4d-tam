@@ -11,6 +11,7 @@ from s4dtam_benchmark.algorithms.s4dtam import (
     LifecycleRules,
     ResourceBudgets,
     S4DTAMReference,
+    ModalityNoiseModel,
 )
 from s4dtam_benchmark.config import load_yaml
 from s4dtam_benchmark.contracts import RunContext
@@ -60,6 +61,7 @@ def _algorithm(spec: dict[str, Any]):
         lifecycle = spec.get("lifecycle", {})
         budgets = spec.get("budgets", {})
         event_logging = spec.get("event_logging", {})
+        noise = spec.get("noise_model", {})
         return S4DTAMReference(
             float(spec.get("association_radius_m", 0.35)),
             int(encoders.get("output_dim", 3)),
@@ -97,6 +99,14 @@ def _algorithm(spec: dict[str, Any]):
                     event_logging.get("include_attention_components", True)
                 ),
             ),
+            noise_model=ModalityNoiseModel(
+                modality_variances={str(k): float(v) for k, v in
+                                    noise.get("modality_variances", {}).items()},
+                default_variance=float(noise.get("default_variance", 0.05)),
+                process_variance_per_s=float(noise.get("process_variance_per_s", 0.01)),
+                quality_power=float(noise.get("quality_power", 2.0)),
+                minimum_quality=float(noise.get("minimum_quality", 0.05)),
+            ),
         )
     if kind == "dead_reckoning":
         return DeadReckoning(float(spec.get("drift_per_step", 0.002)))
@@ -112,14 +122,28 @@ def run_experiment(config_path: str | Path) -> Path:
     if not output_dir.is_absolute():
         output_dir = Path.cwd() / output_dir
     context = RunContext(output_dir=output_dir, seed=seed, config=config)
-    datasets = [_dataset(spec, seed) for spec in config["datasets"]]
+    datasets = [(_dataset(spec, seed), spec) for spec in config["datasets"]]
     algorithms = [_algorithm(spec) for spec in config["algorithms"]]
     records: list[dict[str, Any]] = []
     unavailable: list[dict[str, str]] = []
     failures: list[dict[str, str]] = []
     executions: list[dict[str, Any]] = []
 
-    for dataset in datasets:
+    calibration_sequences = [sequence for dataset, spec in datasets
+                             if spec.get("split") == "calibration"
+                             for sequence in dataset.sequences()]
+    calibration_id = ",".join(
+        f"{item.dataset}/{item.sequence_id}" for item in calibration_sequences
+    )
+    if calibration_sequences:
+        for algorithm in algorithms:
+            calibrate = getattr(algorithm, "calibrate", None)
+            if calibrate is not None:
+                calibrate(calibration_sequences, context, calibration_id)
+
+    for dataset, spec in datasets:
+        if spec.get("split") == "calibration":
+            continue
         for sequence in dataset.sequences():
             for algorithm in algorithms:
                 try:

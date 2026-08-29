@@ -6,7 +6,7 @@ from .association import (
     RadialAssociator,
     TokenMatch,
 )
-from .memory import LifecycleRules, ResourceBudgets, TokenMemory
+from .memory import LifecycleRules, ModalityNoiseModel, ResourceBudgets, TokenMemory
 from .pipeline import S4DTAMReference
 from .proposal import TokenCandidate, TokenProposalModule
 from .token import Token4D, TokenState
@@ -30,6 +30,7 @@ __all__ = [
     "InMemoryEventSink",
     "JsonlEventLogger",
     "LifecycleRules",
+    "ModalityNoiseModel",
     "RadialAssociator",
     "ResourceBudgets",
     "S4DTAMReference",

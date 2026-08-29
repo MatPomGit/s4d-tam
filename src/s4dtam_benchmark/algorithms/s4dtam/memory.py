@@ -78,6 +78,43 @@ class ResourceBudgets:
             raise ValueError("max_update_time_ms must be finite and positive")
 
 
+@dataclass(frozen=True, slots=True)
+class ModalityNoiseModel:
+    """Configurable diagonal observation/process noise model.
+
+    Variance grows for low-quality measurements and with elapsed time.  Unknown
+    or fused modalities use ``default_variance``.
+    """
+
+    modality_variances: dict[str, float] | None = None
+    default_variance: float = 0.05
+    process_variance_per_s: float = 0.01
+    quality_power: float = 2.0
+    minimum_quality: float = 0.05
+
+    def __post_init__(self) -> None:
+        values = list((self.modality_variances or {}).values()) + [
+            self.default_variance,
+            self.process_variance_per_s,
+        ]
+        if any(not np.isfinite(value) or value < 0 for value in values):
+            raise ValueError("noise variances must be finite and non-negative")
+        if not np.isfinite(self.quality_power) or self.quality_power < 0:
+            raise ValueError("quality_power must be finite and non-negative")
+        if not 0 < self.minimum_quality <= 1:
+            raise ValueError("minimum_quality must be in (0, 1]")
+
+    def covariance(self, modality: str, quality: float, dt: float) -> np.ndarray:
+        if not np.isfinite(quality) or not 0 <= quality <= 1:
+            raise ValueError("measurement quality must be finite and in [0, 1]")
+        if not np.isfinite(dt) or dt < 0:
+            raise ValueError("time interval must be finite and non-negative")
+        base = (self.modality_variances or {}).get(modality, self.default_variance)
+        scale = max(quality, self.minimum_quality) ** (-self.quality_power)
+        variance = base * scale + self.process_variance_per_s * dt
+        return np.eye(3) * max(float(variance), np.finfo(float).eps)
+
+
 class TokenMemory:
     """Manage association, lifecycle transitions, attention and bounded storage.
 
@@ -105,6 +142,7 @@ class TokenMemory:
         self,
         association_radius_m: float = 0.35,
         process_noise: float = 0.01,
+        noise_model: ModalityNoiseModel | None = None,
         associator: TokenAssociator | None = None,
         *,
         association_mode: str = "feature",
@@ -127,6 +165,9 @@ class TokenMemory:
             raise ValueError("new_token_threshold must be between zero and one")
         self.association_radius_m = association_radius_m
         self.process_noise = process_noise
+        self.noise_model = noise_model or ModalityNoiseModel(
+            process_variance_per_s=process_noise
+        )
         self.new_token_threshold = new_token_threshold
         self.lifecycle = lifecycle or LifecycleRules()
         if budgets is not None and any(
@@ -183,7 +224,8 @@ class TokenMemory:
             self.event_sink.emit(event, sequence_time_s, **fields)
 
     def update(
-        self, position: np.ndarray, timestamp: float, semantic_class: int | None = None
+        self, position: np.ndarray, timestamp: float, semantic_class: int | None = None,
+        *, modality: str = "legacy", quality: float = 1.0,
     ) -> Token4D:
         """Create or update one token from a legacy position observation.
 
@@ -204,8 +246,10 @@ class TokenMemory:
             if not 0 <= semantic_class < len(logits):
                 raise ValueError("semantic_class must be between 0 and 7")
             logits[semantic_class] = 1.0
+        dt = 0.0 if self._current_timestamp_s is None else max(timestamp - self._current_timestamp_s, 0.0)
         candidate = self.proposals.propose(
-            np.asarray(position), timestamp, semantic_logits=logits[None, :]
+            np.asarray(position), timestamp, semantic_logits=logits[None, :],
+            uncertainty=self.noise_model.covariance(modality, quality, dt),
         )[0]
         return self.update_candidates([candidate])[0]
 

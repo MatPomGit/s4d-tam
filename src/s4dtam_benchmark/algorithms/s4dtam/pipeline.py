@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from time import perf_counter
 
@@ -23,7 +24,7 @@ from .encoders import (
     RGBEncoder,
     ThermalEncoder,
 )
-from .memory import LifecycleRules, ResourceBudgets, TokenMemory
+from .memory import LifecycleRules, ModalityNoiseModel, ResourceBudgets, TokenMemory
 from .telemetry import EventLogConfig, JsonlEventLogger
 
 
@@ -58,6 +59,7 @@ class S4DTAMReference(AlgorithmAdapter):
         lifecycle: LifecycleRules | None = None,
         budgets: ResourceBudgets | None = None,
         event_logging: EventLogConfig | None = None,
+        noise_model: ModalityNoiseModel | None = None,
     ) -> None:
         if encoder_dim != 3:
             raise ValueError("S4DTAMReference requires encoder_dim=3 for TokenMemory positions")
@@ -67,6 +69,13 @@ class S4DTAMReference(AlgorithmAdapter):
         self.lifecycle = lifecycle
         self.budgets = budgets
         self.event_logging = event_logging or EventLogConfig()
+        self.noise_model = noise_model or ModalityNoiseModel()
+        self.calibration_parameters: dict[str, object] = {
+            "feature_mean": [0.0, 0.0, 0.0], "feature_scale": [1.0, 1.0, 1.0],
+            "covariance_scale": 1.0,
+        }
+        self.calibration_data_id = "uncalibrated"
+        self.calibration_artifact: str | None = None
         scales = encoder_scales or {}
         encoder_types = {
             "rgb": RGBEncoder,
@@ -79,6 +88,35 @@ class S4DTAMReference(AlgorithmAdapter):
             name: kind(encoder_dim, scales.get(name, 1.0)) for name, kind in encoder_types.items()
         }
         self.fusion = MaskedFusion(encoder_dim, fusion_weights)
+
+    def calibrate(
+        self, sequences: list[SequenceData], context: RunContext, data_id: str
+    ) -> dict[str, object]:
+        """Fit uncertainty/OOD scaling only on an explicitly held-out split."""
+        features, residual_sq = [], []
+        for sequence in sequences:
+            if sequence.observations is not None:
+                values = np.asarray(sequence.observations, dtype=float)
+                features.extend(values.tolist())
+                residual_sq.extend(np.sum((values - sequence.gt_positions) ** 2, axis=1).tolist())
+        array = np.asarray(features, dtype=float)
+        if array.size == 0:
+            raise ValueError("calibration split has no legacy observations")
+        scale = np.std(array, axis=0).clip(min=1e-6)
+        self.calibration_parameters = {
+            "feature_mean": np.mean(array, axis=0).tolist(),
+            "feature_scale": scale.tolist(),
+            "covariance_scale": max(float(np.mean(residual_sq) / 3.0), 1e-6),
+        }
+        self.calibration_data_id = str(data_id)
+        directory = context.output_dir / "model_artifacts"
+        directory.mkdir(parents=True, exist_ok=True)
+        path = directory / f"{self.name}_calibration.json"
+        payload = {"schema": "s4dtam-calibration/v1", "data_id": self.calibration_data_id,
+                   "parameters": self.calibration_parameters}
+        path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        self.calibration_artifact = str(path.relative_to(context.output_dir))
+        return payload
 
     def run(self, sequence: SequenceData, context: RunContext) -> AlgorithmResult:
         """Process one sequence and return trajectory, semantics and resource metrics.
@@ -126,14 +164,17 @@ class S4DTAMReference(AlgorithmAdapter):
             budgets=self.budgets,
             event_sink=event_logger,
             log_attention_components=self.event_logging.include_attention_components,
+            noise_model=self.noise_model,
         )
-        estimates, semantics, latency = [], [], []
+        estimates, covariances, ood_scores, semantics, latency = [], [], [], [], []
         fused_states: list[int] = []
         last_observation = np.zeros(3)
         for index, timestamp in enumerate(sequence.timestamps):
             start = perf_counter()
             if reference_mode:
                 observation = sequence.observations[index]
+                quality = 1.0
+                modality = "legacy"
                 fused_states.append(int(AvailabilityState.AVAILABLE))
             else:
                 states = {
@@ -146,6 +187,8 @@ class S4DTAMReference(AlgorithmAdapter):
                     and states[name] == AvailabilityState.AVAILABLE
                 ]
                 fused = self.fusion.fuse(encoded, states, float(timestamp))
+                quality = float(np.mean([item.confidence for item in encoded])) if encoded else 0.0
+                modality = encoded[0].modality if len(encoded) == 1 else "fused"
                 fused_states.append(int(fused.state))
                 observation = (
                     fused.features
@@ -159,8 +202,15 @@ class S4DTAMReference(AlgorithmAdapter):
                 if sequence.semantic_observations is not None
                 else None
             )
-            token = memory.update(observation, float(timestamp), semantic_hint)
+            token = memory.update(
+                observation, float(timestamp), semantic_hint, modality=modality, quality=quality
+            )
             estimates.append(token.position.copy())
+            covariance_scale = float(self.calibration_parameters["covariance_scale"])
+            covariances.append(token.covariance.copy() * covariance_scale)
+            centre = np.asarray(self.calibration_parameters["feature_mean"], dtype=float)
+            scale = np.asarray(self.calibration_parameters["feature_scale"], dtype=float)
+            ood_scores.append(float(np.mean(((np.asarray(observation) - centre) / scale) ** 2)))
             semantics.append(int(np.argmax(token.semantic_logits)))
             latency.append((perf_counter() - start) * 1000.0)
 
@@ -195,6 +245,8 @@ class S4DTAMReference(AlgorithmAdapter):
             algorithm=self.name,
             timestamps=sequence.timestamps,
             estimated_positions=np.asarray(estimates),
+            pose_covariances=np.asarray(covariances),
+            ood_scores=np.asarray(ood_scores),
             semantic_pred=np.asarray(semantics),
             occupancy_pred=occupancy_pred,
             latency_ms=np.asarray(latency),
@@ -205,6 +257,9 @@ class S4DTAMReference(AlgorithmAdapter):
                 "fused_availability_states": fused_states,
                 "not_flight_certified": True,
                 "association": memory.association_summary,
+                "calibration": {"data_id": self.calibration_data_id,
+                                "artifact": self.calibration_artifact,
+                                "parameters": self.calibration_parameters},
                 "event_log": (
                     str(event_log_path.relative_to(context.output_dir))
                     if event_log_path is not None

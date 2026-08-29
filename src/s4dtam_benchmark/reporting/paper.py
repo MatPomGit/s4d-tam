@@ -99,6 +99,21 @@ def write_paper_assets(records: list[dict[str, Any]], output_dir: Path,
         axis.figure.savefig(output_dir / "ate_rmse.png", dpi=200)
         plt.close(axis.figure)
 
+    calibration = frame[frame["metric"].str.startswith("calibration/coverage_")]
+    if not calibration.empty:
+        plot = calibration.copy()
+        plot["nominal"] = plot["metric"].str.extract(r"(\d+)pct")[0].astype(float) / 100
+        plot = plot.groupby("nominal", as_index=False)["value"].mean().sort_values("nominal")
+        figure, axis = plt.subplots()
+        axis.plot([0, 1], [0, 1], "--", color="gray", label="ideal")
+        axis.plot(plot["nominal"], plot["value"], marker="o", label="observed")
+        axis.set(xlabel="Nominal coverage", ylabel="Observed coverage", xlim=(0, 1), ylim=(0, 1))
+        axis.legend()
+        figure.tight_layout()
+        figure.savefig(output_dir / "pose_calibration.png", dpi=200)
+        figure.savefig(output_dir / "pose_calibration.pdf")
+        plt.close(figure)
+
     manifest = {
         "config": run_config,
         "python": sys.version,
