@@ -35,10 +35,14 @@ class S4DTAMReference(AlgorithmAdapter):
         encoder_dim: int = 3,
         encoder_scales: dict[str, float] | None = None,
         fusion_weights: dict[str, float] | None = None,
+        association_mode: str = "feature",
+        association_rejection_threshold: float = 0.35,
     ):
         if encoder_dim != 3:
             raise ValueError("S4DTAMReference requires encoder_dim=3 for TokenMemory positions")
         self.association_radius_m = association_radius_m
+        self.association_mode = association_mode
+        self.association_rejection_threshold = association_rejection_threshold
         scales = encoder_scales or {}
         encoder_types = {
             "rgb": RGBEncoder,
@@ -59,7 +63,11 @@ class S4DTAMReference(AlgorithmAdapter):
             raise ValueError("S4D-TAM requires a modality stream or legacy normalized observations")
         if reference_mode and np.shape(sequence.observations) != (len(sequence.timestamps), 3):
             raise ValueError("legacy normalized observations must have shape (samples, 3)")
-        memory = TokenMemory(self.association_radius_m)
+        memory = TokenMemory(
+            self.association_radius_m,
+            association_mode=self.association_mode,
+            rejection_threshold=self.association_rejection_threshold,
+        )
         estimates, semantics, latency = [], [], []
         fused_states: list[int] = []
         last_observation = np.zeros(3)
@@ -132,5 +140,6 @@ class S4DTAMReference(AlgorithmAdapter):
                 "input_mode": "legacy_reference" if reference_mode else "multimodal_encoded",
                 "fused_availability_states": fused_states,
                 "not_flight_certified": True,
+                "association": memory.association_summary,
             },
         )
