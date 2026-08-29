@@ -30,6 +30,7 @@ from .memory import LifecycleRules, ModalityNoiseModel, ResourceBudgets, TokenMe
 from .telemetry import EventLogConfig, JsonlEventLogger
 from .reference_map import ReferenceMap
 from .topology import TopologicalGraph
+from .forecasting import CausalForecaster
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,6 +57,11 @@ class S4DTAMReference(AlgorithmAdapter):
         budgets: Optional token, memory, history and update-time budgets.
         event_logging: Structured per-sequence event log configuration.
         noise_model: Optional modality-, quality-, and time-dependent noise model.
+        reference_map: Optional persistent map used for place matching.
+        map_enabled: Whether reference-map correction is enabled.
+        topology: Optional topology built over ``reference_map``.
+        forecast_horizons_s: Additional physical-time forecast horizons. Horizons
+            declared by occupancy or flow ground truth are included automatically.
 
     Raises:
         ValueError: If ``encoder_dim`` is incompatible with XYZ token positions.
@@ -78,6 +84,7 @@ class S4DTAMReference(AlgorithmAdapter):
         reference_map: ReferenceMap | None = None,
         map_enabled: bool = True,
         topology: TopologicalGraph | None = None,
+        forecast_horizons_s: tuple[float, ...] | list[float] = (),
     ) -> None:
         if encoder_dim != 3:
             raise ValueError("S4DTAMReference requires encoder_dim=3 for TokenMemory positions")
@@ -96,6 +103,7 @@ class S4DTAMReference(AlgorithmAdapter):
             topology.reference_map if topology is not None else None
         )
         self.topology = None
+        self.forecast_horizons_s = tuple(float(value) for value in forecast_horizons_s)
         if self.map_enabled:
             self.topology = topology or (
                 TopologicalGraph(reference_map) if reference_map is not None else None
@@ -270,21 +278,26 @@ class S4DTAMReference(AlgorithmAdapter):
             )
             estimate = token.position.copy()
             confidence = 0.0
-            if self.topology is not None and measurement.availability == AvailabilityState.AVAILABLE:
+            if (
+                self.topology is not None
+                and measurement.availability == AvailabilityState.AVAILABLE
+            ):
                 descriptor = self._map_descriptor(sequence, index, observation)
                 geometry_position = self._map_position(sequence, index, observation)
                 # Retrieval is descriptor-only; geometry is deliberately evaluated
                 # against the current sensor pose rather than token-memory history.
                 match, candidates, rejected = self.topology.match(descriptor, geometry_position)
-                rejected_matches.extend(
-                    {"sample": index, **item} for item in rejected
-                )
+                rejected_matches.extend({"sample": index, **item} for item in rejected)
                 if match is not None:
                     estimate = geometry_position + match.correction
                     confidence = match.confidence
                     accepted_matches.append(
-                        {"sample": index, "token_id": match.token_id,
-                         "confidence": match.confidence, "residual_m": match.residual_m}
+                        {
+                            "sample": index,
+                            "token_id": match.token_id,
+                            "confidence": match.confidence,
+                            "residual_m": match.residual_m,
+                        }
                     )
                     relocalized = tracking_lost
                     if relocalized:
@@ -343,17 +356,31 @@ class S4DTAMReference(AlgorithmAdapter):
             semantics.append(int(np.argmax(token.semantic_logits)))
             latency.append((perf_counter() - start) * 1000.0)
 
-        occupancy_pred = {}
+        occupancy_pred, flow_pred = {}, {}
+        occupancy_uncertainty, flow_uncertainty, forecast_masks = {}, {}, {}
+        forecast_target_indices: dict[str, list[int]] = {}
         if sequence.occupancy_observations is not None:
-            for horizon in sequence.occupancy_gt:
-                steps = max(1, int(round(horizon / np.median(np.diff(sequence.timestamps)))))
-                velocity_proxy = np.roll(sequence.occupancy_observations, steps, axis=0)
-                velocity_proxy[:steps] = sequence.occupancy_observations[:steps]
-                occupancy_pred[horizon] = np.clip(
-                    0.65 * sequence.occupancy_observations + 0.25 * velocity_proxy + 0.05,
-                    0.0,
-                    1.0,
-                )
+            configured = self.forecast_horizons_s or context.config.get("forecasting", {}).get(
+                "horizons_s", []
+            )
+            horizons = sorted(
+                {float(h) for h in (*sequence.occupancy_gt, *sequence.flow_gt, *configured)}
+            )
+            if horizons:
+                forecaster = CausalForecaster(horizons)
+                for timestamp, frame in zip(
+                    sequence.timestamps, sequence.occupancy_observations, strict=True
+                ):
+                    forecaster.update(float(timestamp), frame)
+                forecast = forecaster.result()
+                occupancy_pred = forecast.occupancy_probability
+                flow_pred = forecast.flow_mean
+                occupancy_uncertainty = forecast.occupancy_uncertainty
+                flow_uncertainty = forecast.flow_uncertainty
+                forecast_masks = forecast.observable_mask
+                forecast_target_indices = {
+                    f"{h:g}": indices.tolist() for h, indices in forecast.target_indices.items()
+                }
         resource = {
             "token_count": float(len(memory.tokens)),
             "map_bytes": float(memory.map_bytes),
@@ -389,6 +416,10 @@ class S4DTAMReference(AlgorithmAdapter):
             ood_scores=np.asarray(ood_scores),
             semantic_pred=np.asarray(semantics),
             occupancy_pred=occupancy_pred,
+            flow_pred=flow_pred,
+            occupancy_uncertainty=occupancy_uncertainty,
+            flow_uncertainty=flow_uncertainty,
+            forecast_observable_mask=forecast_masks,
             latency_ms=np.asarray(latency),
             resource=resource,
             metadata={
@@ -396,6 +427,7 @@ class S4DTAMReference(AlgorithmAdapter):
                 "input_mode": "legacy_reference" if reference_mode else "multimodal_encoded",
                 "fused_availability_states": fused_states,
                 "not_flight_certified": True,
+                "forecast_target_indices": forecast_target_indices,
                 "association": memory.association_summary,
                 "map_correction": {
                     "enabled": self.topology is not None,
