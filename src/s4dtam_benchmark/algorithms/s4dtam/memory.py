@@ -78,12 +78,78 @@ class ResourceBudgets:
             raise ValueError("max_update_time_ms must be finite and positive")
 
 
+@dataclass(frozen=True, slots=True)
+class ModalityNoiseModel:
+    """Configurable diagonal observation and process-noise model.
+
+    Args:
+        modality_variances: Observation variance for each sensor modality.
+        default_variance: Observation variance for unlisted and fused inputs.
+        process_variance_per_s: State-transition variance accumulated per second.
+        quality_power: Exponent controlling the low-quality variance penalty.
+        minimum_quality: Lower bound used when scaling rejected/missing inputs.
+
+    Unknown and fused modalities use ``default_variance``. All returned matrices
+    are strictly positive definite, including zero-noise configurations.
+    """
+
+    modality_variances: dict[str, float] | None = None
+    default_variance: float = 0.05
+    process_variance_per_s: float = 0.01
+    quality_power: float = 2.0
+    minimum_quality: float = 0.05
+
+    def __post_init__(self) -> None:
+        values = list((self.modality_variances or {}).values()) + [
+            self.default_variance,
+            self.process_variance_per_s,
+        ]
+        if any(not np.isfinite(value) or value < 0 for value in values):
+            raise ValueError("noise variances must be finite and non-negative")
+        if not np.isfinite(self.quality_power) or self.quality_power < 0:
+            raise ValueError("quality_power must be finite and non-negative")
+        if not 0 < self.minimum_quality <= 1:
+            raise ValueError("minimum_quality must be in (0, 1]")
+
+    def covariance(self, modality: str, quality: float, dt: float) -> np.ndarray:
+        """Return measurement covariance for a sensor sample.
+
+        Args:
+            modality: Sensor modality name or ``"fused"``.
+            quality: Normalized measurement quality in the closed interval [0, 1].
+            dt: Time since the preceding frame, in seconds.
+
+        Returns:
+            A positive-definite 3-by-3 position covariance matrix.
+
+        Raises:
+            ValueError: If quality or elapsed time is outside its valid domain.
+        """
+        if not np.isfinite(quality) or not 0 <= quality <= 1:
+            raise ValueError("measurement quality must be finite and in [0, 1]")
+        if not np.isfinite(dt) or dt < 0:
+            raise ValueError("time interval must be finite and non-negative")
+        base = (self.modality_variances or {}).get(modality, self.default_variance)
+        scale = max(quality, self.minimum_quality) ** (-self.quality_power)
+        variance = base * scale + self.process_variance_per_s * dt
+        return np.eye(3) * max(float(variance), np.finfo(float).eps)
+
+    def process_covariance(self, dt: float) -> np.ndarray:
+        """Return state-transition covariance accumulated over ``dt`` seconds."""
+        if not np.isfinite(dt) or dt < 0:
+            raise ValueError("time interval must be finite and non-negative")
+        variance = max(self.process_variance_per_s * dt, np.finfo(float).eps)
+        return np.eye(3) * variance
+
+
 class TokenMemory:
     """Manage association, lifecycle transitions, attention and bounded storage.
 
     Args:
         association_radius_m: Radius for radial association and default local attention.
-        process_noise: Position process-noise variance per second.
+        process_noise: Backwards-compatible default process-noise variance per second.
+        noise_model: Modality-, quality-, and time-aware noise configuration. When
+            supplied, it supersedes ``process_noise``.
         associator: Optional custom associator. It takes precedence over ``association_mode``.
         association_mode: Built-in association strategy, ``"feature"`` or ``"radial"``.
         rejection_threshold: Feature-association rejection threshold.
@@ -105,6 +171,7 @@ class TokenMemory:
         self,
         association_radius_m: float = 0.35,
         process_noise: float = 0.01,
+        noise_model: ModalityNoiseModel | None = None,
         associator: TokenAssociator | None = None,
         *,
         association_mode: str = "feature",
@@ -126,7 +193,7 @@ class TokenMemory:
         if not 0 <= new_token_threshold <= 1:
             raise ValueError("new_token_threshold must be between zero and one")
         self.association_radius_m = association_radius_m
-        self.process_noise = process_noise
+        self.noise_model = noise_model or ModalityNoiseModel(process_variance_per_s=process_noise)
         self.new_token_threshold = new_token_threshold
         self.lifecycle = lifecycle or LifecycleRules()
         if budgets is not None and any(
@@ -183,14 +250,22 @@ class TokenMemory:
             self.event_sink.emit(event, sequence_time_s, **fields)
 
     def update(
-        self, position: np.ndarray, timestamp: float, semantic_class: int | None = None
+        self,
+        position: np.ndarray,
+        timestamp: float,
+        semantic_class: int | None = None,
+        *,
+        modality: str = "legacy",
+        quality: float = 1.0,
     ) -> Token4D:
-        """Create or update one token from a legacy position observation.
+        """Create or update one token from a position observation.
 
         Args:
             position: XYZ observation accepted by ``TokenProposalModule``.
             timestamp: Monotonic sequence timestamp in seconds.
             semantic_class: Optional class identifier in the eight-class legacy space.
+            modality: Source modality used to select measurement noise.
+            quality: Normalized measurement quality in [0, 1].
 
         Returns:
             Token associated with the observation, even if it is subsequently
@@ -204,8 +279,16 @@ class TokenMemory:
             if not 0 <= semantic_class < len(logits):
                 raise ValueError("semantic_class must be between 0 and 7")
             logits[semantic_class] = 1.0
+        dt = (
+            0.0
+            if self._current_timestamp_s is None
+            else max(timestamp - self._current_timestamp_s, 0.0)
+        )
         candidate = self.proposals.propose(
-            np.asarray(position), timestamp, semantic_logits=logits[None, :]
+            np.asarray(position),
+            timestamp,
+            semantic_logits=logits[None, :],
+            uncertainty=self.noise_model.covariance(modality, quality, dt),
         )[0]
         return self.update_candidates([candidate])[0]
 
@@ -272,9 +355,7 @@ class TokenMemory:
         result.metadata["discarded_proposals"] = len(result.discarded_candidates)
         self._record_association(result, new_tokens=len(output) - len(result.matches))
         merged_into = self._merge_duplicates()
-        output = {
-            index: merged_into.get(token.token_id, token) for index, token in output.items()
-        }
+        output = {index: merged_into.get(token.token_id, token) for index, token in output.items()}
         self._apply_budgets(now_s)
         self._finish_timing(started)
         self._emit(
@@ -352,7 +433,9 @@ class TokenMemory:
             sensory_descriptor=candidate.sensory_descriptor.copy(),
             embedding=candidate.sensory_descriptor.copy(),
             activated_at_s=candidate.timestamp,
-            state=(TokenState.ACTIVE if self.lifecycle.activation_hits <= 1 else TokenState.PENDING),
+            state=(
+                TokenState.ACTIVE if self.lifecycle.activation_hits <= 1 else TokenState.PENDING
+            ),
         )
         self._next_token_id += 1
         self.tokens.append(token)
@@ -370,10 +453,17 @@ class TokenMemory:
         dt = max(candidate.timestamp - token.last_seen_s, 1e-6)
         was_active = token.state == TokenState.ACTIVE
         previous = token.position.copy()
-        prior_cov = token.covariance + np.eye(3) * self.process_noise * dt
-        gain = prior_cov @ np.linalg.pinv(prior_cov + candidate.covariance)
+        prior_cov = token.covariance + self.noise_model.process_covariance(dt)
+        innovation_cov = prior_cov + candidate.covariance
+        gain = np.linalg.solve(innovation_cov.T, prior_cov.T).T
         token.position = token.position + gain @ (candidate.position - token.position)
-        token.covariance = (np.eye(3) - gain) @ prior_cov
+        identity = np.eye(3)
+        residual_gain = identity - gain
+        # Joseph form preserves symmetry and positive definiteness under rounding.
+        token.covariance = (
+            residual_gain @ prior_cov @ residual_gain.T + gain @ candidate.covariance @ gain.T
+        )
+        token.covariance = 0.5 * (token.covariance + token.covariance.T)
         token.velocity = 0.7 * token.velocity + 0.3 * (token.position - previous) / dt
         token.last_seen_s = candidate.timestamp
         token.observations += 1
@@ -458,7 +548,8 @@ class TokenMemory:
             for duplicate in duplicates:
                 total_hits = survivor.hit_count + duplicate.hit_count
                 survivor.position = (
-                    survivor.position * survivor.hit_count + duplicate.position * duplicate.hit_count
+                    survivor.position * survivor.hit_count
+                    + duplicate.position * duplicate.hit_count
                 ) / total_hits
                 survivor.semantic_logits += duplicate.semantic_logits
                 survivor.hit_count = total_hits
@@ -519,12 +610,12 @@ class TokenMemory:
         def over_budget() -> bool:
             """Return whether a hard capacity limit is currently exceeded."""
             return (
-                self.budgets.max_tokens is not None
-                and len(self.tokens) > self.budgets.max_tokens
+                self.budgets.max_tokens is not None and len(self.tokens) > self.budgets.max_tokens
             ) or (
                 self.budgets.max_memory_bytes is not None
                 and self.map_bytes > self.budgets.max_memory_bytes
             )
+
         # score then token id gives deterministic resolution of equal scores.
         while self.tokens and over_budget():
             victim = min(self.tokens, key=lambda token: (token.attention_score, token.token_id))

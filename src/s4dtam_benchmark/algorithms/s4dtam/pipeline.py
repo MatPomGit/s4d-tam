@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import re
+from dataclasses import dataclass
 from time import perf_counter
 
 import numpy as np
@@ -23,8 +25,19 @@ from .encoders import (
     RGBEncoder,
     ThermalEncoder,
 )
-from .memory import LifecycleRules, ResourceBudgets, TokenMemory
+from .calibration import CalibrationParameters, fit_calibration
+from .memory import LifecycleRules, ModalityNoiseModel, ResourceBudgets, TokenMemory
 from .telemetry import EventLogConfig, JsonlEventLogger
+
+
+@dataclass(frozen=True, slots=True)
+class _FrameMeasurement:
+    """Validated three-dimensional measurement consumed by token memory."""
+
+    position: np.ndarray
+    modality: str
+    quality: float
+    availability: AvailabilityState
 
 
 class S4DTAMReference(AlgorithmAdapter):
@@ -40,6 +53,7 @@ class S4DTAMReference(AlgorithmAdapter):
         lifecycle: Optional token lifecycle policy.
         budgets: Optional token, memory, history and update-time budgets.
         event_logging: Structured per-sequence event log configuration.
+        noise_model: Optional modality-, quality-, and time-dependent noise model.
 
     Raises:
         ValueError: If ``encoder_dim`` is incompatible with XYZ token positions.
@@ -58,6 +72,7 @@ class S4DTAMReference(AlgorithmAdapter):
         lifecycle: LifecycleRules | None = None,
         budgets: ResourceBudgets | None = None,
         event_logging: EventLogConfig | None = None,
+        noise_model: ModalityNoiseModel | None = None,
     ) -> None:
         if encoder_dim != 3:
             raise ValueError("S4DTAMReference requires encoder_dim=3 for TokenMemory positions")
@@ -67,6 +82,10 @@ class S4DTAMReference(AlgorithmAdapter):
         self.lifecycle = lifecycle
         self.budgets = budgets
         self.event_logging = event_logging or EventLogConfig()
+        self.noise_model = noise_model or ModalityNoiseModel()
+        self.calibration_parameters = CalibrationParameters()
+        self.calibration_data_id = "uncalibrated"
+        self.calibration_artifact: str | None = None
         scales = encoder_scales or {}
         encoder_types = {
             "rgb": RGBEncoder,
@@ -79,6 +98,64 @@ class S4DTAMReference(AlgorithmAdapter):
             name: kind(encoder_dim, scales.get(name, 1.0)) for name, kind in encoder_types.items()
         }
         self.fusion = MaskedFusion(encoder_dim, fusion_weights)
+
+    def calibrate(
+        self, sequences: list[SequenceData], context: RunContext, data_id: str
+    ) -> dict[str, object]:
+        """Fit and persist calibration parameters on an explicitly held-out split.
+
+        Args:
+            sequences: Calibration-only sequences, never test sequences.
+            context: Run context defining the artifact output directory.
+            data_id: Stable identifier of the exact calibration data selection.
+
+        Returns:
+            JSON-compatible calibration artifact payload.
+
+        Raises:
+            ValueError: If ``data_id`` is empty or no usable calibration samples exist.
+        """
+        if not data_id.strip():
+            raise ValueError("calibration data_id must be non-empty")
+        features: list[np.ndarray] = []
+        errors: list[np.ndarray] = []
+        covariances: list[np.ndarray] = []
+        for sequence in sequences:
+            self._validate_input(sequence)
+            previous_timestamp: float | None = None
+            last_position = np.zeros(3, dtype=float)
+            for index, timestamp in enumerate(sequence.timestamps):
+                measurement = self._measurement_at(sequence, index, last_position)
+                if measurement.availability != AvailabilityState.AVAILABLE:
+                    continue
+                dt = 0.0 if previous_timestamp is None else float(timestamp - previous_timestamp)
+                features.append(measurement.position)
+                errors.append(measurement.position - sequence.gt_positions[index])
+                covariances.append(
+                    self.noise_model.covariance(measurement.modality, measurement.quality, dt)
+                )
+                last_position = measurement.position
+                previous_timestamp = float(timestamp)
+        self.calibration_parameters = fit_calibration(
+            np.asarray(features), np.asarray(errors), np.asarray(covariances)
+        )
+        self.calibration_data_id = str(data_id)
+        directory = context.output_dir / "model_artifacts"
+        directory.mkdir(parents=True, exist_ok=True)
+        data_digest = hashlib.sha256(data_id.encode("utf-8")).hexdigest()[:12]
+        path = directory / f"{self.name}_calibration_{data_digest}.json"
+        payload = {
+            "schema": "s4dtam-calibration/v1",
+            "data_id": self.calibration_data_id,
+            "parameters": self.calibration_parameters.to_dict(),
+        }
+        temporary_path = path.with_suffix(".json.tmp")
+        temporary_path.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        temporary_path.replace(path)
+        self.calibration_artifact = str(path.relative_to(context.output_dir))
+        return payload
 
     def run(self, sequence: SequenceData, context: RunContext) -> AlgorithmResult:
         """Process one sequence and return trajectory, semantics and resource metrics.
@@ -94,12 +171,7 @@ class S4DTAMReference(AlgorithmAdapter):
             ValueError: If the sequence has neither usable modalities nor valid
                 three-dimensional legacy observations.
         """
-        has_modalities = any(getattr(sequence, name) is not None for name in MODALITIES)
-        reference_mode = not has_modalities
-        if reference_mode and sequence.observations is None:
-            raise ValueError("S4D-TAM requires a modality stream or legacy normalized observations")
-        if reference_mode and np.shape(sequence.observations) != (len(sequence.timestamps), 3):
-            raise ValueError("legacy normalized observations must have shape (samples, 3)")
+        reference_mode = self._validate_input(sequence)
         event_logger = None
         event_log_path = None
         if self.event_logging.enabled:
@@ -126,41 +198,34 @@ class S4DTAMReference(AlgorithmAdapter):
             budgets=self.budgets,
             event_sink=event_logger,
             log_attention_components=self.event_logging.include_attention_components,
+            noise_model=self.noise_model,
         )
-        estimates, semantics, latency = [], [], []
+        estimates, covariances, ood_scores, semantics, latency = [], [], [], [], []
         fused_states: list[int] = []
         last_observation = np.zeros(3)
         for index, timestamp in enumerate(sequence.timestamps):
             start = perf_counter()
-            if reference_mode:
-                observation = sequence.observations[index]
-                fused_states.append(int(AvailabilityState.AVAILABLE))
-            else:
-                states = {
-                    name: int(sequence.availability_masks[name][index]) for name in MODALITIES
-                }
-                encoded = [
-                    self.encoders[name].encode(getattr(sequence, name)[index], float(timestamp))
-                    for name in MODALITIES
-                    if getattr(sequence, name) is not None
-                    and states[name] == AvailabilityState.AVAILABLE
-                ]
-                fused = self.fusion.fuse(encoded, states, float(timestamp))
-                fused_states.append(int(fused.state))
-                observation = (
-                    fused.features
-                    if fused.state == AvailabilityState.AVAILABLE
-                    else last_observation
-                )
-                if fused.state == AvailabilityState.AVAILABLE:
-                    last_observation = observation
+            measurement = self._measurement_at(sequence, index, last_observation)
+            observation = measurement.position
+            fused_states.append(int(measurement.availability))
+            if measurement.availability == AvailabilityState.AVAILABLE:
+                last_observation = observation
             semantic_hint = (
                 int(sequence.semantic_observations[index])
                 if sequence.semantic_observations is not None
                 else None
             )
-            token = memory.update(observation, float(timestamp), semantic_hint)
+            token = memory.update(
+                observation,
+                float(timestamp),
+                semantic_hint,
+                modality=measurement.modality,
+                quality=measurement.quality,
+            )
             estimates.append(token.position.copy())
+            covariance_scale = self.calibration_parameters.covariance_scale
+            covariances.append(token.covariance.copy() * covariance_scale)
+            ood_scores.append(self.calibration_parameters.ood_score(observation))
             semantics.append(int(np.argmax(token.semantic_logits)))
             latency.append((perf_counter() - start) * 1000.0)
 
@@ -195,6 +260,8 @@ class S4DTAMReference(AlgorithmAdapter):
             algorithm=self.name,
             timestamps=sequence.timestamps,
             estimated_positions=np.asarray(estimates),
+            pose_covariances=np.asarray(covariances),
+            ood_scores=np.asarray(ood_scores),
             semantic_pred=np.asarray(semantics),
             occupancy_pred=occupancy_pred,
             latency_ms=np.asarray(latency),
@@ -205,6 +272,11 @@ class S4DTAMReference(AlgorithmAdapter):
                 "fused_availability_states": fused_states,
                 "not_flight_certified": True,
                 "association": memory.association_summary,
+                "calibration": {
+                    "data_id": self.calibration_data_id,
+                    "artifact": self.calibration_artifact,
+                    "parameters": self.calibration_parameters.to_dict(),
+                },
                 "event_log": (
                     str(event_log_path.relative_to(context.output_dir))
                     if event_log_path is not None
@@ -212,6 +284,52 @@ class S4DTAMReference(AlgorithmAdapter):
                 ),
             },
         )
+
+    def _validate_input(self, sequence: SequenceData) -> bool:
+        """Validate algorithm-specific inputs and return whether legacy mode is active."""
+        reference_mode = not any(getattr(sequence, name) is not None for name in MODALITIES)
+        if reference_mode and sequence.observations is None:
+            raise ValueError("S4D-TAM requires a modality stream or legacy normalized observations")
+        if reference_mode and np.shape(sequence.observations) != (len(sequence.timestamps), 3):
+            raise ValueError("legacy normalized observations must have shape (samples, 3)")
+        return reference_mode
+
+    def _measurement_at(
+        self, sequence: SequenceData, index: int, last_position: np.ndarray
+    ) -> _FrameMeasurement:
+        """Build one modality-aware measurement for a synchronized frame.
+
+        Args:
+            sequence: Source sequence containing legacy or multimodal observations.
+            index: Zero-based sample index.
+            last_position: Most recent available position used during outages.
+
+        Returns:
+            Position, source modality, quality, and availability state.
+        """
+        if not any(getattr(sequence, name) is not None for name in MODALITIES):
+            assert sequence.observations is not None
+            return _FrameMeasurement(
+                np.asarray(sequence.observations[index], dtype=float),
+                "legacy",
+                1.0,
+                AvailabilityState.AVAILABLE,
+            )
+        states = {name: int(sequence.availability_masks[name][index]) for name in MODALITIES}
+        timestamp = float(sequence.timestamps[index])
+        encoded = [
+            self.encoders[name].encode(getattr(sequence, name)[index], timestamp)
+            for name in MODALITIES
+            if getattr(sequence, name) is not None and states[name] == AvailabilityState.AVAILABLE
+        ]
+        fused = self.fusion.fuse(encoded, states, timestamp)
+        if fused.state != AvailabilityState.AVAILABLE:
+            return _FrameMeasurement(
+                np.asarray(last_position, dtype=float).copy(), "fused", 0.0, fused.state
+            )
+        quality = float(np.mean([item.confidence for item in encoded]))
+        modality = encoded[0].modality if len(encoded) == 1 else "fused"
+        return _FrameMeasurement(fused.features.copy(), modality, quality, fused.state)
 
 
 def _safe_path_component(value: str) -> str:

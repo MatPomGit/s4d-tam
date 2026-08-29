@@ -1,4 +1,5 @@
 from .attention import AttentionWeights, HierarchicalAttention
+from .calibration import CalibrationParameters, fit_calibration
 from .association import (
     AssociationResult,
     FallbackAssociator,
@@ -6,7 +7,7 @@ from .association import (
     RadialAssociator,
     TokenMatch,
 )
-from .memory import LifecycleRules, ResourceBudgets, TokenMemory
+from .memory import LifecycleRules, ModalityNoiseModel, ResourceBudgets, TokenMemory
 from .pipeline import S4DTAMReference
 from .proposal import TokenCandidate, TokenProposalModule
 from .token import Token4D, TokenState
@@ -20,6 +21,7 @@ from .telemetry import (
 
 __all__ = [
     "AttentionWeights",
+    "CalibrationParameters",
     "AssociationResult",
     "EVENT_LOG_SCHEMA",
     "EventLogConfig",
@@ -30,6 +32,7 @@ __all__ = [
     "InMemoryEventSink",
     "JsonlEventLogger",
     "LifecycleRules",
+    "ModalityNoiseModel",
     "RadialAssociator",
     "ResourceBudgets",
     "S4DTAMReference",
@@ -39,4 +42,5 @@ __all__ = [
     "TokenMemory",
     "TokenProposalModule",
     "TokenState",
+    "fit_calibration",
 ]
