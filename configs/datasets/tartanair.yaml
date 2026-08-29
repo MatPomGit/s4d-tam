@@ -1,6 +1,10 @@
 name: tartanair
-adapter: manifest
-root: data/normalized/tartanair
+type: tartanair
+root: data/raw/tartanair
+output_root: data/normalized/tartanair
+axis_convention: tartanair_ned_to_enu
+timestamp_unit: s
+position_unit: m
+required_version: v2
 source: https://tartanair.org/
-recommended_capabilities: [trajectory, depth, semantics, optical_flow]
-license_review_required: true
+license_id: TartanAir-terms
