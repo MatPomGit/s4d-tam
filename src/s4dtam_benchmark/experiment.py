@@ -1,0 +1,89 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+from s4dtam_benchmark.algorithms.dead_reckoning import DeadReckoning
+from s4dtam_benchmark.algorithms.external import ExternalArtifactAlgorithm
+from s4dtam_benchmark.algorithms.s4dtam import S4DTAMReference
+from s4dtam_benchmark.config import load_yaml
+from s4dtam_benchmark.contracts import RunContext
+from s4dtam_benchmark.datasets import ManifestDataset, SyntheticDataset
+from s4dtam_benchmark.evaluation import evaluate_result
+from s4dtam_benchmark.reporting import write_paper_assets
+
+
+def _dataset(spec: dict[str, Any], seed: int):
+    if spec["type"] == "synthetic":
+        return SyntheticDataset(seed=seed, length=int(spec.get("length", 240)))
+    return ManifestDataset(spec["name"], spec["root"], spec.get("manifest"))
+
+
+def _algorithm(spec: dict[str, Any]):
+    kind = spec["type"]
+    if kind == "s4dtam_reference":
+        return S4DTAMReference(float(spec.get("association_radius_m", 0.35)))
+    if kind == "dead_reckoning":
+        return DeadReckoning(float(spec.get("drift_per_step", 0.002)))
+    if kind == "external_artifact":
+        return ExternalArtifactAlgorithm(spec["name"], spec["result_root"])
+    raise ValueError(f"Unknown algorithm type: {kind}")
+
+
+def run_experiment(config_path: str | Path) -> Path:
+    config = load_yaml(config_path)
+    seed = int(config.get("seed", 7))
+    output_dir = Path(config.get("output_dir", "outputs/run"))
+    if not output_dir.is_absolute():
+        output_dir = Path.cwd() / output_dir
+    context = RunContext(output_dir=output_dir, seed=seed, config=config)
+    datasets = [_dataset(spec, seed) for spec in config["datasets"]]
+    algorithms = [_algorithm(spec) for spec in config["algorithms"]]
+    records: list[dict[str, Any]] = []
+    unavailable: list[dict[str, str]] = []
+    failures: list[dict[str, str]] = []
+
+    for dataset in datasets:
+        for sequence in dataset.sequences():
+            for algorithm in algorithms:
+                try:
+                    result = algorithm.run(sequence, context)
+                    metrics, missing = evaluate_result(sequence, result)
+                    records.extend(
+                        {
+                            "dataset": sequence.dataset,
+                            "sequence": sequence.sequence_id,
+                            "algorithm": result.algorithm,
+                            "metric": metric,
+                            "value": value,
+                        }
+                        for metric, value in metrics.items()
+                    )
+                    unavailable.extend(
+                        {
+                            "dataset": sequence.dataset,
+                            "sequence": sequence.sequence_id,
+                            "algorithm": result.algorithm,
+                            "reason": reason,
+                        }
+                        for reason in missing
+                    )
+                except Exception as error:  # isolate baseline failures and keep the benchmark auditable
+                    failures.append(
+                        {
+                            "dataset": sequence.dataset,
+                            "sequence": sequence.sequence_id,
+                            "algorithm": algorithm.name,
+                            "error": f"{type(error).__name__}: {error}",
+                        }
+                    )
+
+    if not records:
+        raise RuntimeError(f"No successful runs. Failures: {failures}")
+    write_paper_assets(records, output_dir, config)
+    (output_dir / "unavailable_metrics.json").write_text(
+        json.dumps(unavailable, indent=2), encoding="utf-8"
+    )
+    (output_dir / "failures.json").write_text(json.dumps(failures, indent=2), encoding="utf-8")
+    return output_dir

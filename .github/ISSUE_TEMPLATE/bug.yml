@@ -1,0 +1,12 @@
+name: Bug report
+description: Report a reproducible benchmark defect
+body:
+  - type: textarea
+    attributes: {label: Description}
+    validations: {required: true}
+  - type: textarea
+    attributes: {label: Minimal reproduction}
+    validations: {required: true}
+  - type: input
+    attributes: {label: Commit and environment}
+    validations: {required: true}

@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this benchmark, cite the software and the associated S4D-TAM paper."
+title: "S4D-TAM Benchmark"
+type: software
+version: 0.1.0
+date-released: 2026-08-29
+authors:
+  - family-names: Pomianek
+    given-names: Mateusz
+license: Apache-2.0
+repository-code: "https://github.com/OWNER/s4d-tam-benchmark"
+abstract: "Reproducible evaluation framework and Python reference implementation for S4D-TAM."

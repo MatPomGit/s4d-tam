@@ -1,0 +1,5 @@
+name: fast_lio2
+type: external_artifact
+upstream: https://github.com/hku-mars/FAST_LIO
+result_root: outputs/baselines/fast_lio2
+pin_commit_before_benchmark: true

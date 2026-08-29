@@ -1,0 +1,6 @@
+name: tartanair
+adapter: manifest
+root: data/normalized/tartanair
+source: https://tartanair.org/
+recommended_capabilities: [trajectory, depth, semantics, optical_flow]
+license_review_required: true

@@ -1,0 +1,6 @@
+name: marsim
+adapter: manifest
+root: data/normalized/marsim
+source: https://github.com/hku-mars/MARSIM
+recommended_capabilities: [trajectory, lidar, dynamics, closed_loop]
+license_review_required: true

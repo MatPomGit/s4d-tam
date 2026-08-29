@@ -1,0 +1,18 @@
+name: s4dtam_ablation
+seed: 2026
+output_dir: outputs/ablation
+variants:
+  - full
+  - no_semantics
+  - no_temporal_state
+  - no_uncertainty
+  - no_topology
+  - no_reference_map
+  - no_risk_prediction
+primary_metrics:
+  - trajectory/ate_rmse_m
+  - forecast/1s/iou
+  - navigation/mission_success
+  - navigation/collisions_per_km
+  - efficiency/latency_p95_ms
+  - efficiency/map_bytes

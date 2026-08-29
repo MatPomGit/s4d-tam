@@ -1,0 +1,6 @@
+name: blackbird
+adapter: manifest
+root: data/normalized/blackbird
+source: https://github.com/mit-aera/Blackbird-Dataset
+recommended_capabilities: [trajectory, visual_inertial, aggressive_flight]
+license_review_required: true

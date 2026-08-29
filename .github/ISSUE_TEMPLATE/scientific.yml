@@ -1,0 +1,9 @@
+name: Scientific validity issue
+description: Report a metric, protocol, leakage, or comparability concern
+body:
+  - type: textarea
+    attributes: {label: Claim or metric affected}
+    validations: {required: true}
+  - type: textarea
+    attributes: {label: Evidence and proposed correction}
+    validations: {required: true}

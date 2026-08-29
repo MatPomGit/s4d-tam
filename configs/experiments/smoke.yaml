@@ -1,0 +1,16 @@
+name: smoke
+seed: 7
+candidate_algorithm: s4d_tam_reference
+bootstrap_resamples: 1000
+output_dir: outputs/smoke
+datasets:
+  - type: synthetic
+    name: synthetic
+    length: 160
+algorithms:
+  - type: s4dtam_reference
+    name: s4d_tam_reference
+    association_radius_m: 0.35
+  - type: dead_reckoning
+    name: dead_reckoning
+    drift_per_step: 0.002

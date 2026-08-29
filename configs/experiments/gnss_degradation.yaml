@@ -1,0 +1,11 @@
+name: gnss_degradation
+seed: 2026
+output_dir: outputs/gnss_degradation
+scenario_factors:
+  gnss_mode: [nominal, dropout_30s, dropout_120s, biased, spoofed]
+  visibility: [clear, low_light, fog]
+  dynamics: [static, moving_obstacles]
+notes: >-
+  Expand these factors into paired trials with identical seeds and trajectories.
+  Closed-loop traces must record collisions, near misses, clearance, mission success,
+  path length, replanning events, compute, memory, and energy.

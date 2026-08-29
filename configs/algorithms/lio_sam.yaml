@@ -1,0 +1,5 @@
+name: lio_sam
+type: external_artifact
+upstream: https://github.com/TixiaoShan/LIO-SAM
+result_root: outputs/baselines/lio_sam
+pin_commit_before_benchmark: true

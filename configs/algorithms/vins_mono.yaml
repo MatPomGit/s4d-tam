@@ -1,0 +1,5 @@
+name: vins_mono
+type: external_artifact
+upstream: https://github.com/HKUST-Aerial-Robotics/VINS-Mono
+result_root: outputs/baselines/vins_mono
+pin_commit_before_benchmark: true

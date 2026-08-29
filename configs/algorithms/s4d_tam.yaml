@@ -1,0 +1,4 @@
+name: s4d_tam_reference
+type: s4dtam_reference
+association_radius_m: 0.35
+status: numerical_reference_not_trained_model

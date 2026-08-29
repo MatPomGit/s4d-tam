@@ -1,0 +1,5 @@
+name: orb_slam3
+type: external_artifact
+upstream: https://github.com/UZ-SLAMLab/ORB_SLAM3
+result_root: outputs/baselines/orb_slam3
+pin_commit_before_benchmark: true

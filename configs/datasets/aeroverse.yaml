@@ -1,0 +1,7 @@
+name: aeroverse
+adapter: manifest
+root: data/normalized/aeroverse
+paper: https://arxiv.org/abs/2408.15511
+recommended_capabilities: [embodied_tasks, world_model]
+release_status: verify_before_use
+license_review_required: true
