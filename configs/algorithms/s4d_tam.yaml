@@ -9,6 +9,14 @@ encoders:
   lidar: {scale: 1.0}
   imu: {scale: 1.0}
   gnss: {scale: 1.0}
+fusion:
+  strategy: confidence_weighted_mean
+  weights:
+    rgb: 1.0
+    thermal: 1.0
+    lidar: 1.0
+    imu: 1.0
+    gnss: 1.0
 modality_degradation:
   stream_absent: exclude_for_entire_sequence
   sample_missing: exclude_sample_and_reuse_last_fused_observation

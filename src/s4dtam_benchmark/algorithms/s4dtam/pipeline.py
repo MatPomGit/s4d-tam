@@ -34,7 +34,10 @@ class S4DTAMReference(AlgorithmAdapter):
         association_radius_m: float = 0.35,
         encoder_dim: int = 3,
         encoder_scales: dict[str, float] | None = None,
+        fusion_weights: dict[str, float] | None = None,
     ):
+        if encoder_dim != 3:
+            raise ValueError("S4DTAMReference requires encoder_dim=3 for TokenMemory positions")
         self.association_radius_m = association_radius_m
         scales = encoder_scales or {}
         encoder_types = {
@@ -47,7 +50,7 @@ class S4DTAMReference(AlgorithmAdapter):
         self.encoders = {
             name: kind(encoder_dim, scales.get(name, 1.0)) for name, kind in encoder_types.items()
         }
-        self.fusion = MaskedFusion(encoder_dim)
+        self.fusion = MaskedFusion(encoder_dim, fusion_weights)
 
     def run(self, sequence: SequenceData, context: RunContext) -> AlgorithmResult:
         has_modalities = any(getattr(sequence, name) is not None for name in MODALITIES)

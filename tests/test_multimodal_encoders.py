@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from s4dtam_benchmark.algorithms.s4dtam.encoders import (
+    EncodedObservation,
     GNSSEncoder,
     IMUEncoder,
     LiDAREncoder,
@@ -33,6 +34,36 @@ def test_encoder_shape_and_determinism(encoder_type, sample):
     second = encoder.encode(sample.copy(), 1.25)
     assert first.features.shape == (7,)
     np.testing.assert_array_equal(first.features, second.features)
+    assert not first.features.flags.writeable
+
+
+def test_modality_specific_descriptors_do_not_collapse_equal_inputs():
+    sample = np.ones((3, 3))
+    rgb = RGBEncoder(5).encode(np.repeat(sample[..., None], 3, axis=-1), 0.0)
+    thermal = ThermalEncoder(5).encode(sample, 0.0)
+    assert not np.array_equal(rgb.features, thermal.features)
+
+
+@pytest.mark.parametrize(
+    ("encoder", "invalid", "message"),
+    [
+        (RGBEncoder(), np.ones((3, 3)), "rgb sample"),
+        (ThermalEncoder(), np.ones(5), "thermal sample"),
+        (LiDAREncoder(), np.ones((4, 2)), "lidar sample"),
+        (IMUEncoder(), np.ones(3), "imu sample"),
+        (GNSSEncoder(), np.ones(4), "gnss sample"),
+    ],
+)
+def test_encoders_reject_modality_specific_invalid_shapes(encoder, invalid, message):
+    with pytest.raises(ValueError, match=message):
+        encoder.encode(invalid, 0.0)
+
+
+def test_encoded_observation_validates_metadata():
+    with pytest.raises(ValueError, match="confidence"):
+        EncodedObservation("rgb", 0.0, np.ones(3), confidence=1.1)
+    with pytest.raises(ValueError, match="timestamp"):
+        EncodedObservation("rgb", np.nan, np.ones(3))
 
 
 def _sequence(missing: set[str] = frozenset()) -> SequenceData:
@@ -81,14 +112,23 @@ def test_masks_distinguish_all_unavailable_reasons(tmp_path: Path):
 
 
 def test_fusion_excludes_rejected_observation():
-    rgb = RGBEncoder(3).encode(np.ones(3), 0.0)
-    thermal = ThermalEncoder(3).encode(np.full(3, 100.0), 0.0)
+    rgb = RGBEncoder(3).encode(np.ones((2, 2, 3)), 0.0)
+    thermal = ThermalEncoder(3).encode(np.full((2, 2), 100.0), 0.0)
     fused = MaskedFusion(3).fuse(
         [rgb, thermal],
         {"rgb": AvailabilityState.AVAILABLE, "thermal": AvailabilityState.QUALITY_REJECTED},
         0.0,
     )
     np.testing.assert_array_equal(fused.features, rgb.features)
+
+
+def test_fusion_validates_feature_dimensions_and_duplicates():
+    rgb = RGBEncoder(2).encode(np.ones((2, 2, 3)), 0.0)
+    states = {"rgb": AvailabilityState.AVAILABLE}
+    with pytest.raises(ValueError, match="shape"):
+        MaskedFusion(3).fuse([rgb], states, 0.0)
+    with pytest.raises(ValueError, match="duplicate"):
+        MaskedFusion(2).fuse([rgb, rgb], states, 0.0)
 
 
 def test_sequence_rejects_inconsistent_absent_mask():

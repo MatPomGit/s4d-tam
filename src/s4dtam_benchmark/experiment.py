@@ -60,6 +60,10 @@ def _algorithm(spec: dict[str, Any]):
                 for name, values in encoders.items()
                 if isinstance(values, dict)
             },
+            {
+                name: float(weight)
+                for name, weight in spec.get("fusion", {}).get("weights", {}).items()
+            },
         )
     if kind == "dead_reckoning":
         return DeadReckoning(float(spec.get("drift_per_step", 0.002)))
