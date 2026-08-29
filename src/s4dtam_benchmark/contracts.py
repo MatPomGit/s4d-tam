@@ -98,6 +98,13 @@ class SequenceData:
 
 @dataclass(slots=True)
 class AlgorithmResult:
+    """Normalized output contract shared by algorithms and evaluators.
+
+    Per-sample arrays use the same leading dimension as ``timestamps``. Pose
+    covariance matrices are required to be symmetric positive definite because
+    uncertainty evaluation uses their inverse and log determinant.
+    """
+
     algorithm: str
     timestamps: np.ndarray
     estimated_positions: np.ndarray
@@ -114,17 +121,25 @@ class AlgorithmResult:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        count = len(np.asarray(self.timestamps))
-        if np.shape(self.estimated_positions) != (count, 3):
-            raise ValueError("estimated_positions must have shape [N,3]")
+        self.timestamps = np.asarray(self.timestamps, dtype=float)
+        self.estimated_positions = np.asarray(self.estimated_positions, dtype=float)
+        if self.timestamps.ndim != 1 or not np.all(np.isfinite(self.timestamps)):
+            raise ValueError("result timestamps must be a finite one-dimensional array")
+        count = len(self.timestamps)
+        if self.estimated_positions.shape != (count, 3) or not np.all(
+            np.isfinite(self.estimated_positions)
+        ):
+            raise ValueError("estimated_positions must be a finite array with shape [N,3]")
         if self.pose_covariances is not None:
             covariance = np.asarray(self.pose_covariances, dtype=float)
             if covariance.shape != (count, 3, 3):
                 raise ValueError("pose_covariances must have shape [N,3,3]")
-            if not np.all(np.isfinite(covariance)) or np.any(
-                np.linalg.eigvalsh(covariance) <= 0
-            ):
-                raise ValueError("pose_covariances must be finite and positive definite")
+            if not np.all(np.isfinite(covariance)):
+                raise ValueError("pose_covariances must be finite")
+            if not np.allclose(covariance, np.swapaxes(covariance, 1, 2), atol=1e-10):
+                raise ValueError("pose_covariances must be symmetric")
+            if np.any(np.linalg.eigvalsh(covariance) <= 0):
+                raise ValueError("pose_covariances must be positive definite")
             self.pose_covariances = covariance
         if self.ood_scores is not None:
             scores = np.asarray(self.ood_scores, dtype=float)

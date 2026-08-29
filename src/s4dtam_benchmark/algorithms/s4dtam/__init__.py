@@ -1,4 +1,5 @@
 from .attention import AttentionWeights, HierarchicalAttention
+from .calibration import CalibrationParameters, fit_calibration
 from .association import (
     AssociationResult,
     FallbackAssociator,
@@ -20,6 +21,7 @@ from .telemetry import (
 
 __all__ = [
     "AttentionWeights",
+    "CalibrationParameters",
     "AssociationResult",
     "EVENT_LOG_SCHEMA",
     "EventLogConfig",
@@ -40,4 +42,5 @@ __all__ = [
     "TokenMemory",
     "TokenProposalModule",
     "TokenState",
+    "fit_calibration",
 ]

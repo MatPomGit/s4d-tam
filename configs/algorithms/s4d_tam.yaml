@@ -35,6 +35,20 @@ fusion:
     lidar: 1.0
     imu: 1.0
     gnss: 1.0
+noise_model:
+  # Position variances are expressed in square metres in the common 3-D state space.
+  modality_variances:
+    rgb: 0.08
+    thermal: 0.10
+    lidar: 0.02
+    imu: 0.12
+    gnss: 0.04
+    fused: 0.03
+    legacy: 0.05
+  default_variance: 0.05
+  process_variance_per_s: 0.01
+  quality_power: 2.0
+  minimum_quality: 0.05
 modality_degradation:
   stream_absent: exclude_for_entire_sequence
   sample_missing: exclude_sample_and_reuse_last_fused_observation

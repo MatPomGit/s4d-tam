@@ -9,11 +9,18 @@ from .forecast import flow_metrics, occupancy_metrics
 from .navigation import navigation_metrics
 from .semantic import semantic_metrics
 from .trajectory import rotation_rpe_deg, trajectory_metrics
-from .uncertainty import (binary_risk_metrics, ood_metrics, pose_calibration_metrics,
-                          pose_uncertainty_metrics, selective_risk_metrics)
+from .uncertainty import (
+    binary_risk_metrics,
+    ood_metrics,
+    pose_calibration_metrics,
+    pose_uncertainty_metrics,
+    selective_risk_metrics,
+)
 
 
-def evaluate_result(sequence: SequenceData, result: AlgorithmResult) -> tuple[dict[str, float], list[str]]:
+def evaluate_result(
+    sequence: SequenceData, result: AlgorithmResult
+) -> tuple[dict[str, float], list[str]]:
     metrics = trajectory_metrics(sequence.gt_positions, result.estimated_positions)
     unavailable: list[str] = []
     metrics.update(efficiency_metrics(result.latency_ms, result.resource))
@@ -30,16 +37,29 @@ def evaluate_result(sequence: SequenceData, result: AlgorithmResult) -> tuple[di
                 sequence.gt_positions, result.estimated_positions, result.pose_covariances
             )
         )
-        metrics.update(pose_calibration_metrics(
-            sequence.gt_positions, result.estimated_positions, result.pose_covariances
-        ))
+        metrics.update(
+            pose_calibration_metrics(
+                sequence.gt_positions, result.estimated_positions, result.pose_covariances
+            )
+        )
     else:
         unavailable.append("pose uncertainty: covariance prediction absent")
 
+    selection_uncertainty = None
+    if result.pose_covariances is not None:
+        selection_uncertainty = np.trace(result.pose_covariances, axis1=1, axis2=2)
+    elif result.ood_scores is not None:
+        selection_uncertainty = result.ood_scores
+    if selection_uncertainty is not None:
+        metrics.update(
+            selective_risk_metrics(
+                sequence.gt_positions, result.estimated_positions, selection_uncertainty
+            )
+        )
+    else:
+        unavailable.append("selective risk: uncertainty prediction absent")
+
     if result.ood_scores is not None:
-        metrics.update(selective_risk_metrics(
-            sequence.gt_positions, result.estimated_positions, result.ood_scores
-        ))
         labels = sequence.metadata.get("ood_labels")
         if labels is not None:
             metrics.update(ood_metrics(np.asarray(labels), result.ood_scores))
