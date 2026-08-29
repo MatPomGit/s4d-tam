@@ -21,11 +21,25 @@ from .encoders import (
     RGBEncoder,
     ThermalEncoder,
 )
-from .memory import TokenMemory
+from .memory import LifecycleRules, ResourceBudgets, TokenMemory
 
 
 class S4DTAMReference(AlgorithmAdapter):
-    """Transparent CPU reference for the proposed token lifecycle and interfaces."""
+    """Transparent CPU reference for the token lifecycle and sensor interfaces.
+
+    Args:
+        association_radius_m: Radial fallback association threshold in metres.
+        encoder_dim: Common encoder feature dimension. The reference map requires three.
+        encoder_scales: Optional per-modality input scaling factors.
+        fusion_weights: Optional per-modality confidence multipliers.
+        association_mode: Built-in primary association mode.
+        association_rejection_threshold: Maximum accepted feature-association cost.
+        lifecycle: Optional token lifecycle policy.
+        budgets: Optional token, memory, history and update-time budgets.
+
+    Raises:
+        ValueError: If ``encoder_dim`` is incompatible with XYZ token positions.
+    """
 
     name = "s4d_tam_reference"
 
@@ -37,12 +51,16 @@ class S4DTAMReference(AlgorithmAdapter):
         fusion_weights: dict[str, float] | None = None,
         association_mode: str = "feature",
         association_rejection_threshold: float = 0.35,
-    ):
+        lifecycle: LifecycleRules | None = None,
+        budgets: ResourceBudgets | None = None,
+    ) -> None:
         if encoder_dim != 3:
             raise ValueError("S4DTAMReference requires encoder_dim=3 for TokenMemory positions")
         self.association_radius_m = association_radius_m
         self.association_mode = association_mode
         self.association_rejection_threshold = association_rejection_threshold
+        self.lifecycle = lifecycle
+        self.budgets = budgets
         scales = encoder_scales or {}
         encoder_types = {
             "rgb": RGBEncoder,
@@ -57,6 +75,19 @@ class S4DTAMReference(AlgorithmAdapter):
         self.fusion = MaskedFusion(encoder_dim, fusion_weights)
 
     def run(self, sequence: SequenceData, context: RunContext) -> AlgorithmResult:
+        """Process one sequence and return trajectory, semantics and resource metrics.
+
+        Args:
+            sequence: Validated synchronized sensor or legacy observation sequence.
+            context: Experiment output, seed and configuration context.
+
+        Returns:
+            Reference estimates and diagnostics in the benchmark result contract.
+
+        Raises:
+            ValueError: If the sequence has neither usable modalities nor valid
+                three-dimensional legacy observations.
+        """
         has_modalities = any(getattr(sequence, name) is not None for name in MODALITIES)
         reference_mode = not has_modalities
         if reference_mode and sequence.observations is None:
@@ -67,6 +98,8 @@ class S4DTAMReference(AlgorithmAdapter):
             self.association_radius_m,
             association_mode=self.association_mode,
             rejection_threshold=self.association_rejection_threshold,
+            lifecycle=self.lifecycle,
+            budgets=self.budgets,
         )
         estimates, semantics, latency = [], [], []
         fused_states: list[int] = []
@@ -116,6 +149,14 @@ class S4DTAMReference(AlgorithmAdapter):
                     0.0,
                     1.0,
                 )
+        resource = {
+            "token_count": float(len(memory.tokens)),
+            "map_bytes": float(memory.map_bytes),
+            "last_update_ms": float(memory.last_update_ms),
+            "time_budget_exceeded": float(memory.time_budget_exceeded),
+        }
+        if memory.budgets.max_update_time_ms is not None:
+            resource["update_time_budget_ms"] = float(memory.budgets.max_update_time_ms)
         return AlgorithmResult(
             algorithm=self.name,
             timestamps=sequence.timestamps,
@@ -123,18 +164,7 @@ class S4DTAMReference(AlgorithmAdapter):
             semantic_pred=np.asarray(semantics),
             occupancy_pred=occupancy_pred,
             latency_ms=np.asarray(latency),
-            resource={
-                "token_count": float(len(memory.tokens)),
-                "map_bytes": float(
-                    sum(
-                        token.position.nbytes
-                        + token.covariance.nbytes
-                        + token.velocity.nbytes
-                        + token.semantic_logits.nbytes
-                        for token in memory.tokens
-                    )
-                ),
-            },
+            resource=resource,
             metadata={
                 "implementation": "reference_cpu",
                 "input_mode": "legacy_reference" if reference_mode else "multimodal_encoded",
