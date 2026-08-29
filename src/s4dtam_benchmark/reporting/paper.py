@@ -32,7 +32,8 @@ def _latex_table(frame: pd.DataFrame) -> str:
     return "\n".join(lines)
 
 
-def write_paper_assets(records: list[dict[str, Any]], output_dir: Path, run_config: dict[str, Any]) -> None:
+def write_paper_assets(records: list[dict[str, Any]], output_dir: Path,
+                       run_config: dict[str, Any], executions: list[dict[str, Any]] | None = None) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     frame = pd.DataFrame(records)
     frame.to_csv(output_dir / "metrics_long.csv", index=False)
@@ -102,6 +103,12 @@ def write_paper_assets(records: list[dict[str, Any]], output_dir: Path, run_conf
         "config": run_config,
         "python": sys.version,
         "platform": platform.platform(),
+        "hardware": {
+            "machine": platform.machine(),
+            "processor": platform.processor(),
+            "node": platform.node(),
+        },
+        "executions": executions or [],
         "note": "Report unavailable metrics explicitly; do not impute them.",
     }
     (output_dir / "run_manifest.json").write_text(

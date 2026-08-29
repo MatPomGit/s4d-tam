@@ -1,5 +1,26 @@
 name: orb_slam3
 type: external_artifact
 upstream: https://github.com/UZ-SLAMLab/ORB_SLAM3
+revision: 4452a3c4d6d9d7333b30f1e6f2e67a4311a7c991
+container: ghcr.io/s4d-tam/orb-slam3@sha256:5c02f44e8738891a64056c44fe26fb90d1cf48f44c0f9c340fad22c80f4f78fb
 result_root: outputs/baselines/orb_slam3
-pin_commit_before_benchmark: true
+artifact_format: s4dtam-algorithm-result-npz/v1
+input_mapping:
+  camera: /camera/image_raw
+  imu: /imu
+calibration_required:
+- camera_intrinsics
+- camera_distortion
+- T_camera_imu
+- imu_noise
+hardware:
+  cpu: x86_64, record model in run manifest
+  gpu: NVIDIA CUDA, record model and driver in run manifest
+  ram_gb: 32
+warm_up:
+  discard_sequences: 1
+  discard_seconds: 10
+loop_closure:
+  enabled: true
+  vocabulary: ORBvoc.txt
+  min_keyframes: 10

@@ -49,7 +49,7 @@ def _algorithm(spec: dict[str, Any]):
     if kind == "dead_reckoning":
         return DeadReckoning(float(spec.get("drift_per_step", 0.002)))
     if kind == "external_artifact":
-        return ExternalArtifactAlgorithm(spec["name"], spec["result_root"])
+        return ExternalArtifactAlgorithm(spec["name"], spec["result_root"], spec)
     raise ValueError(f"Unknown algorithm type: {kind}")
 
 
@@ -65,12 +65,17 @@ def run_experiment(config_path: str | Path) -> Path:
     records: list[dict[str, Any]] = []
     unavailable: list[dict[str, str]] = []
     failures: list[dict[str, str]] = []
+    executions: list[dict[str, Any]] = []
 
     for dataset in datasets:
         for sequence in dataset.sequences():
             for algorithm in algorithms:
                 try:
                     result = algorithm.run(sequence, context)
+                    executions.append({
+                        "dataset": sequence.dataset, "sequence": sequence.sequence_id,
+                        "algorithm": result.algorithm, **result.metadata,
+                    })
                     metrics, missing = evaluate_result(sequence, result)
                     records.extend(
                         {
@@ -103,7 +108,7 @@ def run_experiment(config_path: str | Path) -> Path:
 
     if not records:
         raise RuntimeError(f"No successful runs. Failures: {failures}")
-    write_paper_assets(records, output_dir, config)
+    write_paper_assets(records, output_dir, config, executions)
     (output_dir / "unavailable_metrics.json").write_text(
         json.dumps(unavailable, indent=2), encoding="utf-8"
     )
