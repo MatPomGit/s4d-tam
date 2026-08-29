@@ -40,6 +40,8 @@ def test_logger_rejects_unsafe_paths_and_reserved_fields(tmp_path: Path) -> None
     )
     with pytest.raises(ValueError, match="reserved"):
         logger.emit("invalid", 0.0, event_index=99)
+    with pytest.raises(ValueError, match="finite"):
+        logger.emit("invalid_time", float("nan"))
 
 
 def test_memory_emits_lifecycle_and_deterministic_pruning_events() -> None:

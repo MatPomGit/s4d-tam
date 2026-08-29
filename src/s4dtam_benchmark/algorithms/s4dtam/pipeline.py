@@ -28,6 +28,8 @@ from .encoders import (
 from .calibration import CalibrationParameters, fit_calibration
 from .memory import LifecycleRules, ModalityNoiseModel, ResourceBudgets, TokenMemory
 from .telemetry import EventLogConfig, JsonlEventLogger
+from .reference_map import ReferenceMap
+from .topology import TopologicalGraph
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,6 +75,9 @@ class S4DTAMReference(AlgorithmAdapter):
         budgets: ResourceBudgets | None = None,
         event_logging: EventLogConfig | None = None,
         noise_model: ModalityNoiseModel | None = None,
+        reference_map: ReferenceMap | None = None,
+        map_enabled: bool = True,
+        topology: TopologicalGraph | None = None,
     ) -> None:
         if encoder_dim != 3:
             raise ValueError("S4DTAMReference requires encoder_dim=3 for TokenMemory positions")
@@ -83,19 +88,28 @@ class S4DTAMReference(AlgorithmAdapter):
         self.budgets = budgets
         self.event_logging = event_logging or EventLogConfig()
         self.noise_model = noise_model or ModalityNoiseModel()
+        self.map_enabled = bool(map_enabled)
+        if topology is not None and reference_map is not None:
+            if topology.reference_map is not reference_map:
+                raise ValueError("topology and reference_map must refer to the same map object")
+        self.reference_map = reference_map or (
+            topology.reference_map if topology is not None else None
+        )
+        self.topology = None
+        if self.map_enabled:
+            self.topology = topology or (
+                TopologicalGraph(reference_map) if reference_map is not None else None
+            )
         self.calibration_parameters = CalibrationParameters()
         self.calibration_data_id = "uncalibrated"
         self.calibration_artifact: str | None = None
         scales = encoder_scales or {}
-        encoder_types = {
-            "rgb": RGBEncoder,
-            "thermal": ThermalEncoder,
-            "lidar": LiDAREncoder,
-            "imu": IMUEncoder,
-            "gnss": GNSSEncoder,
-        }
         self.encoders = {
-            name: kind(encoder_dim, scales.get(name, 1.0)) for name, kind in encoder_types.items()
+            "rgb": RGBEncoder(encoder_dim, scales.get("rgb", 1.0)),
+            "thermal": ThermalEncoder(encoder_dim, scales.get("thermal", 1.0)),
+            "lidar": LiDAREncoder(encoder_dim, scales.get("lidar", 1.0)),
+            "imu": IMUEncoder(encoder_dim, scales.get("imu", 1.0)),
+            "gnss": GNSSEncoder(encoder_dim, scales.get("gnss", 1.0)),
         }
         self.fusion = MaskedFusion(encoder_dim, fusion_weights)
 
@@ -144,7 +158,7 @@ class S4DTAMReference(AlgorithmAdapter):
         directory.mkdir(parents=True, exist_ok=True)
         data_digest = hashlib.sha256(data_id.encode("utf-8")).hexdigest()[:12]
         path = directory / f"{self.name}_calibration_{data_digest}.json"
-        payload = {
+        payload: dict[str, object] = {
             "schema": "s4dtam-calibration/v1",
             "data_id": self.calibration_data_id,
             "parameters": self.calibration_parameters.to_dict(),
@@ -200,8 +214,30 @@ class S4DTAMReference(AlgorithmAdapter):
             log_attention_components=self.event_logging.include_attention_components,
             noise_model=self.noise_model,
         )
+        if event_logger is not None and self.event_logging.include_map_events:
+            map_fields: dict[str, object] = {
+                "enabled": self.topology is not None,
+                "mode": "reference_map" if self.topology is not None else "mapless",
+            }
+            if self.topology is not None:
+                map_fields.update(
+                    {
+                        "map_schema": self.topology.reference_map.schema,
+                        "place_count": len(self.topology.reference_map.tokens),
+                        "transition_count": len(self.topology.transitions),
+                        "descriptor_threshold": self.topology.descriptor_threshold,
+                        "ambiguity_margin": self.topology.ambiguity_margin,
+                        "geometric_threshold_m": self.topology.geometric_threshold_m,
+                    }
+                )
+            event_logger.emit("map_mode_initialized", None, **map_fields)
         estimates, covariances, ood_scores, semantics, latency = [], [], [], [], []
         fused_states: list[int] = []
+        map_confidence: list[float] = []
+        accepted_matches: list[dict[str, object]] = []
+        rejected_matches: list[dict[str, object]] = []
+        relocalizations: list[int] = []
+        tracking_lost = False
         last_observation = np.zeros(3)
         for index, timestamp in enumerate(sequence.timestamps):
             start = perf_counter()
@@ -210,6 +246,16 @@ class S4DTAMReference(AlgorithmAdapter):
             fused_states.append(int(measurement.availability))
             if measurement.availability == AvailabilityState.AVAILABLE:
                 last_observation = observation
+            elif not tracking_lost:
+                tracking_lost = True
+                if event_logger is not None and self.event_logging.include_map_events:
+                    event_logger.emit(
+                        "tracking_lost",
+                        float(timestamp),
+                        sample_index=index,
+                        reason="measurement_unavailable",
+                        availability_state=int(measurement.availability),
+                    )
             semantic_hint = (
                 int(sequence.semantic_observations[index])
                 if sequence.semantic_observations is not None
@@ -222,7 +268,75 @@ class S4DTAMReference(AlgorithmAdapter):
                 modality=measurement.modality,
                 quality=measurement.quality,
             )
-            estimates.append(token.position.copy())
+            estimate = token.position.copy()
+            confidence = 0.0
+            if self.topology is not None and measurement.availability == AvailabilityState.AVAILABLE:
+                descriptor = self._map_descriptor(sequence, index, observation)
+                geometry_position = self._map_position(sequence, index, observation)
+                # Retrieval is descriptor-only; geometry is deliberately evaluated
+                # against the current sensor pose rather than token-memory history.
+                match, candidates, rejected = self.topology.match(descriptor, geometry_position)
+                rejected_matches.extend(
+                    {"sample": index, **item} for item in rejected
+                )
+                if match is not None:
+                    estimate = geometry_position + match.correction
+                    confidence = match.confidence
+                    accepted_matches.append(
+                        {"sample": index, "token_id": match.token_id,
+                         "confidence": match.confidence, "residual_m": match.residual_m}
+                    )
+                    relocalized = tracking_lost
+                    if relocalized:
+                        relocalizations.append(index)
+                    tracking_lost = False
+                    if event_logger is not None and self.event_logging.include_map_events:
+                        event_logger.emit(
+                            "map_match_accepted",
+                            float(timestamp),
+                            sample_index=index,
+                            token_id=match.token_id,
+                            candidate_count=len(candidates),
+                            rejected_candidate_count=len(rejected),
+                            confidence=match.confidence,
+                            residual_m=match.residual_m,
+                            correction_norm_m=float(np.linalg.norm(match.correction)),
+                            relocalized=relocalized,
+                        )
+                elif candidates:
+                    newly_lost = not tracking_lost
+                    tracking_lost = True
+                    if event_logger is not None and self.event_logging.include_map_events:
+                        reasons = sorted({str(item["reason"]) for item in rejected})
+                        event_logger.emit(
+                            "map_match_rejected",
+                            float(timestamp),
+                            sample_index=index,
+                            candidate_count=len(candidates),
+                            rejection_count=len(rejected),
+                            reasons=reasons,
+                            tracking_lost=newly_lost,
+                        )
+                        if newly_lost:
+                            event_logger.emit(
+                                "tracking_lost",
+                                float(timestamp),
+                                sample_index=index,
+                                reason="map_match_rejected",
+                                availability_state=int(measurement.availability),
+                            )
+                elif event_logger is not None and self.event_logging.include_map_events:
+                    event_logger.emit(
+                        "map_match_rejected",
+                        float(timestamp),
+                        sample_index=index,
+                        candidate_count=0,
+                        rejection_count=0,
+                        reasons=["no_candidates"],
+                        tracking_lost=False,
+                    )
+            map_confidence.append(confidence)
+            estimates.append(estimate)
             covariance_scale = self.calibration_parameters.covariance_scale
             covariances.append(token.covariance.copy() * covariance_scale)
             ood_scores.append(self.calibration_parameters.ood_score(observation))
@@ -249,12 +363,23 @@ class S4DTAMReference(AlgorithmAdapter):
         if memory.budgets.max_update_time_ms is not None:
             resource["update_time_budget_ms"] = float(memory.budgets.max_update_time_ms)
         if event_logger is not None:
+            completion_fields: dict[str, object] = {
+                "token_count": len(memory.tokens),
+                "map_bytes": memory.map_bytes,
+                "sample_count": len(sequence.timestamps),
+            }
+            if self.event_logging.include_map_events:
+                completion_fields.update(
+                    {
+                        "accepted_map_matches": len(accepted_matches),
+                        "rejected_map_candidates": len(rejected_matches),
+                        "relocalization_count": len(relocalizations),
+                    }
+                )
             event_logger.emit(
                 "run_completed",
                 float(sequence.timestamps[-1]) if len(sequence.timestamps) else None,
-                token_count=len(memory.tokens),
-                map_bytes=memory.map_bytes,
-                sample_count=len(sequence.timestamps),
+                **completion_fields,
             )
         return AlgorithmResult(
             algorithm=self.name,
@@ -272,6 +397,15 @@ class S4DTAMReference(AlgorithmAdapter):
                 "fused_availability_states": fused_states,
                 "not_flight_certified": True,
                 "association": memory.association_summary,
+                "map_correction": {
+                    "enabled": self.topology is not None,
+                    "mode": "reference_map" if self.topology is not None else "mapless",
+                    "confidence": map_confidence,
+                    "accepted_matches": accepted_matches,
+                    "rejected_matches": rejected_matches,
+                    "relocalizations": relocalizations,
+                    "relocalized": bool(relocalizations),
+                },
                 "calibration": {
                     "data_id": self.calibration_data_id,
                     "artifact": self.calibration_artifact,
@@ -285,13 +419,54 @@ class S4DTAMReference(AlgorithmAdapter):
             },
         )
 
+    def _map_descriptor(
+        self, sequence: SequenceData, index: int, observation: np.ndarray
+    ) -> np.ndarray:
+        """Return an explicit descriptor when supplied, otherwise use encoded XYZ."""
+        descriptors = sequence.metadata.get("map_descriptors")
+        if descriptors is not None:
+            values = np.asarray(descriptors, dtype=float)
+            if (
+                values.ndim != 2
+                or values.shape[0] != len(sequence.timestamps)
+                or values.shape[1] == 0
+                or not np.all(np.isfinite(values))
+            ):
+                raise ValueError(
+                    "metadata.map_descriptors must contain one non-empty finite vector per sample"
+                )
+            return values[index]
+        return np.asarray(observation, dtype=float)
+
+    def _map_position(
+        self, sequence: SequenceData, index: int, observation: np.ndarray
+    ) -> np.ndarray:
+        """Return a pose in the map frame when the dataset exposes one explicitly."""
+        positions = sequence.metadata.get("map_positions")
+        if positions is None:
+            return np.asarray(observation, dtype=float)
+        values = np.asarray(positions, dtype=float)
+        if values.shape != (len(sequence.timestamps), 3) or not np.all(np.isfinite(values)):
+            raise ValueError("metadata.map_positions must be a finite [samples, 3] array")
+        position = values[index]
+        frame = sequence.metadata.get("map_position_frame", "map")
+        if frame == "map":
+            return position
+        if self.reference_map is None or not isinstance(frame, str):
+            raise ValueError("map_position_frame requires a reference map and a string frame name")
+        return self.reference_map.transform(position, frame, "map")
+
     def _validate_input(self, sequence: SequenceData) -> bool:
         """Validate algorithm-specific inputs and return whether legacy mode is active."""
         reference_mode = not any(getattr(sequence, name) is not None for name in MODALITIES)
-        if reference_mode and sequence.observations is None:
-            raise ValueError("S4D-TAM requires a modality stream or legacy normalized observations")
-        if reference_mode and np.shape(sequence.observations) != (len(sequence.timestamps), 3):
-            raise ValueError("legacy normalized observations must have shape (samples, 3)")
+        if reference_mode:
+            observations = sequence.observations
+            if observations is None:
+                raise ValueError(
+                    "S4D-TAM requires a modality stream or legacy normalized observations"
+                )
+            if observations.shape != (len(sequence.timestamps), 3):
+                raise ValueError("legacy normalized observations must have shape (samples, 3)")
         return reference_mode
 
     def _measurement_at(

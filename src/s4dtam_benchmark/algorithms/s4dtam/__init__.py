@@ -11,6 +11,14 @@ from .memory import LifecycleRules, ModalityNoiseModel, ResourceBudgets, TokenMe
 from .pipeline import S4DTAMReference
 from .proposal import TokenCandidate, TokenProposalModule
 from .token import Token4D, TokenState
+from .reference_map import (
+    MAP_SCHEMA,
+    CoordinateFrame,
+    ReferenceMap,
+    ReferenceMapFormatError,
+    ReferenceToken,
+)
+from .topology import MatchRejection, PlaceCandidate, TopologicalGraph, VerifiedMatch
 from .telemetry import (
     EVENT_LOG_SCHEMA,
     EventLogConfig,
@@ -32,10 +40,19 @@ __all__ = [
     "InMemoryEventSink",
     "JsonlEventLogger",
     "LifecycleRules",
+    "MAP_SCHEMA",
     "ModalityNoiseModel",
     "RadialAssociator",
     "ResourceBudgets",
     "S4DTAMReference",
+    "CoordinateFrame",
+    "ReferenceMap",
+    "ReferenceMapFormatError",
+    "ReferenceToken",
+    "PlaceCandidate",
+    "MatchRejection",
+    "TopologicalGraph",
+    "VerifiedMatch",
     "Token4D",
     "TokenCandidate",
     "TokenMatch",

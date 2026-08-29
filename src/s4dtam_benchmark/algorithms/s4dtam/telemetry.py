@@ -37,12 +37,15 @@ class EventLogConfig:
             fsync improves throughput while retaining line-by-line appends.
         include_attention_components: Include local, temporal and global scores in
             pruning decision events.
+        include_map_events: Include topological retrieval, verification, tracking-loss,
+            and relocalization decisions. Raw descriptors and positions are never logged.
     """
 
     enabled: bool = True
     directory: str = "logs"
     flush_each_event: bool = False
     include_attention_components: bool = True
+    include_map_events: bool = True
 
     def __post_init__(self) -> None:
         path = Path(self.directory)
@@ -103,6 +106,11 @@ class JsonlEventLogger:
             or not event.replace("_", "").isalnum()
         ):
             raise ValueError("event must be a non-empty snake-case identifier")
+        if sequence_time_s is not None:
+            if isinstance(sequence_time_s, bool) or not isinstance(sequence_time_s, (int, float)):
+                raise TypeError("sequence_time_s must be a finite number or None")
+            if not float("-inf") < float(sequence_time_s) < float("inf"):
+                raise ValueError("sequence_time_s must be finite")
         reserved = {"schema", "event", "event_index", "sequence_time_s", *self.context}
         collision = reserved.intersection(fields)
         if collision:
