@@ -1,11 +1,13 @@
 import tempfile
 import unittest
 from pathlib import Path
+import json
 
 import numpy as np
 
 from s4dtam_benchmark.algorithms.s4dtam import (
     CoordinateFrame,
+    EventLogConfig,
     ReferenceMap,
     ReferenceToken,
     S4DTAMReference,
@@ -87,11 +89,41 @@ class ReferenceMapTest(unittest.TestCase):
                       "map_positions": [[2.1, 0, 0], [2.1, 0, 0], [2.1, 0, 0]]},
         )
         with tempfile.TemporaryDirectory() as directory:
-            result = algorithm.run(sequence, RunContext(Path(directory), 1, {}))
+            output = Path(directory)
+            result = algorithm.run(sequence, RunContext(output, 1, {}))
+            log_path = output / result.metadata["event_log"]
+            events = [json.loads(line) for line in log_path.read_text().splitlines()]
         correction = result.metadata["map_correction"]
         self.assertTrue(correction["relocalized"])
         self.assertEqual(correction["relocalizations"], [2])
         np.testing.assert_allclose(result.estimated_positions[2], [2, 0, 0])
+        map_events = [event for event in events if event["event"].startswith("map_")]
+        self.assertEqual(map_events[0]["event"], "map_mode_initialized")
+        self.assertEqual(map_events[0]["map_schema"], reference.schema)
+        accepted = [event for event in map_events if event["event"] == "map_match_accepted"]
+        self.assertTrue(accepted[-1]["relocalized"])
+        self.assertNotIn("descriptor", accepted[-1])
+        completed = events[-1]
+        self.assertEqual(completed["relocalization_count"], 1)
+
+    def test_map_events_can_be_disabled_independently(self):
+        reference = ReferenceMap(tokens=[ReferenceToken(1, [0, 0, 0], [1, 0, 0])])
+        algorithm = S4DTAMReference(
+            reference_map=reference,
+            event_logging=EventLogConfig(include_map_events=False),
+        )
+        sequence = SequenceData(
+            "test", "quiet-map", np.array([0.0]), np.zeros((1, 3)),
+            observations=np.array([[0.0, 0.0, 0.0]]),
+            metadata={"map_descriptors": [[1.0, 0.0, 0.0]]},
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            result = algorithm.run(sequence, RunContext(output, 1, {}))
+            events = [json.loads(line) for line in
+                      (output / result.metadata["event_log"]).read_text().splitlines()]
+        self.assertFalse(any(event["event"].startswith("map_") for event in events))
+        self.assertNotIn("accepted_map_matches", events[-1])
 
     def test_mapless_mode_records_mode(self):
         algorithm = S4DTAMReference(map_enabled=False)

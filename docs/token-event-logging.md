@@ -27,6 +27,7 @@ event_logging:
   directory: logs
   flush_each_event: false
   include_attention_components: true
+  include_map_events: true
 ```
 
 - `enabled` controls creation of the per-sequence artifact.
@@ -36,6 +37,9 @@ event_logging:
   trials; leave it disabled for normal offline benchmarks to avoid storage latency.
 - `include_attention_components` adds local, temporal, and global scores to `token_pruned`.
   The aggregate score is always recorded.
+- `include_map_events` records map-mode initialization, place-match decisions, tracking loss,
+  and relocalization. Disable it when only token lifecycle telemetry is required. Raw map
+  positions and descriptors are never written.
 
 Files are stored as
 `<output>/<directory>/<safe-dataset>/<safe-sequence>_s4d_tam_reference.jsonl`. Dataset and
@@ -62,6 +66,13 @@ reported as `metadata.event_log` in the algorithm result.
    `time_budget_exceeded`; latency never participates in the pruning key.
 8. `frame_completed` records counts, resident payload bytes, update latency and the SLO flag.
 9. After the last sample, `run_completed` records final token, byte and sample counts.
+
+When reference-map matching is enabled, `map_mode_initialized` records the map schema, graph
+size and matching thresholds. Each available frame then produces either `map_match_accepted`
+or `map_match_rejected`. Accepted events contain only token IDs, scalar scores, residual and
+correction norm; rejected events aggregate reason codes without copying descriptors or poses.
+`tracking_lost` records the transition into a lost state, while an accepted event sets
+`relocalized=true` when it restores tracking.
 
 Lifecycle-only time progression through `TokenMemory.advance` produces state/removal/pruning
 events but no artificial frame event.
@@ -95,7 +106,11 @@ but ignore unknown fields and event names from a compatible version.
 | `token_pruned` | Token ID, attention, capacity snapshot and reason. |
 | `time_budget_exceeded` | Measured and configured milliseconds. |
 | `frame_completed` | Association/output counts, bytes, latency and SLO status. |
-| `run_completed` | Final token, byte and sample counts. |
+| `map_mode_initialized` | Map mode/schema, place and transition counts, matching thresholds. |
+| `map_match_accepted` | Token ID, candidate counts, confidence, residual, correction norm, relocalization flag. |
+| `map_match_rejected` | Candidate/rejection counts, reason codes and tracking-loss transition. |
+| `tracking_lost` | Sample index, availability state and loss reason. |
+| `run_completed` | Final token/byte/sample counts and aggregate map-match/relocalization counts. |
 
 ## Reading and validating logs
 

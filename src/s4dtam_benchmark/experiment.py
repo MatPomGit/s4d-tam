@@ -104,6 +104,7 @@ def _algorithm(spec: dict[str, Any]):
                 include_attention_components=bool(
                     event_logging.get("include_attention_components", True)
                 ),
+                include_map_events=bool(event_logging.get("include_map_events", True)),
             ),
             noise_model=ModalityNoiseModel(
                 modality_variances={str(k): float(v) for k, v in

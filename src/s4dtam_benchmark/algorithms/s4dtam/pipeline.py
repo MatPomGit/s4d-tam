@@ -214,6 +214,23 @@ class S4DTAMReference(AlgorithmAdapter):
             log_attention_components=self.event_logging.include_attention_components,
             noise_model=self.noise_model,
         )
+        if event_logger is not None and self.event_logging.include_map_events:
+            map_fields: dict[str, object] = {
+                "enabled": self.topology is not None,
+                "mode": "reference_map" if self.topology is not None else "mapless",
+            }
+            if self.topology is not None:
+                map_fields.update(
+                    {
+                        "map_schema": self.topology.reference_map.schema,
+                        "place_count": len(self.topology.reference_map.tokens),
+                        "transition_count": len(self.topology.transitions),
+                        "descriptor_threshold": self.topology.descriptor_threshold,
+                        "ambiguity_margin": self.topology.ambiguity_margin,
+                        "geometric_threshold_m": self.topology.geometric_threshold_m,
+                    }
+                )
+            event_logger.emit("map_mode_initialized", None, **map_fields)
         estimates, covariances, ood_scores, semantics, latency = [], [], [], [], []
         fused_states: list[int] = []
         map_confidence: list[float] = []
@@ -229,8 +246,16 @@ class S4DTAMReference(AlgorithmAdapter):
             fused_states.append(int(measurement.availability))
             if measurement.availability == AvailabilityState.AVAILABLE:
                 last_observation = observation
-            else:
+            elif not tracking_lost:
                 tracking_lost = True
+                if event_logger is not None and self.event_logging.include_map_events:
+                    event_logger.emit(
+                        "tracking_lost",
+                        float(timestamp),
+                        sample_index=index,
+                        reason="measurement_unavailable",
+                        availability_state=int(measurement.availability),
+                    )
             semantic_hint = (
                 int(sequence.semantic_observations[index])
                 if sequence.semantic_observations is not None
@@ -261,11 +286,55 @@ class S4DTAMReference(AlgorithmAdapter):
                         {"sample": index, "token_id": match.token_id,
                          "confidence": match.confidence, "residual_m": match.residual_m}
                     )
-                    if tracking_lost:
+                    relocalized = tracking_lost
+                    if relocalized:
                         relocalizations.append(index)
                     tracking_lost = False
+                    if event_logger is not None and self.event_logging.include_map_events:
+                        event_logger.emit(
+                            "map_match_accepted",
+                            float(timestamp),
+                            sample_index=index,
+                            token_id=match.token_id,
+                            candidate_count=len(candidates),
+                            rejected_candidate_count=len(rejected),
+                            confidence=match.confidence,
+                            residual_m=match.residual_m,
+                            correction_norm_m=float(np.linalg.norm(match.correction)),
+                            relocalized=relocalized,
+                        )
                 elif candidates:
+                    newly_lost = not tracking_lost
                     tracking_lost = True
+                    if event_logger is not None and self.event_logging.include_map_events:
+                        reasons = sorted({str(item["reason"]) for item in rejected})
+                        event_logger.emit(
+                            "map_match_rejected",
+                            float(timestamp),
+                            sample_index=index,
+                            candidate_count=len(candidates),
+                            rejection_count=len(rejected),
+                            reasons=reasons,
+                            tracking_lost=newly_lost,
+                        )
+                        if newly_lost:
+                            event_logger.emit(
+                                "tracking_lost",
+                                float(timestamp),
+                                sample_index=index,
+                                reason="map_match_rejected",
+                                availability_state=int(measurement.availability),
+                            )
+                elif event_logger is not None and self.event_logging.include_map_events:
+                    event_logger.emit(
+                        "map_match_rejected",
+                        float(timestamp),
+                        sample_index=index,
+                        candidate_count=0,
+                        rejection_count=0,
+                        reasons=["no_candidates"],
+                        tracking_lost=False,
+                    )
             map_confidence.append(confidence)
             estimates.append(estimate)
             covariance_scale = self.calibration_parameters.covariance_scale
@@ -294,12 +363,23 @@ class S4DTAMReference(AlgorithmAdapter):
         if memory.budgets.max_update_time_ms is not None:
             resource["update_time_budget_ms"] = float(memory.budgets.max_update_time_ms)
         if event_logger is not None:
+            completion_fields: dict[str, object] = {
+                "token_count": len(memory.tokens),
+                "map_bytes": memory.map_bytes,
+                "sample_count": len(sequence.timestamps),
+            }
+            if self.event_logging.include_map_events:
+                completion_fields.update(
+                    {
+                        "accepted_map_matches": len(accepted_matches),
+                        "rejected_map_candidates": len(rejected_matches),
+                        "relocalization_count": len(relocalizations),
+                    }
+                )
             event_logger.emit(
                 "run_completed",
                 float(sequence.timestamps[-1]) if len(sequence.timestamps) else None,
-                token_count=len(memory.tokens),
-                map_bytes=memory.map_bytes,
-                sample_count=len(sequence.timestamps),
+                **completion_fields,
             )
         return AlgorithmResult(
             algorithm=self.name,
