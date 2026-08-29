@@ -100,7 +100,11 @@ class SequenceData:
 class AlgorithmResult:
     """Normalized output contract shared by algorithms and evaluators.
 
-    Per-sample arrays use the same leading dimension as ``timestamps``. Pose
+    Per-sample arrays use the same leading dimension as ``timestamps``. Forecast
+    mappings are keyed by horizon in seconds; occupancy predictions parameterize
+    Bernoulli distributions while flow prediction/uncertainty pairs parameterize
+    axis-independent Gaussian distributions. Forecast masks identify valid
+    spatiotemporal evaluation regions. Pose
     covariance matrices are required to be symmetric positive definite because
     uncertainty evaluation uses their inverse and log determinant.
     """
@@ -114,6 +118,9 @@ class AlgorithmResult:
     semantic_pred: np.ndarray | None = None
     occupancy_pred: dict[float, np.ndarray] = field(default_factory=dict)
     flow_pred: dict[float, np.ndarray] = field(default_factory=dict)
+    occupancy_uncertainty: dict[float, np.ndarray] = field(default_factory=dict)
+    flow_uncertainty: dict[float, np.ndarray] = field(default_factory=dict)
+    forecast_observable_mask: dict[float, np.ndarray] = field(default_factory=dict)
     risk_pred: np.ndarray | None = None
     latency_ms: np.ndarray | None = None
     resource: dict[str, float] = field(default_factory=dict)

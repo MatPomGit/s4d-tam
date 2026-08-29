@@ -75,14 +75,28 @@ def evaluate_result(
 
     for horizon, target in sequence.occupancy_gt.items():
         if horizon in result.occupancy_pred:
-            for key, value in occupancy_metrics(target, result.occupancy_pred[horizon]).items():
+            prediction = result.occupancy_pred[horizon]
+            mask = result.forecast_observable_mask.get(horizon)
+            if mask is not None:
+                target, prediction = np.asarray(target)[mask], prediction[mask]
+            if prediction.size == 0:
+                unavailable.append(f"forecast/{horizon:g}s: no observable targets")
+                continue
+            for key, value in occupancy_metrics(target, prediction).items():
                 metrics[f"forecast/{horizon:g}s/{key}"] = value
         else:
             unavailable.append(f"forecast/{horizon:g}s: prediction absent")
 
     for horizon, target in sequence.flow_gt.items():
         if horizon in result.flow_pred:
-            for key, value in flow_metrics(target, result.flow_pred[horizon]).items():
+            prediction = result.flow_pred[horizon]
+            mask = result.forecast_observable_mask.get(horizon)
+            if mask is not None:
+                target, prediction = np.asarray(target)[mask], prediction[mask]
+            if prediction.size == 0:
+                unavailable.append(f"flow/{horizon:g}s: no observable targets")
+                continue
+            for key, value in flow_metrics(target, prediction).items():
                 metrics[f"flow/{horizon:g}s/{key}"] = value
         else:
             unavailable.append(f"flow/{horizon:g}s: prediction absent")

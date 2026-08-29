@@ -4,6 +4,9 @@ association_radius_m: 0.35
 association_mode: feature
 association_rejection_threshold: 0.35
 status: numerical_reference_not_trained_model
+forecasting:
+  # Dataset horizons are always included; these add requested physical-time horizons.
+  horizons_s: []
 lifecycle:
   activation_hits: 1
   sleep_after_s: 10.0

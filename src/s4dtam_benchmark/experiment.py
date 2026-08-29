@@ -107,8 +107,9 @@ def _algorithm(spec: dict[str, Any]):
                 include_map_events=bool(event_logging.get("include_map_events", True)),
             ),
             noise_model=ModalityNoiseModel(
-                modality_variances={str(k): float(v) for k, v in
-                                    noise.get("modality_variances", {}).items()},
+                modality_variances={
+                    str(k): float(v) for k, v in noise.get("modality_variances", {}).items()
+                },
                 default_variance=float(noise.get("default_variance", 0.05)),
                 process_variance_per_s=float(noise.get("process_variance_per_s", 0.01)),
                 quality_power=float(noise.get("quality_power", 2.0)),
@@ -116,6 +117,9 @@ def _algorithm(spec: dict[str, Any]):
             ),
             reference_map=reference_map,
             map_enabled=bool(spec.get("map_enabled", True)),
+            forecast_horizons_s=tuple(
+                float(value) for value in spec.get("forecasting", {}).get("horizons_s", [])
+            ),
         )
     if kind == "dead_reckoning":
         return DeadReckoning(float(spec.get("drift_per_step", 0.002)))
@@ -138,9 +142,12 @@ def run_experiment(config_path: str | Path) -> Path:
     failures: list[dict[str, str]] = []
     executions: list[dict[str, Any]] = []
 
-    calibration_sequences = [sequence for dataset, spec in datasets
-                             if spec.get("split") == "calibration"
-                             for sequence in dataset.sequences()]
+    calibration_sequences = [
+        sequence
+        for dataset, spec in datasets
+        if spec.get("split") == "calibration"
+        for sequence in dataset.sequences()
+    ]
     calibration_id = ",".join(
         f"{item.dataset}/{item.sequence_id}" for item in calibration_sequences
     )
