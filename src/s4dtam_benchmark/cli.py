@@ -12,6 +12,7 @@ from s4dtam_benchmark.datasets import TartanAirDataset
 from s4dtam_benchmark.experiment import run_experiment
 from s4dtam_benchmark.readiness import render_readiness_summary, validate_readiness_matrix
 from s4dtam_benchmark.reproduction import verify_reproduction_package
+from s4dtam_benchmark.study_freeze import validate_confirmatory_freeze
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -32,6 +33,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="validate the dataset/sensor/baseline/metric readiness matrix",
     )
     readiness.add_argument("config", type=Path)
+    freeze = subparsers.add_parser(
+        "validate-freeze",
+        help="validate an immutable confirmatory-study freeze manifest",
+    )
+    freeze.add_argument("config", type=Path)
     tartanair = subparsers.add_parser(
         "preflight-tartanair",
         help="strictly validate converted TartanAir sequence descriptors and source files",
@@ -55,7 +61,7 @@ def main(argv: list[str] | None = None) -> int:
         print("datasets: synthetic, manifest, tartanair, blackbird, marsim, aeroverse")
         print("algorithms: s4dtam_reference, dead_reckoning, external_artifact")
         print("comparison levels: external, internal")
-        print("readiness gates: dataset-baseline matrix, TartanAir preflight")
+        print("readiness gates: dataset-baseline matrix, TartanAir preflight, confirmatory freeze")
         return 0
     if args.command == "validate-ablation":
         validate_ablation_config(load_yaml(args.config))
@@ -70,6 +76,10 @@ def main(argv: list[str] | None = None) -> int:
         validate_readiness_matrix(config)
         print(f"Valid readiness matrix: {args.config}")
         print(render_readiness_summary(config))
+        return 0
+    if args.command == "validate-freeze":
+        validate_confirmatory_freeze(load_yaml(args.config))
+        print(f"Valid confirmatory study freeze: {args.config}")
         return 0
     if args.command == "preflight-tartanair":
         sequences = list(
