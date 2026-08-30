@@ -11,6 +11,18 @@ from .memory import LifecycleRules, ModalityNoiseModel, ResourceBudgets, TokenMe
 from .pipeline import S4DTAMReference
 from .proposal import TokenCandidate, TokenProposalModule
 from .token import Token4D, TokenState
+from .planner import (
+    CostWeights,
+    DynamicsConstraints,
+    PlanResult,
+    PlannerConfig,
+    PlannerGoal,
+    PlannerState,
+    PredictiveMap,
+    TrajectoryPlanner,
+    plan_trajectory,
+    trajectory_cost,
+)
 from .reference_map import (
     MAP_SCHEMA,
     CoordinateFrame,
@@ -59,5 +71,15 @@ __all__ = [
     "TokenMemory",
     "TokenProposalModule",
     "TokenState",
+    "CostWeights",
+    "DynamicsConstraints",
+    "PlanResult",
+    "PlannerConfig",
+    "PlannerGoal",
+    "PlannerState",
+    "PredictiveMap",
+    "TrajectoryPlanner",
+    "plan_trajectory",
+    "trajectory_cost",
     "fit_calibration",
 ]
