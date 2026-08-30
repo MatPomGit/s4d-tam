@@ -1,0 +1,48 @@
+format_version: 1.0.0
+release_version: 0.1.0
+package_id: s4dtam-reference-metadata-fixture-1
+architecture:
+  name: s4dtam-reference
+  version: s4dtam-reference-1
+  framework: schema-fixture
+  framework_version: 1.0.0
+  config: weights/fixture/architecture.yaml
+  config_sha256: d227c54c3032fc384019360fc06e4bd83470bc4094ec8c7f7da22ac2f6bb2f85
+weights:
+  file: weights/fixture/model.bin
+  media_type: application/octet-stream
+  bytes: 1
+  sha256: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+training:
+  config: weights/fixture/training.yaml
+  config_sha256: f41e570db9b3b1b41dc613541fd9942214b5f187b70cd1c34a0a66e84862a4b0
+  source_commit: b1a863b5366b37b5dd2839cf9aa5040fc0b1c988
+  seed: 42
+  determinism: No optimization is performed; the one-byte payload is immutable.
+  hardware: Hardware-independent metadata fixture.
+  stopping_rule: Zero epochs by construction.
+data_provenance:
+  - manifest: manifests/datasets/synthetic-v1.yaml
+    manifest_sha256: d6c6969ceb54a88937bec6c480bd0632ee2c852e0cd27ee638ab6a3ad271c178
+    role: test-fixture
+    splits: [test]
+preprocessing:
+  description: Read the UTF-8 fixture verbatim; no learned or data-dependent transformation.
+  input_contract: manifests/datasets/synthetic-v1.yaml
+calibration:
+  method: temperature-scaling
+  objective: Demonstrate serialization of calibration provenance; no statistical fit is claimed.
+  parameters: {temperature: 1.0}
+  fitted_on: synthetic-fixture/test
+  sample_count: 0
+evaluation:
+  protocol: Metadata and checksum validation only.
+  metrics: []
+intended_use:
+  - Test parsers, package transport, provenance resolution and release-integrity failures.
+limitations:
+  - This is not a trained model and must not be used for inference or scientific comparison.
+  - The calibration parameters are declarative test values, not empirical estimates.
+license:
+  spdx: Apache-2.0
+  text_or_url: LICENSE

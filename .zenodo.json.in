@@ -1,0 +1,9 @@
+{
+  "title": "S4D-TAM Benchmark",
+  "upload_type": "software",
+  "description": "Reproducible evaluation framework and Python reference implementation for S4D-TAM.",
+  "license": "Apache-2.0",
+  "creators": [{"name": "Pomianek, Mateusz"}],
+  "related_identifiers": [{"identifier": "https://github.com/OWNER/s4d-tam-benchmark", "relation": "isSupplementTo", "resource_type": "software"}],
+  "notes": "A DOI is intentionally absent; add the DOI returned by the repository only after registration."
+}

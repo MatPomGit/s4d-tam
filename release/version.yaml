@@ -1,0 +1,5 @@
+release_version: 0.1.0
+manifest_schema_version: 1.0.0
+weights_format_version: 1.0.0
+architecture_version: s4dtam-reference-1
+container_api_version: 1.0.0

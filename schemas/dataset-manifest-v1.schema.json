@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://s4dtam.example/schemas/dataset-manifest-v1.schema.json",
+  "title": "S4D-TAM dataset manifest",
+  "description": "Normative, versioned provenance record for an immutable evaluation dataset. Paths are repository-relative and every byte-bearing input is authenticated with SHA-256.",
+  "type": "object",
+  "required": ["schema_version", "manifest_version", "release_version", "dataset", "scientific_scope", "license", "splits", "files", "calibrations", "conversion_tools"],
+  "properties": {
+    "schema_version": {"const": "1.0.0", "description": "Version of this validation contract."},
+    "manifest_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$", "description": "Version of the dataset description; increment whenever membership or interpretation changes."},
+    "release_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "dataset": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "version", "source", "acquired_at", "modalities", "coordinate_frames", "sampling"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1}, "version": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1}, "acquired_at": {"type": "string", "format": "date-time"},
+        "modalities": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "coordinate_frames": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["id", "convention"], "properties": {"id": {"type": "string"}, "convention": {"type": "string"}}}},
+        "sampling": {"type": "object", "required": ["unit", "nominal_rate"], "properties": {"unit": {"type": "string"}, "nominal_rate": {"type": "number", "exclusiveMinimum": 0}}}
+      }
+    },
+    "scientific_scope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["purpose", "population", "inclusion_criteria", "exclusion_criteria", "known_limitations", "leakage_policy"],
+      "properties": {
+        "purpose": {"type": "string", "minLength": 1}, "population": {"type": "string", "minLength": 1},
+        "inclusion_criteria": {"type": "array", "items": {"type": "string"}}, "exclusion_criteria": {"type": "array", "items": {"type": "string"}},
+        "known_limitations": {"type": "array", "minItems": 1, "items": {"type": "string"}}, "leakage_policy": {"type": "string", "minLength": 1}
+      }
+    },
+    "license": {"type": "object", "additionalProperties": false, "required": ["spdx", "text_or_url", "redistribution"], "properties": {"spdx": {"type": "string", "minLength": 1}, "text_or_url": {"type": "string", "minLength": 1}, "redistribution": {"type": "boolean"}}},
+    "splits": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}},
+    "files": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/file"}},
+    "calibrations": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["id", "kind", "file", "bytes", "sha256", "valid_for"], "properties": {"id": {"type": "string"}, "kind": {"type": "string"}, "file": {"type": "string"}, "bytes": {"type": "integer", "minimum": 0}, "sha256": {"$ref": "#/$defs/sha256"}, "valid_for": {"type": "array", "minItems": 1, "items": {"type": "string"}}}}},
+    "conversion_tools": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["name", "version", "source_commit", "container", "command"], "properties": {"name": {"type": "string"}, "version": {"type": "string"}, "source_commit": {"type": "string", "pattern": "^[a-f0-9]{40}$"}, "container": {"type": "string", "pattern": "@sha256:[a-f0-9]{64}$"}, "command": {"type": "array", "minItems": 1, "items": {"type": "string"}}}}}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "file": {"type": "object", "additionalProperties": false, "required": ["path", "sequence_id", "media_type", "bytes", "sha256"], "properties": {"path": {"type": "string"}, "sequence_id": {"type": "string"}, "media_type": {"type": "string"}, "bytes": {"type": "integer", "minimum": 0}, "sha256": {"$ref": "#/$defs/sha256"}}}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://s4dtam.example/schemas/weights-package-v1.schema.json",
+  "title": "S4D-TAM weights package",
+  "description": "Normative provenance and interpretation contract for immutable learned parameters; it is not a claim of model validity.",
+  "type": "object",
+  "required": ["format_version", "release_version", "package_id", "architecture", "weights", "training", "data_provenance", "preprocessing", "calibration", "evaluation", "intended_use", "limitations", "license"],
+  "properties": {
+    "format_version": {"const": "1.0.0"}, "release_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"}, "package_id": {"type": "string", "minLength": 1},
+    "architecture": {"type": "object", "additionalProperties": false, "required": ["name", "version", "framework", "framework_version", "config", "config_sha256"], "properties": {"name": {"type": "string"}, "version": {"type": "string"}, "framework": {"type": "string"}, "framework_version": {"type": "string"}, "config": {"type": "string"}, "config_sha256": {"$ref": "#/$defs/sha256"}}},
+    "weights": {"type": "object", "additionalProperties": false, "required": ["file", "media_type", "bytes", "sha256"], "properties": {"file": {"type": "string"}, "media_type": {"type": "string"}, "bytes": {"type": "integer", "minimum": 0}, "sha256": {"$ref": "#/$defs/sha256"}}},
+    "training": {"type": "object", "additionalProperties": false, "required": ["config", "config_sha256", "source_commit", "seed", "determinism", "hardware", "stopping_rule"], "properties": {"config": {"type": "string"}, "config_sha256": {"$ref": "#/$defs/sha256"}, "source_commit": {"type": "string", "pattern": "^[a-f0-9]{40}$"}, "seed": {"type": "integer"}, "determinism": {"type": "string"}, "hardware": {"type": "string"}, "stopping_rule": {"type": "string"}}},
+    "data_provenance": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["manifest", "manifest_sha256", "role", "splits"], "properties": {"manifest": {"type": "string"}, "manifest_sha256": {"$ref": "#/$defs/sha256"}, "role": {"enum": ["training", "validation", "calibration", "test-fixture"]}, "splits": {"type": "array", "minItems": 1, "items": {"type": "string"}}}}},
+    "preprocessing": {"type": "object", "required": ["description", "input_contract"]},
+    "calibration": {"type": "object", "additionalProperties": false, "required": ["method", "objective", "parameters", "fitted_on", "sample_count"], "properties": {"method": {"type": "string"}, "objective": {"type": "string"}, "parameters": {"type": "object"}, "fitted_on": {"type": "string"}, "sample_count": {"type": "integer", "minimum": 0}}},
+    "evaluation": {"type": "object", "required": ["protocol", "metrics"], "properties": {"protocol": {"type": "string"}, "metrics": {"type": "array", "items": {"type": "object", "required": ["name", "value", "unit", "split"]}}}},
+    "intended_use": {"type": "array", "minItems": 1, "items": {"type": "string"}}, "limitations": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "license": {"type": "object", "additionalProperties": false, "required": ["spdx", "text_or_url"], "properties": {"spdx": {"type": "string", "minLength": 1}, "text_or_url": {"type": "string", "minLength": 1}}}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}},
+  "additionalProperties": false
+}
