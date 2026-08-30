@@ -4,11 +4,15 @@ import argparse
 import hashlib
 import re
 import sys
-import tomllib
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10 compatibility
+    import tomli as tomllib
 
 SHA256 = re.compile(r"^[a-f0-9]{64}$")
 DIGEST = re.compile(r"@sha256:[a-f0-9]{64}$")
