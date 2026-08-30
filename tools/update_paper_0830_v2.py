@@ -3,6 +3,9 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+from docx.oxml.ns import qn
+from docx.text.paragraph import Paragraph
+
 
 MODULE_PATH = Path(__file__).with_name("update_paper_0830.py")
 spec = importlib.util.spec_from_file_location("update_paper_0830", MODULE_PATH)
@@ -18,7 +21,8 @@ def _normalize(value: str) -> str:
 
 def robust_replace_contains(doc, needle: str, new: str) -> None:
     wanted = _normalize(needle)
-    for paragraph in doc.paragraphs:
+    for element in doc.element.iter(qn("w:p")):
+        paragraph = Paragraph(element, doc)
         if wanted in _normalize(paragraph.text):
             paragraph.text = new
             return
