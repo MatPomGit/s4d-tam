@@ -1,14 +1,16 @@
 <div class="hero" markdown>
 
+![S4D-TAM Benchmark Banner](assets/s4d-tam-baner.png){ .hero-banner }
+
 # S4D-TAM Benchmark
 
 **Reproducible evaluation infrastructure and transparent reference implementation for Semantic 4D Token Attention Map UAV navigation in GNSS-degraded environments.**
 
 The project provides one auditable evaluation path for S4D-TAM and external navigation baselines, from dataset registration to publication-ready statistics and artifacts.
 
-[Get started](getting-started.md){ .md-button .md-button--primary }
-[Project status](project-status.md){ .md-button }
-[GitHub repository](https://github.com/MatPomGit/s4d-tam){ .md-button }
+[:material-rocket-launch: Get started](getting-started.md){ .md-button .md-button--primary }
+[:material-list-status: Project status](project-status.md){ .md-button }
+[:fontawesome-brands-github: GitHub repository](https://github.com/MatPomGit/s4d-tam){ .md-button }
 
 </div>
 

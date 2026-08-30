@@ -17,3 +17,4 @@ outputs/*
 *.ply
 *.pcd
 *.mp4
+site/
