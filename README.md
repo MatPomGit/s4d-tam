@@ -10,6 +10,15 @@ The repository is designed to support publication-grade comparison of S4D-TAM wi
 
 > **Research status:** `S4DTAMReference` is an executable research reference, not the final trained hierarchical transformer and not a flight-certified navigation system. See the [project status](docs/project-status.md) and [roadmap](docs/roadmap.md).
 
+## Manuscript
+
+The current article draft is versioned together with the implementation so that the mathematical description, implementation status and experimental protocol remain synchronized:
+
+- [PDF manuscript](paper/S4D_TAM_draft_0830.pdf) is the recommended reading format and preserves the mathematical equations and page layout;
+- [DOCX manuscript](paper/S4D_TAM_draft_0830.docx) is the editable source document.
+
+The manuscript distinguishes two evaluation levels: external complete-system comparison of S4D-TAM with ORB-SLAM3, VINS-Mono, FAST-LIO2 and LIO-SAM, and internal mechanism analysis using the full model versus the preregistered H1-H7 single-component ablations.
+
 ## Documentation
 
 The full documentation is published at **https://matpomgit.github.io/s4d-tam/**.
@@ -19,7 +28,8 @@ Start with:
 - [Getting started](https://matpomgit.github.io/s4d-tam/getting-started/) for installation and the first benchmark run;
 - [Project status](https://matpomgit.github.io/s4d-tam/project-status/) for implementation maturity;
 - [Architecture](https://matpomgit.github.io/s4d-tam/architecture/) for the normalized benchmark contracts;
-- [Methodology](https://matpomgit.github.io/s4d-tam/methodology/) and [Reproducibility](https://matpomgit.github.io/s4d-tam/reproducibility/) for scientific evaluation;
+- [Methodology](https://matpomgit.github.io/s4d-tam/methodology/) and [Comparison protocol](docs/comparison-protocol.md) for the two-level scientific evaluation;
+- [Modules](docs/modules.md) for implemented reference components and planned research backends;
 - [Datasets](https://matpomgit.github.io/s4d-tam/datasets/) and [Metrics](https://matpomgit.github.io/s4d-tam/metrics/) for experiment design.
 
 ## Quick start
@@ -78,13 +88,14 @@ Statistics + provenance + failure records
 CSV / LaTeX / plots / publication artifacts
 ```
 
-Scientific experiments should use version-controlled configurations, immutable sequence lists, repeated seeds and the protocol described in [docs/reproducibility.md](docs/reproducibility.md). Confirmatory ablations should follow [docs/preregistration.md](docs/preregistration.md).
+Scientific experiments should use version-controlled configurations, immutable sequence lists, repeated seeds and the protocol described in [docs/reproducibility.md](docs/reproducibility.md). The distinction between external complete-system comparison and internal H1-H7 mechanism analysis is defined in [docs/comparison-protocol.md](docs/comparison-protocol.md), while confirmatory ablations follow [docs/preregistration.md](docs/preregistration.md).
 
 ## Repository structure
 
 ```text
 configs/                  experiment, dataset and algorithm configuration
 docs/                     MkDocs documentation and validation protocols
+paper/                    versioned manuscript in PDF and editable DOCX
 src/s4dtam_benchmark/     benchmark core, algorithms, adapters and reporting
 tests/                    numerical, contract and regression tests
 tools/                    release and research-support utilities
