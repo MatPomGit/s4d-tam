@@ -16,6 +16,7 @@ dependencies = [
   "pandas>=2.1",
   "PyYAML>=6.0",
   "matplotlib>=3.8",
+  "tomli>=2.0; python_version < '3.11'",
 ]
 
 [project.optional-dependencies]
