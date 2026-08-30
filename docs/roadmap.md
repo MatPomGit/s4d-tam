@@ -17,16 +17,21 @@ The roadmap distinguishes between **software components that exist as executable
 
 The adapter architecture exists, but public dataset and baseline validation must still be completed against exact upstream releases.
 
-- [ ] complete TartanAir conversion with frame and calibration checks
+- [x] define an executable dataset/sensor/baseline/metric readiness matrix
+- [x] add a strict TartanAir conversion preflight and CI regression fixture
+- [ ] run the TartanAir preflight on pinned real upstream sequences and freeze checksums
+- [ ] complete TartanAir conversion with frame and calibration checks on the frozen real cohort
 - [ ] complete Blackbird ROS bag conversion and time-synchronization validation
 - [ ] complete MARSIM scenario export with deterministic seed control
 - [ ] verify AeroVerse release identity, licensing and conversion path
-- [ ] reproduce pinned ORB-SLAM3 baseline configuration
-- [ ] reproduce pinned VINS-Mono baseline configuration
-- [ ] reproduce pinned FAST-LIO2 baseline configuration
-- [ ] reproduce pinned LIO-SAM baseline configuration
+- [ ] reproduce pinned ORB-SLAM3 baseline configuration on compatible frozen sequences
+- [ ] reproduce pinned VINS-Mono baseline configuration on compatible frozen sequences
+- [ ] reproduce pinned FAST-LIO2 baseline configuration on compatible frozen sequences
+- [ ] reproduce pinned LIO-SAM baseline configuration on compatible frozen sequences
 - [ ] assess additional external systems only when sensing assumptions and reproduction requirements are compatible
 - [ ] verify normalized external-result artifacts against common evaluators
+
+The external benchmark does not require a dense Cartesian product of datasets and baselines. Only sensor-compatible pairs declared by `configs/readiness/dataset_baseline_matrix.yaml` may enter the study. Missing sensor regimes are reported as not applicable rather than filled with derived or unfair surrogate inputs.
 
 ## Milestone 3: S4D-TAM research implementation
 
@@ -68,6 +73,7 @@ The adapter architecture exists, but public dataset and baseline validation must
 ### External system comparison
 
 - [ ] freeze publication dataset versions and immutable sequence lists
+- [ ] clear every compatible pair in the executable readiness matrix
 - [ ] reproduce all selected baselines using pinned environments
 - [ ] execute S4D-TAM vs ORB-SLAM3, VINS-Mono, FAST-LIO2 and LIO-SAM under the common evaluator contract
 - [ ] report system-level effects separately from component-ablation inference
@@ -102,4 +108,4 @@ The protocol documents exist; execution of the validation campaign remains pendi
 
 ## Definition of research readiness
 
-A green CI pipeline is necessary but not sufficient for publication readiness. The project should be treated as confirmatory-study ready only when dataset conversions, baseline reproductions, learned-model configuration, preregistered experiments and statistical reporting are frozen together under one versioned release.
+A green CI pipeline is necessary but not sufficient for publication readiness. The project should be treated as confirmatory-study ready only when dataset conversions, compatible baseline reproductions, learned-model configuration, preregistered experiments and statistical reporting are frozen together under one versioned release.
