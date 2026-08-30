@@ -1,0 +1,48 @@
+schema_version: 1
+study_state: draft
+code_commit: FILL_40_HEX_COMMIT
+
+preregistration:
+  sha256: FILL_64_HEX_SHA256
+  external_timestamp: FILL_EXTERNAL_TIMESTAMP_OR_REGISTRY_ID
+
+datasets:
+  tartanair:
+    release: FILL_RELEASE
+    manifest_sha256: FILL_64_HEX_SHA256
+    sequence_list_sha256: FILL_64_HEX_SHA256
+  blackbird:
+    release: FILL_RELEASE
+    manifest_sha256: FILL_64_HEX_SHA256
+    sequence_list_sha256: FILL_64_HEX_SHA256
+  marsim:
+    release: FILL_RELEASE
+    manifest_sha256: FILL_64_HEX_SHA256
+    sequence_list_sha256: FILL_64_HEX_SHA256
+  aeroverse:
+    release: FILL_RELEASE
+    manifest_sha256: FILL_64_HEX_SHA256
+    sequence_list_sha256: FILL_64_HEX_SHA256
+
+baselines:
+  orb_slam3: {validated: false, config_sha256: FILL_64_HEX_SHA256, evidence_manifest_sha256: FILL_64_HEX_SHA256}
+  vins_mono: {validated: false, config_sha256: FILL_64_HEX_SHA256, evidence_manifest_sha256: FILL_64_HEX_SHA256}
+  fast_lio2: {validated: false, config_sha256: FILL_64_HEX_SHA256, evidence_manifest_sha256: FILL_64_HEX_SHA256}
+  lio_sam: {validated: false, config_sha256: FILL_64_HEX_SHA256, evidence_manifest_sha256: FILL_64_HEX_SHA256}
+
+models:
+  full: {artifact_sha256: FILL_64_HEX_SHA256, config_sha256: FILL_64_HEX_SHA256}
+  H1_no_semantics: {artifact_sha256: FILL_64_HEX_SHA256, config_sha256: FILL_64_HEX_SHA256}
+  H2_no_temporal_state: {artifact_sha256: FILL_64_HEX_SHA256, config_sha256: FILL_64_HEX_SHA256}
+  H3_no_calibrated_uncertainty: {artifact_sha256: FILL_64_HEX_SHA256, config_sha256: FILL_64_HEX_SHA256}
+  H4_no_topology: {artifact_sha256: FILL_64_HEX_SHA256, config_sha256: FILL_64_HEX_SHA256}
+  H5_no_reference_map: {artifact_sha256: FILL_64_HEX_SHA256, config_sha256: FILL_64_HEX_SHA256}
+  H6_no_risk_prediction: {artifact_sha256: FILL_64_HEX_SHA256, config_sha256: FILL_64_HEX_SHA256}
+  H7_no_token_lifecycle: {artifact_sha256: FILL_64_HEX_SHA256, config_sha256: FILL_64_HEX_SHA256}
+
+seeds: [2026, 2027, 2028, 2029, 2030]
+
+analysis:
+  multiplicity: holm
+  bootstrap_resamples: 10000
+  h7_noninferiority_margin_pp: 2.0
