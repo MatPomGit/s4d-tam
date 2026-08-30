@@ -1,0 +1,87 @@
+site_name: S4D-TAM Benchmark
+site_description: Reproducible benchmark and reference implementation for Semantic 4D Token Attention Map autonomous UAV navigation.
+site_url: https://matpomgit.github.io/s4d-tam/
+repo_url: https://github.com/MatPomGit/s4d-tam
+repo_name: MatPomGit/s4d-tam
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; S4D-TAM contributors
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Benchmark:
+      - Architecture: architecture.md
+      - Methodology: methodology.md
+      - Metrics: metrics.md
+      - Datasets: datasets.md
+      - Artifact specification: artifact-specification.md
+  - Evaluation protocols:
+      - Reproducibility: reproducibility.md
+      - Preregistration: preregistration.md
+      - SIL protocol: sil-protocol.md
+      - HIL protocol: hil-protocol.md
+      - Real-flight protocol: real-flight-protocol.md
+      - Token event logging: token-event-logging.md
+  - Reproduction and compliance:
+      - Independent reproduction package: independent-reproduction-package.md
+      - Compliance report: compliance-report.md
+  - Development:
+      - Roadmap: roadmap.md
+      - Contributing: contributing.md
+      - Changelog: changelog.md
+      - Citation: citation.md
