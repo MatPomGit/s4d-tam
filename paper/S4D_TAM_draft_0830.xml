@@ -1,1 +1,2205 @@
-.
+<?xml version="1.0" encoding="utf-8" ?>
+<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" office:version="1.2">
+  <office:font-face-decls>
+    <style:font-face style:name="Courier New" style:font-family-generic="modern" style:font-pitch="fixed" svg:font-family="'Courier New'" />
+  </office:font-face-decls>
+  <office:automatic-styles>
+    <style:style style:name="T1" style:family="text"><style:text-properties fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold" /></style:style>
+    <style:style style:name="T2" style:family="text"><style:text-properties fo:font-style="italic" style:font-style-asian="italic" style:font-style-complex="italic" /></style:style>
+    <style:style style:name="fr2" style:family="graphic" style:parent-style-name="Formula"><style:graphic-properties style:vertical-pos="middle" style:vertical-rel="text" style:horizontal-pos="center" style:horizontal-rel="paragraph-content" style:wrap="none" /></style:style>
+    <style:style style:name="fr1" style:family="graphic" style:parent-style-name="Formula"><style:graphic-properties style:vertical-pos="middle" style:vertical-rel="text" /></style:style>
+    <style:style style:name="P1" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P2" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P3" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P4" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P5" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P6" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P7" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P8" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P9" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P10" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P11" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P12" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P13" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P14" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P15" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P16" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="P17" style:family="paragraph" style:parent-style-name="Quotations">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" />
+    </style:style>
+    <style:style style:name="TableHeaderRowCell" style:family="table-cell">
+      <style:table-cell-properties fo:border="none" />
+    </style:style>
+    <style:style style:name="TableRowCell" style:family="table-cell">
+      <style:table-cell-properties fo:border="none" />
+    </style:style>
+    <style:style style:name="Table1" style:family="table">
+      <style:table-properties table:align="center" style:rel-width="100%" />
+    </style:style>
+    <style:style style:name="Table1.A" style:family="table-column">
+      <style:table-column-properties style:rel-column-width="17409*" />
+    </style:style>
+    <style:style style:name="Table1.B" style:family="table-column">
+      <style:table-column-properties style:rel-column-width="15357*" />
+    </style:style>
+    <style:style style:name="Table1.C" style:family="table-column">
+      <style:table-column-properties style:rel-column-width="14339*" />
+    </style:style>
+    <style:style style:name="Table1.D" style:family="table-column">
+      <style:table-column-properties style:rel-column-width="18428*" />
+    </style:style>
+  </office:automatic-styles>
+<office:body>
+<office:text>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">S4D-TAM:
+Semantic 4D Token Attention Map for Autonomous Navigation of Unmanned
+Aerial Vehicles in GNSS-Degraded Environments</text:span></text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">Dr.
+Mateusz Pomianek</text:span></text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Department
+of Computer and Control Engineering,</text:span></text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Rzeszów
+University of Technology, Poland,
+m.pomianek@prz.edu.pl</text:span></text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">Abstract</text:span></text:p>
+<text:p text:style-name="Text_20_body">We propose S4D-TAM (Semantic 4D
+Token Attention Map), a novel navigation system architecture for
+unmanned aerial vehicles (UAVs) operating in GNSS-degraded environments.
+Unlike classical methods that repeatedly analyze raw image streams, the
+proposed system transforms sensor data (RGB, thermal, IMU, GNSS) into a
+persistent map of semantic 4D tokens. Each token represents a spatial
+fragment or object instance and contains its geometry, semantic
+embedding, dynamics, observation history, and calibrated uncertainty. A
+hierarchical spatiotemporal transformer updates the world model, aligns
+it with reference maps, and forecasts occupancy in partially observable
+regions. The predictive map is then used by a planner that accounts for
+risk, energy cost, and information value of future observations. The
+proposed representation aims to reduce image processing redundancy,
+increase robustness to GNSS degradation, and enable decision-making
+based on persistent spatial memory rather than solely on the current
+sensor field of view. The article presents the system concept,
+literature review, mathematical description, an executable auditable
+reference implementation, and a two-level experimental methodology
+separating external system comparison from internal mechanism ablation.
+Confirmatory experimental results are not yet reported.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">Keywords</text:span>:
+unmanned aerial vehicles, semantic SLAM, 4D tokens, spatiotemporal
+transformer, autonomous navigation, GNSS degradation, world model,
+occupancy forecasting</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">Table
+of Contents</text:span></text:p>
+<text:p text:style-name="Text_20_body">1. Introduction</text:p>
+<text:p text:style-name="Text_20_body">2. Literature Review</text:p>
+<text:p text:style-name="P1">2.1. Semantic SLAM for UAVs</text:p>
+<text:p text:style-name="P1">2.2. Point Cloud Transformers</text:p>
+<text:p text:style-name="P1">2.3. 4D Occupancy Forecasting</text:p>
+<text:p text:style-name="P1">2.4. World Models and Planning</text:p>
+<text:p text:style-name="P1">2.5. UAV Navigation in GNSS-Denied
+Environments</text:p>
+<text:p text:style-name="First_20_paragraph">3. Research Gap and
+Motivation</text:p>
+<text:p text:style-name="Text_20_body">4. S4D-TAM System
+Concept</text:p>
+<text:p text:style-name="P2">4.1. Definition of the 4D Token</text:p>
+<text:p text:style-name="P2">4.2. System Architecture</text:p>
+<text:p text:style-name="P2">4.3. Current Reference Implementation and
+Target Research Modules</text:p>
+<text:p text:style-name="First_20_paragraph">5. Mathematical
+Description</text:p>
+<text:p text:style-name="P3">5.1. Sensor Layer and Data Fusion</text:p>
+<text:p text:style-name="P3">5.2. SLAM Front-End</text:p>
+<text:p text:style-name="P3">5.3. Point Cloud Tokenization</text:p>
+<text:p text:style-name="P3">5.4. Spatiotemporal Attention
+Mechanism</text:p>
+<text:p text:style-name="P3">5.5. Object Memory and Semantics</text:p>
+<text:p text:style-name="P3">5.6. Reference Map Alignment</text:p>
+<text:p text:style-name="P3">5.7. Occupancy and Risk
+Forecasting</text:p>
+<text:p text:style-name="P3">5.8. Trajectory Planning</text:p>
+<text:p text:style-name="P3">5.9. Active Perception</text:p>
+<text:p text:style-name="P3">5.10. Metrological Error Analysis of the
+S4D-TAM System</text:p>
+<text:p text:style-name="P3">5.11. Extended Semantic Token
+Model</text:p>
+<text:p text:style-name="P3">5.12. Bayesian Inference about Future Scene
+States</text:p>
+<text:p text:style-name="P3">5.13. Bayesian Risk Estimation and
+Trajectory Planning</text:p>
+<text:p text:style-name="P3">5.14. Adaptive World Model with
+Hierarchical Resolution</text:p>
+<text:p text:style-name="P3">5.15. Computational Resource Management and
+Bottleneck Elimination</text:p>
+<text:p text:style-name="First_20_paragraph">6. Research
+Hypotheses</text:p>
+<text:p text:style-name="Text_20_body">7. Proposed Experimental
+Validation</text:p>
+<text:p text:style-name="P4">7.1. Datasets</text:p>
+<text:p text:style-name="P4">7.2. Two-Level Comparison Design</text:p>
+<text:p text:style-name="P4">7.2.1. External System Comparison</text:p>
+<text:p text:style-name="P4">7.2.2. Internal Mechanism Study</text:p>
+<text:p text:style-name="P4">7.3. Metrics</text:p>
+<text:p text:style-name="P4">7.4. Confirmatory Protocol and Statistical
+Analysis</text:p>
+<text:p text:style-name="First_20_paragraph">8. Discussion</text:p>
+<text:p text:style-name="Text_20_body">9. Conclusions and Future
+Research Directions</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">1.
+Introduction</text:span></text:p>
+<text:p text:style-name="Text_20_body">Autonomous navigation of unmanned
+aerial vehicles (UAVs) in environments with limited GNSS signal
+availability is one of the central challenges of modern mobile robotics.
+Satellite signal degradation can occur in dense urban environments,
+under heavy forest canopy, in tunnels and canyons, and under deliberate
+jamming or spoofing conditions [19], [20], [47], [48]. In such
+scenarios, a UAV must rely on alternative information sources: RGB and
+thermal cameras, inertial measurement units (IMU), altimeters, LiDARs,
+and reference maps [26], [53], [54], [57].</text:p>
+<text:p text:style-name="Text_20_body">Contemporary autonomous
+navigation systems perform pose estimation, map construction, semantic
+segmentation, object recognition, occupancy forecasting, and trajectory
+planning as separate, loosely coupled modules [9], [31]. This approach
+leads to computational redundancy - the same images are repeatedly
+analyzed by different modules, and semantic and geometric information is
+not efficiently shared between perception and planning stages [12],
+[40].</text:p>
+<text:p text:style-name="Text_20_body">In this work, we propose S4D-TAM
+(Semantic 4D Token Attention Map), a novel navigation system
+architecture in which the fundamental environment representation is a
+persistent, semantic, continuously updated map of 4D tokens derived from
+the SLAM point cloud. RGB and thermal camera data are used primarily to
+update the geometry and semantic meaning of points and objects stored in
+the map. Planning, risk assessment, and decision-making modules do not
+repeatedly analyze the same images - they operate on a compressed
+spatial representation containing geometry, semantics, dynamics,
+observation history, and uncertainty [1].</text:p>
+<text:p text:style-name="Text_20_body">The key scientific novelty of the
+proposed system is the introduction of a persistent memory map composed
+of semantic 4D tokens, which serves as a unified representation for
+localization, environment understanding, future scene state prediction,
+risk estimation, and UAV trajectory planning. The system remembers not
+only where an object was located, but also when and how many times it
+was observed, from which sensors the information originated, how
+reliable its position and recognition are, whether the object is static,
+dynamic, or periodically displaced, what spatial relations hold between
+it and other terrain elements, what invisible areas may be hidden behind
+it, and what significance the object has for flight safety and planning
+[1].</text:p>
+<text:p text:style-name="Text_20_body">The article combines a conceptual
+system architecture with an executable research reference and a
+reproducible benchmark framework. The current repository implements
+token state and lifecycle management, proposal and association,
+multimodal encoder interfaces, attention-related processing, uncertainty
+calibration utilities, reference-map and topological support, causal
+occupancy and motion forecasting, deterministic risk-aware planning,
+telemetry, and the integrated S4DTAMReference execution path. The final
+learned hierarchical model, full public-dataset reproduction, and
+confirmatory results remain under development. Section 7 therefore
+specifies a prospective two-level validation protocol rather than
+reporting final performance results.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">2.
+Literature Review</text:span></text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">2.1.
+Semantic SLAM for UAVs</text:span></text:p>
+<text:p text:style-name="Text_20_body">Semantic SLAM for aerial
+platforms must be lightweight, robust to GPS signal loss, and capable of
+producing useful semantic maps for planning and multi-robot
+coordination. Liu et al. proposed SlideSLAM - a sparse, lightweight,
+decentralized metric-semantic SLAM for multi-robot navigation that uses
+an object-based representation and enables efficient map merging in
+heterogeneous aerial-ground teams [2]. Tao et al. integrated active
+exploration with metric-semantic SLAM for resource-constrained aerial
+robots, explicitly balancing exploration and localization uncertainty
+(including semantic loop closures), which informs S4D-TAM strategies for
+uncertainty-aware mapping in GNSS-denied environments [3]. Liu et al.
+presented a real-time semantic SLAM that detects and models tree trunks
+and planes from LiDAR to constrain poses and enable drift compensation
+during long-range autonomous flights under forest canopy, directly
+relevant to drift mitigation and semantic constraints in S4D-TAM
+trajectory planning [4].</text:p>
+<text:p text:style-name="Text_20_body">Tian et al. proposed SAME - a
+ground-air collaboration system that fuses semantic Octree units from a
+UAV and a UGV into a coherent global map supporting collaborative
+exploration, offering a semantic octree architecture and fusion approach
+useful in S4D-TAM for cross-platform mapping and multi-perspective scene
+reconstruction [6]. Xiang and Su developed a LiDAR-based semantic
+mapping pipeline that creates hierarchical semantic maps together with
+occupancy grids for navigation and task adaptation, illustrating
+practical semantic mapping designs and hierarchical semantics that
+S4D-TAM can exploit for task-oriented scene understanding [7].</text:p>
+<text:p text:style-name="Text_20_body">Li et al. introduced Hi-SLAM - a
+hierarchical categorical representation within 3D Gaussian Splatting for
+compact encoding of multiple semantic classes and improved semantic
+mapping and tracking, directly applicable to S4D-TAM requirements for
+scalable semantic scene representations [5], [46]. More recent semantic
+SLAM works employing 3D Gaussian Splatting include SGS-SLAM [27], GS4
+[28], SemGauss-SLAM [29], SAP-SLAM [30], DynaGS-SLAM [32], GSFF-SLAM
+[33], OVO-SLAM [34], MSGS-SLAM [35], NIS-SLAM [36], and NEDS-SLAM [45],
+demonstrating growing interest in real-time dense semantic
+representations for SLAM.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">2.2.
+Point Cloud Transformers</text:span></text:p>
+<text:p text:style-name="Text_20_body">Point cloud transformer
+architectures and related models provide expressive spatiotemporal
+encoding of 3D geometry and dynamics, useful for the point-cloud-based
+perception and temporal prediction modules of S4D-TAM. PCPNet introduces
+a transformer network for future LiDAR point cloud prediction with a
+semantic auxiliary training objective for semantically consistent
+forecasts, directly applicable to S4D-TAM for point-level prediction and
+semantic alignment [16]. Silva et al. proposed S2TPVFormer, which
+extends TPV embeddings with hybrid cross-view temporal attention for
+temporally consistent semantic 3D occupancy, offering a spatiotemporal
+transformer design that S4D-TAM can adopt for temporally consistent
+semantic occupancy mapping [12].</text:p>
+<text:p text:style-name="Text_20_body">Chen et al. presented AdaOcc,
+which employs adaptive forward-view transformations and flow modeling
+(with strong Swin camera backbone models) to improve voxel occupancy and
+flow prediction, providing practical camera-to-3D transformer strategies
+applicable in vision-oriented S4D-TAM modules [15]. Work on point cloud
+forecasting as a proxy for 4D occupancy prediction redefines the problem
+toward sensor-agnostic spatiotemporal (4D) occupancy forecasting,
+directing S4D-TAM toward world-oriented 4D occupancy targets for robust
+temporal modeling [8].</text:p>
+<text:p text:style-name="Text_20_body">Further relevant works include
+Point-BERT [43], which introduces masked point modeling for pre-training
+point cloud transformers; SAT3D [42] for semantic segmentation of 3D
+scenes using slot attention; and YOGO [37] and Efficient Point
+Transformer [38], [39], demonstrating efficient point cloud processing
+with token representation and relation inference modules relevant to
+S4D-TAM token compression.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">2.3.
+4D Occupancy Forecasting</text:span></text:p>
+<text:p text:style-name="Text_20_body">Accurate 4D occupancy forecasting
+provides the spatiotemporal scene model required by S4D-TAM for risk
+assessment and trajectory planning. Yu et al. proposed Drive-OccWorld,
+which adapts a vision-centric 4D world model with memory normalization
+and action-conditioned decoding for occupancy and flow prediction, and
+integrates forecasting with end-to-end planning, providing an approach
+that S4D-TAM can leverage to couple occupancy prediction with trajectory
+selection [8]. Zheng et al. presented OccWorld - a spatiotemporal
+generative transformer architecture for 4D occupancy prediction,
+demonstrating effectiveness on driving datasets and offering S4D-TAM a
+transformer backbone for long-horizon volumetric prediction
+[3].</text:p>
+<text:p text:style-name="Text_20_body">Ma et al. provided Cam4DOcc - a
+standardized camera-only benchmark and four baselines for current and
+future occupancy estimation, providing S4D-TAM with evaluation protocols
+and camera-only baseline designs for 4D occupancy forecasting [4]. Guo
+et al. proposed FSF-Net, which uses coarse BEV scene flow plus
+vector-quantized latent features and U-Net fusion to improve occupancy
+prediction accuracy, showing a practical pipeline that S4D-TAM can adapt
+for efficient flow-conditioned occupancy prediction [7].</text:p>
+<text:p text:style-name="Text_20_body">Wang et al. introduced OccSora,
+which uses a 4D scene tokenizer and a diffusion transformer for
+generative long-horizon 4D occupancy simulation conditioned on
+trajectories, offering S4D-TAM a generative world simulator approach for
+scenario generation and planning evaluation [10]. Liao et al. proposed
+I2-World with hierarchical intra/inter tokenizers and an encoder-decoder
+design for efficient compression and generation of temporally consistent
+4D occupancy, presenting a tokenization strategy that S4D-TAM can apply
+for compact world representations and fast inference [14].</text:p>
+<text:p text:style-name="Text_20_body">Zheng et al. presented
+GaussianAD, which represents scenes through semantic 3D Gaussians
+refined from images, predicts 3D flows for those Gaussians, and
+integrates forecasting with planning - this sparse semantic Gaussian
+approach is directly relevant to S4D-TAM's lightweight scene
+abstractions and prediction-based planning [17].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">2.4.
+World Models and Planning</text:span></text:p>
+<text:p text:style-name="Text_20_body">World models unify perception,
+prediction, and planning; for S4D-TAM, they provide a mechanism for
+simulating the future, evaluating trajectories, and incorporating
+action-conditioned forecasts. Chen et al. proposed DriveWorld - a Memory
+State-Space Model with dynamic memory and static scene propagation for
+spatiotemporal pre-training, demonstrating downstream gains in
+detection, mapping, tracking, forecasting, and planning - relevant to
+S4D-TAM pre-training strategies and multi-task world modeling [14],
+[18].</text:p>
+<text:p text:style-name="Text_20_body">Zhao et al. used a contrastive
+world model objective to learn visual representations for drone
+navigation and visuomotor policy learning, illustrating how world model
+pre-training can improve navigation policies, which S4D-TAM can leverage
+for improved visual generalization [13]. Mei et al. proposed IR-WM,
+which focuses on predicting residual changes relative to a temporal BEV
+prior and couples forecasting with planning, offering S4D-TAM a compact
+residual prediction approach that reduces redundant static background
+modeling and improves planning integration [10].</text:p>
+<text:p text:style-name="Text_20_body">Cai et al. presented NEUSIS - a
+compositional neuro-symbolic framework combining neuro-symbolic
+perception, a probabilistic world model with Bayesian filtering, and
+hierarchical search planning, exemplifying an interpretable and
+uncertainty-aware world modeling and planning workflow useful for
+S4D-TAM mission-level decision-making [11]. Liu et al. proposed HPP,
+which integrates occupancy-conditioned prediction with game-theoretic
+motion forecasting and planning, demonstrating methods for aligning
+prediction patterns with planning objectives that S4D-TAM can adopt for
+improved trajectory selection under uncertainty and interaction
+[11].</text:p>
+<text:p text:style-name="Text_20_body">Feng et al. provided a
+comprehensive survey of world models for autonomous driving, covering 4D
+occupancy forecasting, generative simulation, and planning integration,
+providing a conceptual foundation and taxonomy that can guide S4D-TAM
+design choices in world model selection, pre-training, and evaluation
+[9].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">2.5.
+UAV Navigation in GNSS-Denied Environments</text:span></text:p>
+<text:p text:style-name="Text_20_body">Autonomous UAV navigation in
+GNSS-degraded environments requires multi-sensor fusion, robust SLAM
+algorithms, and uncertainty-aware planning strategies. Yue et al.
+proposed an air-ground cooperative UAV autonomous navigation system for
+GPS-denied environments that combines visual odometry, IMU, and
+communication with a ground robot for robust localization [19]. Radwan
+et al. presented UAV-assisted visual SLAM generating reconstructed 3D
+scene graphs in GPS-denied environments, demonstrating scene graph
+representations for scene understanding and planning [20].</text:p>
+<text:p text:style-name="Text_20_body">Nieuwenhuisen et al. developed an
+autonomous navigation system for micro aerial vehicles in complex
+GNSS-denied environments, using LiDAR, IMU, and obstacle-aware planning
+[26], [53]. Yue et al. proposed semantically guided visual autonomous
+navigation for UAVs that employs semantic segmentation to identify
+navigable areas and obstacles for improved path planning [54]. Hu et al.
+provided a review of vision-based UAV localization and
+optimization-based path planning in GPS-denied environments,
+synthesizing SLAM, object detection, and trajectory planning methods
+[57].</text:p>
+<text:p text:style-name="Text_20_body">Further relevant works include
+UAV navigation systems using multi-sensor fusion (IMU, camera, LiDAR,
+radar) [48], [50], [51], [52], [58], KAZE feature-based SLAM [49],
+map-aided navigation and dead reckoning [56], and platforms for
+search-and-rescue missions [55]. Castano presented autonomous UAV
+navigation in GPS-denied environments using LiDAR point clouds for
+localization and mapping [59].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">3.
+Research Gap and Motivation</text:span></text:p>
+<text:p text:style-name="Text_20_body">Contemporary solutions perform
+pose estimation, map construction, semantic segmentation, object
+recognition, occupancy prediction, trajectory planning, and risk
+assessment as separate, independent modules [9], [31], [40]. Systems
+such as LVI-SAM integrate LiDAR, camera, and IMU in a factor graph,
+while Kimera constructs metric-semantic 3D models. Neither, however,
+constitutes a complete, learned world model that exploits persistent map
+tokens for predicting unseen hazards and guiding sensor attention
+[12].</text:p>
+<text:p text:style-name="Text_20_body">OpenScene enables assigning
+language-image embedding space features to point cloud points. Open3DSG
+extends such approaches with inter-object relationships, while
+Octree-Graph combines semantics, occupancy, and graph structure. These
+solutions, however, primarily address scene understanding rather than
+closed-loop UAV control operating under limited computational resources
+and partial observability [6], [7].</text:p>
+<text:p text:style-name="Text_20_body">Research on 4D occupancy
+forecasting has demonstrated that predicting the future state of space
+can serve as an effective planning foundation [8], [10], [14], [17].
+Nevertheless, automotive applications, dense voxel representations, and
+full sensor sequence processing still dominate. The proposed S4D-TAM
+system fills the gap between semantic SLAM, 4D world models, and
+risk-aware planning for UAVs in GNSS-degraded environments.</text:p>
+<text:p text:style-name="Text_20_body">The key motivation is to
+transition from a classical geometric map to a predictive spatial memory
+of the UAV - one that not only records where objects are, but also
+predicts where they may appear, which areas are unobservable, and what
+risk they pose to flight safety. This approach can be termed a
+SLAM-native world model: a world model whose primary representation
+space is the SLAM map rather than the image stream [1].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">4.
+S4D-TAM System Concept</text:span></text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">4.1.
+Definition of the 4D Token</text:span></text:p>
+<text:p text:style-name="Text_20_body">A 3D token would represent a
+spatial fragment or object at a given position:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">tᵢ
+= [xᵢ, yᵢ, zᵢ]</text:span></text:p>
+<text:p text:style-name="Text_20_body">It would not, however, capture
+environmental changes or observation history. In an autonomous system it
+is essential to distinguish a building, tree, or rock from a person,
+vehicle, or object that may change its position [1].</text:p>
+<text:p text:style-name="Text_20_body">A 4D token should therefore
+incorporate the time dimension and additional attributes:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Tᵢ(t)
+= [pᵢ, Σᵢ, gᵢ, sᵢ, vᵢ, hᵢ, uᵢ, rᵢ]</text:span></text:p>
+<text:p text:style-name="Text_20_body">where the individual elements
+denote:</text:p>
+<text:p text:style-name="P5">1. pᵢ ∈ ℝ³ - position in space</text:p>
+<text:p text:style-name="P5">2. Σᵢ ∈ ℝ³ × 3 - position covariance matrix
+(geometric uncertainty)</text:p>
+<text:p text:style-name="P5">3. gᵢ ∈ ℝdg - geometric descriptor
+(normals, curvature, local features)</text:p>
+<text:p text:style-name="P5">4. sᵢ ∈ ℝds - semantic embedding (features
+from a neural network or open-vocabulary model)</text:p>
+<text:p text:style-name="P5">5. vᵢ ∈ ℝ³ - estimated velocity/motion
+vector</text:p>
+<text:p text:style-name="P5">6. hᵢ ∈ ℝdh - observation history
+(observation count, timestamps, sensor sources)</text:p>
+<text:p text:style-name="P5">7. uᵢ ∈ [0,1] - overall token uncertainty
+(scalar reliability measure)</text:p>
+<text:p text:style-name="P5">8. rᵢ ∈ [0,1] - local risk indicator
+(hazard probability)</text:p>
+<text:p text:style-name="First_20_paragraph">The fourth dimension does
+not merely add time as an additional coordinate. The token also stores
+persistence, observation ordering, rate of change, and the predicted
+future state of the object [1], [17], [22], [23], [25].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">4.2.
+System Architecture</text:span></text:p>
+<text:p text:style-name="Text_20_body">The S4D-TAM system consists of
+the following layers (Figure 1):</text:p>
+<text:p text:style-name="Text_20_body">Layer 1: Sensor Fusion
+Integration of data from RGB and thermal cameras, IMU, GNSS, altimeter,
+optionally LiDAR/radar, and reference maps. Each measurement receives
+a timestamp, coordinate frame transformation, and a reliability measure
+[1].</text:p>
+<text:p text:style-name="Text_20_body">Layer 2: SLAM Front-End A
+lightweight visual front-end for feature tracking, depth estimation,
+characteristic object detection, and feature vector extraction. The
+geometric SLAM creates a local point cloud and estimates the UAV
+trajectory. The factor graph includes visual odometry, inertial, GNSS,
+altimeter, semantic loop-closure, and reference-map alignment factors
+[2], [3], [4].</text:p>
+<text:p text:style-name="Text_20_body">Layer 3: Tokenization and
+Hierarchical Representation The full point cloud is divided into
+superpoints, object segments, adaptive octree cells, local surface
+patches, and dynamic instances. Each segment is encoded as one or more
+tokens. The hierarchical representation stores large, regular surfaces
+at low resolution while edges, obstacles, and dynamic objects are
+retained at higher resolution [5], [6], [7], [37], [38].</text:p>
+<text:p text:style-name="Text_20_body">Layer 4: Spatiotemporal
+Transformer A hierarchical attention mechanism with local scope (tokens
+within a given spatial radius, predicted flight corridor, sensor
+visibility region) and global scope (landmarks, major terrain obstacles,
+dynamic objects, high-uncertainty areas, elevated-risk locations). The
+attention weight depends on token features and their mutual positions
+[8], [12], [14], [16].</text:p>
+<text:p text:style-name="Text_20_body">Layer 5: Object Memory and
+Semantics Upon detecting a characteristic object, the system creates an
+instance token storing a class probability distribution, observation
+history, open-vocabulary embedding, and spatial relations with other
+objects [5], [11], [34].</text:p>
+<text:p text:style-name="Text_20_body">Layer 6: Reference Map Alignment
+The system maintains two representations: the current map Mt built on
+the fly, and the reference map Mref derived from elevation maps,
+previous flights, or a simplified terrain point cloud. Alignment uses a
+three-step procedure: global topological and terrain descriptor
+matching, landmark token matching, and local geometric optimization [4],
+[19], [20].</text:p>
+<text:p text:style-name="Text_20_body">Layer 7: Occupancy and Risk
+Forecasting The model predicts future space occupancy and the
+probability of risk in partially observable areas. The system infers
+that beyond a building edge lies an unobservable region, a road or
+terrain trail may lead to an unseen object, a previously detected
+dynamic object may have moved into a neighboring zone, and terrain
+topography limits available escape trajectories [8], [10], [14], [17],
+[21].</text:p>
+<text:p text:style-name="Text_20_body">Layer 8: Trajectory Planning The
+planner minimizes an objective function that accounts for trajectory
+length, energy cost, collision probability, predicted environmental
+risk, and the cost arising from map uncertainty. The system selects
+among: continuing flight, altitude change, heading change, temporary
+hover in a safe zone, return along the memorized route, limiting
+non-critical measurements, and increasing observation intensity in
+high-uncertainty areas [11], [19], [41].</text:p>
+<text:p text:style-name="Text_20_body">Layer 9: Active Perception The
+active perception module selects camera orientation, processing
+frequency, and sensory modality based on expected uncertainty reduction
+relative to cost. The IR camera may be activated more frequently in low
+illumination or in areas where prior data indicates the possible
+presence of a thermal object. The RGB camera need not be analyzed by the
+full network at every frame [1], [3], [6].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">4.3.
+Current Reference Implementation and Target Research
+Modules</text:span></text:p>
+<text:p text:style-name="Text_20_body">The S4D-TAM concept is
+accompanied by an executable Python research reference. The
+implementation is intentionally modular so that individual mechanisms
+can be tested, replaced, and ablated without changing the evaluator
+boundary.</text:p>
+<text:p text:style-name="Text_20_body">Implemented reference components
+include persistent token state and lifecycle management (token.py,
+memory.py), token proposal and data association (proposal.py,
+association.py), modality-oriented encoder interfaces and masked fusion
+(encoders/), attention-related processing (attention.py), calibration
+and uncertainty utilities (calibration.py), reference-map and
+topological support (reference_map.py, topology.py), causal
+probabilistic occupancy and motion forecasting (forecasting.py),
+deterministic risk-, energy-, time-, progress-, and information-aware
+planning (planner.py), structured event telemetry (telemetry.py), and
+the integrated S4DTAMReference pipeline (pipeline.py).</text:p>
+<text:p text:style-name="Text_20_body">The reference implementation
+favors causality, deterministic replay, explicit uncertainty, and
+auditability over maximum throughput. This is advantageous during early
+numerical validation because an observed difference can be traced to a
+defined mechanism rather than hidden implementation
+nondeterminism.</text:p>
+<text:p text:style-name="Text_20_body">Several formulations in Sections
+5.12-5.15 describe target research extensions rather than already
+completed backends. These include a learned hierarchical spatiotemporal
+model, a DBN/particle or equivalent multimodal probabilistic scene-state
+backend, an MPPI planner backend, adaptive octree/LOD storage, a
+closed-loop active-perception controller, and a safety-aware real-time
+scheduler. They are maintained as explicit implementation milestones and
+must preserve the same causal and evaluator-facing contracts when
+introduced.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.
+Mathematical Description</text:span></text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.1.
+Sensor Layer and Data Fusion</text:span></text:p>
+<text:p text:style-name="Text_20_body">The system uses a sensor set 𝒮=
+\s₁, s₂, …, sn\, where each sensor sᵢ provides a measurement zᵢ(t) at
+time t with uncertainty Σᵢ(t). Data fusion is performed in a factor
+graph:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Ftotal
+= FVO + FIMU + FGNSS + Falt + Fsem + Fref</text:span></text:p>
+<text:p text:style-name="Text_20_body">where:</text:p>
+<text:p text:style-name="P6">• FVO - visual odometry factor</text:p>
+<text:p text:style-name="P6">• FIMU - inertial factor</text:p>
+<text:p text:style-name="P6">• FGNSS - GNSS factor (with adaptive weight
+under degradation)</text:p>
+<text:p text:style-name="P6">• Falt - altimeter factor</text:p>
+<text:p text:style-name="P6">• Fsem - semantic loop-closure
+factor</text:p>
+<text:p text:style-name="P6">• Fref - reference map alignment
+factor</text:p>
+<text:p text:style-name="First_20_paragraph">Each factor takes the
+form:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Fᵢ
+= ∑ₖ ‖ eᵢk ‖_Σᵢk²</text:span></text:p>
+<text:p text:style-name="Text_20_body">where eᵢk is the residual error
+and Σᵢk is the covariance matrix [2], [3], [4].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.2.
+SLAM Front-End</text:span></text:p>
+<text:p text:style-name="Text_20_body">The SLAM front-end estimates the
+UAV trajectory X = \x₁, x₂, …, xT\ and the point map M = \m₁, m₂, …, mN\
+by minimizing the cost function:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">X*,
+M* = arg minX, M ∑ᵢ,j ρ( ‖ zᵢⱼ - h(xᵢ, mⱼ) ‖_Σ_ij²
+)</text:span></text:p>
+<text:p text:style-name="Text_20_body">where h(xᵢ, mⱼ) is the projection
+function of point mⱼ onto pose xᵢ, and ρ(·) is a robust function (e.g.,
+Huber) [2], [4].</text:p>
+<text:p text:style-name="Text_20_body">The reconstruction scale is
+corrected using:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">s*
+= arg mins ∑ₖ wₖ ‖ s · dₖVO - dₖref ‖²</text:span></text:p>
+<text:p text:style-name="Text_20_body">where dₖVO is the distance from
+visual odometry, dₖref is the reference distance (from IMU, altimeter,
+GNSS, known object sizes, elevation map), and wₖ are reliability weights
+[1], [4].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.3.
+Point Cloud Tokenization</text:span></text:p>
+<text:p text:style-name="Text_20_body">The point cloud M is divided into
+K tokens \T₁, T₂, …, TK\ through hierarchical segmentation:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">M
+= ⋃ᵢ=1K 𝒫ᵢ</text:span></text:p>
+<text:p text:style-name="Text_20_body">where 𝒫ᵢ is the set of points
+assigned to token Tᵢ. Segmentation may use:</text:p>
+<text:p text:style-name="P7">1. Superpoints - grouping of points with
+similar geometry and semantics [37], [38]</text:p>
+<text:p text:style-name="P7">2. Object segments - instance detection
+[5], [34]</text:p>
+<text:p text:style-name="P7">3. Adaptive octree - hierarchical space
+partitioning [6], [7]</text:p>
+<text:p text:style-name="P7">4. Local surface patches - planes, edges,
+corners [4]</text:p>
+<text:p text:style-name="P7">5. Dynamic instances - moving objects [17],
+[22]</text:p>
+<text:p text:style-name="First_20_paragraph">For each token Tᵢ the
+following attributes are computed:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">pᵢ
+= (1)/(|𝒫ᵢ|) ∑m ∈ 𝒫ᵢ m</text:span></text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Σᵢ
+= (1)/(|𝒫ᵢ|) ∑m ∈ 𝒫ᵢ (m - pᵢ)(m - pᵢ)ᵀ</text:span></text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">gᵢ
+= GeomEncoder(𝒫ᵢ)</text:span></text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">sᵢ
+= SemEncoder(ℐᵢ, 𝒫ᵢ)</text:span></text:p>
+<text:p text:style-name="Text_20_body">where ℐᵢ is the set of images
+observing points 𝒫ᵢ [5], [16], [38].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.4.
+Spatiotemporal Attention Mechanism</text:span></text:p>
+<text:p text:style-name="Text_20_body">The hierarchical spatiotemporal
+transformer updates token representations through the attention
+mechanism:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Tᵢ'
+= Tᵢ + Attention(Qᵢ, K, V)</text:span></text:p>
+<text:p text:style-name="Text_20_body">where:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Qᵢ
+= WQ Tᵢ, quad K = WK T, quad V = WV T</text:span></text:p>
+<text:p text:style-name="Text_20_body">Local attention covers tokens
+within radius rlocal:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">𝒩ᵢlocal
+= : ‖pᵢ - pⱼ‖ &lt; rlocal\</text:span></text:p>
+<text:p text:style-name="Text_20_body">Global attention covers tokens of
+particular significance:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">𝒩ᵢglobal
+= : landmark(j) ∨ dynamic(j) ∨ uⱼ &gt; θu ∨ rⱼ &gt;
+θr\</text:span></text:p>
+<text:p text:style-name="Text_20_body">The attention weight accounts for
+spatial, temporal, and uncertainty relations:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">αᵢⱼ
+= (exp( fracQᵢᵀ Kⱼ)/(√dₖ) · φ(pᵢ, pⱼ, tᵢ, tⱼ) · ψ(uᵢ, uⱼ) )∑ₖ ∈ 𝒩ᵢ exp(
+(Qᵢᵀ Kₖ)/(√dₖ) · φ(pᵢ, pₖ, tᵢ, tₖ) · ψ(uᵢ, uₖ) )</text:span></text:p>
+<text:p text:style-name="Text_20_body">where φ(·) encodes spatial and
+temporal relations, and ψ(·) limits the influence of uncertain
+observations [8], [12], [14], [16].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.5.
+Object Memory and Semantics</text:span></text:p>
+<text:p text:style-name="Text_20_body">Upon detecting a characteristic
+object, the system creates an instance token:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Oₖ
+= [pₖ, Σₖ, bₖ, sₖ, P(cₖ | z₁:t), hₖ]</text:span></text:p>
+<text:p text:style-name="Text_20_body">where bₖ is the bounding box, and
+P(cₖ | z₁:t) is the probability distribution over the object class cₖ
+given the observation history z₁:t.</text:p>
+<text:p text:style-name="Text_20_body">The class distribution is updated
+via Bayesian filtering:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">P(cₖ
+| z₁:t) = fracP(zt | cₖ) P(cₖ | z₁:t-1)∑c' P(zt | c') P(c' |
+z₁:t-1)</text:span></text:p>
+<text:p text:style-name="Text_20_body">The open-vocabulary approach
+allows searching the map for objects and properties that were not
+constrained to a closed class set during training [5], [11],
+[34].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.6.
+Reference Map Alignment</text:span></text:p>
+<text:p text:style-name="Text_20_body">The system maintains two
+representations: the current map Mt and the reference map Mref.
+Alignment uses a three-step procedure:</text:p>
+<text:p text:style-name="Text_20_body">Step 1: Global Alignment
+Determining the transformation Tglobal by matching global
+descriptors:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Tglobal
+= arg minT ∑ᵢ ‖ dᵢt - d_σ(i)ref ‖²</text:span></text:p>
+<text:p text:style-name="Text_20_body">where dᵢt and d_σ(i)ref are
+global descriptors (e.g., topological, terrain-based) [4], [19],
+[20].</text:p>
+<text:p text:style-name="Text_20_body">Step 2: Landmark Matching
+Refining the transformation by matching landmark tokens:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Tlandmark
+= arg minT ∑ⱼ ∈ ℒ ‖ T pⱼt - p_σ(j)ref ‖_Σⱼ²</text:span></text:p>
+<text:p text:style-name="Text_20_body">where ℒ is the landmark set [2],
+[4].</text:p>
+<text:p text:style-name="Text_20_body">Step 3: Local Geometric
+Optimization Final refinement via ICP or a semantic variant:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Tfinal
+= arg minT ∑ᵢ,j wᵢⱼ ‖ T pᵢt - pⱼref ‖²</text:span></text:p>
+<text:p text:style-name="Text_20_body">where wᵢⱼ accounts for semantic
+consistency [4], [5].</text:p>
+<text:p text:style-name="Text_20_body">The difference between the
+current map and the reference map indicates: a localization error, an
+environmental change, appearance of a new object, absence of a
+previously existing object, or unreliability of the current GNSS
+measurement [1], [19].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.7.
+Occupancy and Risk Forecasting</text:span></text:p>
+<text:p text:style-name="Text_20_body">The system predicts future space
+occupancy and risk probability in partially observable regions:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">O(t+Δ
+t) = fpred(T₁:K(t), a(t))</text:span></text:p>
+<text:p text:style-name="Text_20_body">where O(t+Δ t) is the predicted
+occupancy at time t+Δ t, T₁:K(t) are tokens at time t, a(t) is the
+planned action (trajectory), and fpred is the predictive model (e.g.,
+temporal transformer, diffusion model) [8], [10], [14], [17].</text:p>
+<text:p text:style-name="Text_20_body">The risk map is determined
+as:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">R(p,
+t+Δ t) = P(Hp, t+Δ t | M₁:t, Mref, Ct)</text:span></text:p>
+<text:p text:style-name="Text_20_body">where Hp, t+Δ t denotes a
+hazardous event at position p at time t+Δ t, and Ct is the motion and
+environment context [1], [21].</text:p>
+<text:p text:style-name="Text_20_body">The system infers risk in
+unobservable areas via:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Roccluded(p)
+= ∑c ∈ 𝒞 P(c | Tvisible) · P(H | c, geometry(p))</text:span></text:p>
+<text:p text:style-name="Text_20_body">where 𝒞 is the set of contexts
+(road, terrain trail, building edge), Tvisible are the visible tokens,
+and geometry(p) describes the terrain topography at position p [1],
+[11], [21].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.8.
+Trajectory Planning</text:span></text:p>
+<text:p text:style-name="Text_20_body">The planner minimizes the
+objective function:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">J(ξ)
+= ∫₀ᵀ [ L(ξ(t)) + E(ξ(t), ξ(t)) + λH PH(ξ(t)) + λR R(ξ(t), t) + λU
+U(ξ(t)) ] dt</text:span></text:p>
+<text:p text:style-name="Text_20_body">where:</text:p>
+<text:p text:style-name="P8">• ξ(t) is the UAV trajectory</text:p>
+<text:p text:style-name="P8">• L(ξ(t)) is the trajectory length</text:p>
+<text:p text:style-name="P8">• E(ξ(t), ξ(t)) is the energy cost</text:p>
+<text:p text:style-name="P8">• PH(ξ(t)) is the collision
+probability</text:p>
+<text:p text:style-name="P8">• R(ξ(t), t) is the predicted environmental
+risk</text:p>
+<text:p text:style-name="P8">• U(ξ(t)) is the cost arising from map
+uncertainty</text:p>
+<text:p text:style-name="P8">• λH, λR, λU are weighting
+coefficients</text:p>
+<text:p text:style-name="First_20_paragraph">Collision probability is
+determined as:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">PH(ξ(t))
+= 1 - ∏ᵢ (1 - P(collision | ξ(t), Tᵢ(t)))</text:span></text:p>
+<text:p text:style-name="Text_20_body">The uncertainty cost accounts for
+missing information:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">U(ξ(t))
+= ∑ᵢ ∈ 𝒩(ξ(t)) uᵢ · exp(-(‖ξ(t) - pᵢ‖²)/(2σ²))</text:span></text:p>
+<text:p text:style-name="Text_20_body">The system selects the
+action:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">a*
+= arg mina ∈ 𝒜 J(ξ(a))</text:span></text:p>
+<text:p text:style-name="Text_20_body">where 𝒜 is the set of possible
+actions: continuing flight, altitude change, heading change, temporary
+hover in a safe zone, return along the memorized route, limiting
+non-critical measurements, and increasing observation intensity in
+high-uncertainty areas [1], [11], [19], [41].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.9.
+Active Perception</text:span></text:p>
+<text:p text:style-name="Text_20_body">The active perception module
+selects a sensory action atsense that maximizes expected uncertainty
+reduction relative to cost:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">atsense
+= arg maxa ∈ 𝒜_sense (I(T; z | a))/(C(a))</text:span></text:p>
+<text:p text:style-name="Text_20_body">where I(T; z | a) is the mutual
+information between tokens T and measurement z given action a, and C(a)
+is the energy and computational cost of the action [1], [3],
+[6].</text:p>
+<text:p text:style-name="Text_20_body">Mutual information is
+approximated as:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">I(T;
+z | a) ≈ H(T) - Ez|a[H(T|z)]</text:span></text:p>
+<text:p text:style-name="Text_20_body">where H(T) is the token entropy
+before measurement and H(T|z) is the entropy after measurement.</text:p>
+<text:p text:style-name="Text_20_body">The IR camera may be activated
+more frequently in low illumination or in regions where prior data
+indicate the possible presence of a thermal object. The RGB camera need
+not be processed by the full network at every frame [1].</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.10.
+Metrological Error Analysis of the S4D-TAM System</text:span></text:p>
+<text:p text:style-name="Text_20_body">Metrological analysis forms the
+foundation for designing reliable autonomous navigation systems. The
+objective of this subsection is to formalize the error models of
+individual S4D-TAM system layers, derive lower bounds on estimation
+uncertainty, and determine the cumulative positioning error budget of
+the UAV in a GNSS-degraded environment.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.10.1.
+Sensor Layer Error Model</text:span></text:p>
+<text:p text:style-name="Text_20_body">Each sensor sᵢ ∈ 𝒮 is
+characterized by its own error model. Adopting the general measurement
+form:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">zᵢ(t)
+= hᵢ(x(t)) + nᵢ(t) + bᵢ(t)</text:span></text:p>
+<text:p text:style-name="Text_20_body">where hᵢ(·) is the observation
+function, nᵢ(t) sim 𝒩(0, Rᵢ) is the measurement noise with covariance
+matrix Rᵢ, and bᵢ(t) is the systematic error (bias).</text:p>
+<text:p text:style-name="Text_20_body">IMU (gyroscope + accelerometer):
+The error model of the gyroscope and accelerometer in an IMU extended
+with bias is described as:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">ω(t)
+= ω(t) + bg(t) + ng(t), quad ng sim 𝒩(0, σg² I₃)</text:span></text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">a(t)
+= a(t) + ba(t) + na(t), quad na sim 𝒩(0, σa² I₃)</text:span></text:p>
+<text:p text:style-name="Text_20_body">where biases evolve according to
+a random walk model:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">bg
+= nbg, quad nbg sim 𝒩(0, σbg² I₃)</text:span></text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">ba
+= nba, quad nba sim 𝒩(0, σba² I₃)</text:span></text:p>
+<text:p text:style-name="Text_20_body">The position error resulting from
+double integration of IMU grows over time as:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">σIMU(t)
+= (1)/(2)σa t² + (1)/(6)σba t³</text:span></text:p>
+<text:p text:style-name="Text_20_body">GNSS under degradation
+conditions: In GNSS-degraded environments we introduce a signal quality
+indicator qGNSS(t) ∈ [0, 1], where qGNSS = 1 denotes full constellation
+coverage and qGNSS = 0 denotes complete signal loss. The GNSS
+measurement covariance scales adaptively:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">RGNSS(t)
+= fracRGNSS^(0)qGNSS(t) + ε</text:span></text:p>
+<text:p text:style-name="Text_20_body">where RGNSS^(0) is the baseline
+covariance at full signal and ε ll 1 is a regularization parameter
+preventing singularity. As qGNSS to 0, the factor FGNSS is effectively
+removed from the factor graph through the increase in its
+variance.</text:p>
+<text:p text:style-name="Text_20_body">Visual odometry (VO) - relative
+drift: The visual odometry error accumulates quasi-randomly,
+proportional to the traveled distance d:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">σVO(d)
+= αVO d + βVO √(d)</text:span></text:p>
+<text:p text:style-name="Text_20_body">where αVO is the linear error
+coefficient (typically 0.5–2\% per meter traveled), and βVO describes
+the diffusive component associated with stochastic visual
+noise.</text:p>
+<text:p text:style-name="Text_20_body">Barometric altimeter: The
+altitude measurement error is dominated by slow-varying temperature and
+ambient pressure drift:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">zbaro(t)
+= ztrue(t) + bbaro + nbaro(t)</text:span></text:p>
+<text:p text:style-name="Text_20_body">where bbaro sim 𝒰(-δb, +δb) is
+the bias with a uniform distribution over range δb ≈ 1–3 m, and nbaro
+sim 𝒩(0, σbaro²) with σbaro ≈ 0.1–0.5 m.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.10.2.
+Error Propagation in the Factor Graph</text:span></text:p>
+<text:p text:style-name="Text_20_body">Let ξ = [ptop, vtop, φtop, bgtop,
+batop]top ∈ ℝ¹⁵ be the navigation state vector (p - position, v -
+velocity, φ - Euler angles, bg, ba - IMU biases). The lower bound on the
+variance of an unbiased estimator ξ is given by the Cramér-Rao Lower
+Bound (CRLB):</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Cov(ξ)
+≥ J-¹(ξ)</text:span></text:p>
+<text:p text:style-name="Text_20_body">where J(ξ) is the Fisher
+Information Matrix (FIM), the sum of contributions from all factor graph
+factors:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">J(ξ)
+= ∑ᵢ Hᵢtop Rᵢ-¹ Hᵢ + Jprior</text:span></text:p>
+<text:p text:style-name="Text_20_body">where Hᵢ = (∂ hᵢ)/(∂ ξ) is the
+Jacobian matrix of the observation function of the i-th factor, and
+Jprior represents the prior information contribution. The marginal
+position variance σp² is the diagonal element:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">σp²
+≥ [J-¹(ξ)]pp</text:span></text:p>
+<text:p text:style-name="Text_20_body">Navigation state covariance
+propagation follows the Riccati equation:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">P(t)
+= F(t) P(t) + P(t) F(t)top + G(t) Q(t) G(t)top</text:span></text:p>
+<text:p text:style-name="Text_20_body">where F(t) is the inertial system
+state transition matrix, G(t) is the noise input matrix, and Q(t) =
+diag(σa²I₃, σg²I₃, σba²I₃, σbg²I₃) is the noise spectral density
+matrix.</text:p>
+<text:p text:style-name="Text_20_body">When merging measurements from M
+sensors in the factor graph, the combined FIM grows additively, reducing
+the estimator covariance:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Jfused
+= JIMU + JVO + qGNSS JGNSS + Jalt + Jsem + Jref</text:span></text:p>
+<text:p text:style-name="Text_20_body">where each term is weighted
+according to the reliability of the corresponding source.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.10.3.
+Quantization and Discretization Error of Tokens</text:span></text:p>
+<text:p text:style-name="Text_20_body">The 3D space is divided into
+tokens of side length ell meters (§5.3). The quantization operation
+mapping the coordinates of point p ∈ ℝ³ to the centroid of token cₖ
+introduces a quantization error:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">εq
+= p - cₖ, quad ‖εq‖ ≤ fracell√(3)2</text:span></text:p>
+<text:p text:style-name="Text_20_body">For a regular cubic grid of side
+length ell, the quantization error variance along each axis is:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">σq,1D²
+= (ell²)/(12)</text:span></text:p>
+<text:p text:style-name="Text_20_body">and the total 3D
+variance:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">σq²
+= (ell²)/(4)</text:span></text:p>
+<text:p text:style-name="Text_20_body">An additional semantic error
+arises from imperfections of the open-vocabulary classifier. Defining
+the classifier confusion matrix C ∈ ℝC × C (C classes), the semantic
+error of token k is expressed by the conditional entropy of the class
+assignment:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">εsem^(k)
+= -∑c=1C p(c|Tₖ) log p(c|Tₖ) = H(c|Tₖ)</text:span></text:p>
+<text:p text:style-name="Text_20_body">A value of εsem^(k) = 0 indicates
+certain assignment, while εsem^(k) = log C indicates maximum semantic
+uncertainty. A token with high εsem^(k) receives increased covariance in
+the Fsem factor graph factor.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.10.4.
+Lower Bound on Localization Error</text:span></text:p>
+<text:p text:style-name="Text_20_body">The total UAV positioning error
+is a combination of: visual odometry drift σVO, uncertainty arising from
+IMU integration σIMU, GNSS error σGNSS, and the contribution from
+semantic anchoring σsem. Under joint optimization in the factor graph,
+the CRLB on the position error takes the form:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">σp,min²(t)
+= [Jfused-¹(t)]pp = (1)/(∑ᵢ [Hᵢtop Rᵢ^-1) Hᵢ]pp</text:span></text:p>
+<text:p text:style-name="Text_20_body">In the scenario of complete GNSS
+absence (qGNSS = 0), position error grows according to a modified drift
+model:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">σp²(t)
+= σp,0² + αVO² d(t)² + γsem Nloop-¹</text:span></text:p>
+<text:p text:style-name="Text_20_body">where σp,0² is the initial
+variance (determined by GNSS before degradation), d(t) is the total
+distance traveled, Nloop is the number of successful semantic loop
+closures, and γsem is the semantic correction coefficient. Each semantic
+loop closure reduces σp² proportionally to the strength of the semantic
+evidence, determined by the Fisher information of factor Fsem.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.10.5.
+Occupancy Forecasting Error</text:span></text:p>
+<text:p text:style-name="Text_20_body">The 4D occupancy predictor (§5.7)
+produces a probabilistic map O(x, t+Δ t) based on the token state at
+time t. Prediction error grows with the temporal horizon Δ t. Modeling
+the evolution of token Tₖ as a linear-Gaussian stochastic process with
+transition matrix Φ and noise diffusion Qdyn:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Tₖ(t+Δ
+t) = Φ(Δ t) Tₖ(t) + ωₖ, quad ωₖ sim 𝒩(0, Qdyn(Δ t))</text:span></text:p>
+<text:p text:style-name="Text_20_body">the prediction error covariance
+is:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Σpred(Δ
+t) = Φ(Δ t) Σₖ(t) Φ(Δ t)top + Qdyn(Δ t)</text:span></text:p>
+<text:p text:style-name="Text_20_body">For static objects Φ ≈ I and Qdyn
+≈ 0, while for dynamic objects Qdyn(Δ t) ∝ Δ t. This results in a linear
+growth of prediction uncertainty with horizon:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">σpred²(Δ
+t) = σpred,0² + σdyn² · Δ t</text:span></text:p>
+<text:p text:style-name="Text_20_body">The binary occupancy
+classification error is defined by the Brier Score:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">BS(Δ
+t) = (1)/(|𝒱|) ∑x ∈ 𝒱 (O(x, t+Δ t) - Otrue(x, t+Δ
+t))²</text:span></text:p>
+<text:p text:style-name="Text_20_body">where 𝒱 is the set of workspace
+voxels. The expected value of BS(Δ t) is lower bounded by the entropy of
+the dynamic environment.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.10.6.
+Cumulative Error Budget</text:span></text:p>
+<text:p text:style-name="Text_20_body">The table below summarizes the
+error sources of the S4D-TAM system with their typical values for the
+target configuration (lightweight UAV in an urban environment with
+partial GNSS degradation):</text:p>
+<table:table table:name="Table1" table:style-name="Table1">
+  <table:table-column table:style-name="Table1.A" />
+  <table:table-column table:style-name="Table1.B" />
+  <table:table-column table:style-name="Table1.C" />
+  <table:table-column table:style-name="Table1.D" />
+  <table:table-header-rows>
+    <table:table-row>
+      <table:table-cell table:style-name="TableHeaderRowCell" office:value-type="string">
+        <text:p text:style-name="Table_20_Heading"><text:span text:style-name="T1">Error
+        Source</text:span></text:p>
+      </table:table-cell>
+      <table:table-cell table:style-name="TableHeaderRowCell" office:value-type="string">
+        <text:p text:style-name="Table_20_Heading"><text:span text:style-name="T1">Characteristic</text:span></text:p>
+      </table:table-cell>
+      <table:table-cell table:style-name="TableHeaderRowCell" office:value-type="string">
+        <text:p text:style-name="Table_20_Heading"><text:span text:style-name="T1">Typical
+        Value (1σ)</text:span></text:p>
+      </table:table-cell>
+      <table:table-cell table:style-name="TableHeaderRowCell" office:value-type="string">
+        <text:p text:style-name="Table_20_Heading"><text:span text:style-name="T1">Time/Distance
+        Dependence</text:span></text:p>
+      </table:table-cell>
+    </table:table-row>
+  </table:table-header-rows>
+  <table:table-row>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">IMU noise
+      (accelerometer)</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">White noise
+      σa</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">0.05 m/s²</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">σ ∝ t²
+      (integration)</text:p>
+    </table:table-cell>
+  </table:table-row>
+  <table:table-row>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">IMU bias
+      drift</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">Random walk
+      σba</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">0.002 m/s²/√s</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">σ ∝ t³/2</text:p>
+    </table:table-cell>
+  </table:table-row>
+  <table:table-row>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">Visual
+      odometry</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">Proportional drift
+      αVO</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">1\% per meter</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">σ ∝ d</text:p>
+    </table:table-cell>
+  </table:table-row>
+  <table:table-row>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">GNSS (full
+      signal)</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">σGNSS^(0)</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">1.5 m
+      (horizontal)</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">Constant</text:p>
+    </table:table-cell>
+  </table:table-row>
+  <table:table-row>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">GNSS
+      (degraded)</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">σGNSS(q)</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">5–50 m</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">∝ 1/qGNSS</text:p>
+    </table:table-cell>
+  </table:table-row>
+  <table:table-row>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">Barometric
+      altimeter</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">σbaro + bias</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">0.3 m + 2 m</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">Thermal drift</text:p>
+    </table:table-cell>
+  </table:table-row>
+  <table:table-row>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">Token
+      quantization</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">σq</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">ell/2 (e.g., 0.5 m for
+      ell = 1 m)</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">Constant (depends on
+      ell)</text:p>
+    </table:table-cell>
+  </table:table-row>
+  <table:table-row>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">Semantic
+      error</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">Classifier entropy
+      $H(c</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">\mathbf{T})$</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">0.1–0.8 bit</text:p>
+    </table:table-cell>
+  </table:table-row>
+  <table:table-row>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">Occupancy prediction
+      (Δ t = 1 s)</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">BS(Δ t)</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">0.05–0.15</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">∝ Δ t</text:p>
+    </table:table-cell>
+  </table:table-row>
+  <table:table-row>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">Total position error
+      (IMU+VO only, d = 100 m)</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">CRLB σp</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">≈ 2–5 m</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">∝ d</text:p>
+    </table:table-cell>
+  </table:table-row>
+  <table:table-row>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">Total position error
+      (IMU+VO+sem, Nloop = 5)</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">CRLB σp</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">≈ 0.5–1.5 m</text:p>
+    </table:table-cell>
+    <table:table-cell table:style-name="TableRowCell" office:value-type="string">
+      <text:p text:style-name="Table_20_Contents">Bounded by loop
+      closures</text:p>
+    </table:table-cell>
+  </table:table-row>
+</table:table>
+<text:p text:style-name="First_20_paragraph">The error budget indicates
+that the key mechanism for limiting position drift under GNSS-degraded
+conditions is the effectiveness of semantic loop closures. Each loop
+closure with high semantic confidence (low εsem^(k)) reduces position
+variance proportionally to the Fisher information of factor Fsem,
+enabling maintenance of the error below the operational threshold σp
+&lt; 2 m even when flying through zones of complete GNSS loss extending
+to several kilometers.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.11.
+Extended Semantic Token Model</text:span></text:p>
+<text:p text:style-name="Text_20_body">The basic geometric token
+introduced in §5.3 is replaced by an extended semantic-temporal token
+𝒯ₖ, constituting a complete profile of an object recognized in the UAV's
+environment. Each token stores not only the object's position, but a
+complete record of the multidimensional observation history:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">𝒯ₖ
+= ⟨ μₖ, Σₖ, pc^(k), 𝒪ₖ, δₖ, vₖ, ℛₖ, Ωₖ, ρₖ ⟩</text:span></text:p>
+<text:p text:style-name="Text_20_body">where the individual components
+have the following meaning:</text:p>
+<text:p text:style-name="P9">• μₖ ∈ ℝ³ - estimated position (centroid)
+in the global frame</text:p>
+<text:p text:style-name="P9">• Σₖ ∈ ℝ³ × 3 - position covariance matrix
+(localization uncertainty)</text:p>
+<text:p text:style-name="P9">• pc^(k) = (cⱼ | 𝒯ₖ)\ⱼ=1C - semantic class
+probability distribution</text:p>
+<text:p text:style-name="P9">• 𝒪ₖ = \(tᵢ, sᵢ, wᵢ, zᵢ)\ᵢ=1nₖ -
+observation history: time, sensor ID, reliability weight,
+measurement</text:p>
+<text:p text:style-name="P9">• δₖ ∈ , dynamic, periodic\ - motion state
+classification</text:p>
+<text:p text:style-name="P9">• vₖ ∈ ℝ³ - estimated velocity vector (for
+δₖ ≠ static)</text:p>
+<text:p text:style-name="P9">• ℛₖ = \rₖl\ - set of spatial-semantic
+relations to neighboring tokens</text:p>
+<text:p text:style-name="P9">• Ωₖ - occlusion region (areas hidden by
+object k)</text:p>
+<text:p text:style-name="P9">• ρₖ ∈ [0,1] - significance coefficient for
+flight safety and planning</text:p>
+<text:p text:style-name="First_20_paragraph">Weighted multi-sensor
+fusion:</text:p>
+<text:p text:style-name="Text_20_body">Each observation in the history
+𝒪ₖ carries a reliability weight depending on the sensor source,
+detection confidence, and time elapsed since the last
+observation:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">wᵢ
+= wbase(sᵢ)· confᵢ · fdecay(t - tᵢ)</text:span></text:p>
+<text:p text:style-name="Text_20_body">where wbase(sᵢ) is the baseline
+reliability of sensor sᵢ (calibrated a priori), confᵢ ∈ [0,1] is the
+detection confidence, and fdecay is the temporal decay
+function:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">fdecay(Δ
+t) = exp(-λs · Δ t)</text:span></text:p>
+<text:p text:style-name="Text_20_body">The constant λs is a
+sensor-specific parameter: RGB cameras decay faster (λRGB &gt; λLiDAR)
+due to sensitivity to illumination changes. The position estimate and
+its covariance are determined by weighted information fusion:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Σₖ-¹
+= ∑ᵢ=1nₖ wᵢ · Σᵢ-¹, qquad μₖ = Σₖ ∑ᵢ=1nₖ wᵢ · Σᵢ-¹
+zᵢ^(k)</text:span></text:p>
+<text:p text:style-name="Text_20_body">Bayesian update of the semantic
+class:</text:p>
+<text:p text:style-name="Text_20_body">At each new observation znew, the
+token class is updated according to Bayes' rule:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">p(cⱼ
+| 𝒯ₖ, znew) ∝ p(znew | cⱼ) · p(cⱼ | 𝒯ₖ)</text:span></text:p>
+<text:p text:style-name="Text_20_body">The prior p(cⱼ | 𝒯ₖ) comes from
+the previous iteration, and the likelihood p(znew | cⱼ) is the output of
+the open-vocabulary classifier. The accumulation of observations causes
+semantic certainty to increase monotonically with nₖ.</text:p>
+<text:p text:style-name="Text_20_body">Motion state
+classification:</text:p>
+<text:p text:style-name="Text_20_body">Based on the observation history
+𝒪ₖ, the system classifies the token into one of three dynamic classes.
+Define the sequence of estimated displacements:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Δ
+μₖ^(i) = μₖ^(tᵢ) - μₖ^(tᵢ₋₁)</text:span></text:p>
+<text:p text:style-name="Text_20_body">The classification criterion is
+based on a statistical test:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">δₖ
+= begincases static &amp; if ‖Δ μₖ‖̄ &lt; εs and σ_Δ &lt; ε_σ \\
+periodic &amp; if FFT\‖Δ μₖ^(i)‖\ contains a dominant frequency f* \\
+dynamic &amp; otherwise endcases</text:span></text:p>
+<text:p text:style-name="Text_20_body">where εs and ε_σ are
+experimentally calibrated thresholds.</text:p>
+<text:p text:style-name="Text_20_body">Spatial relations between
+tokens:</text:p>
+<text:p text:style-name="Text_20_body">A pair of tokens (𝒯ₖ, 𝒯l) is
+connected by a relation rₖl describing their mutual geometric and
+semantic conditioning:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">rₖl
+= ⟨ dₖl, eₖl, ψₖl, αₖl ⟩</text:span></text:p>
+<text:p text:style-name="Text_20_body">where dₖl = ‖μₖ - μl‖ is the
+distance, eₖl is the unit direction vector, ψₖl is the ontological
+relation (e.g., above, adjacent, blocks), and αₖl is the position
+uncertainty correlation coefficient. These relations form a scene graph
+𝒢 = (𝒱, ℰ), in which vertices are tokens and edges carry relations
+rₖl.</text:p>
+<text:p text:style-name="Text_20_body">Modeling of occluded
+areas:</text:p>
+<text:p text:style-name="Text_20_body">For each token 𝒯ₖ and the current
+UAV position xUAV, the system determines the occlusion cone Ωₖ(xUAV) as
+the set of points geometrically hidden by the object:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Ωₖ(xUAV)
+= x ∈ ℝ³ : ∃ λ &gt; 1, x = xUAV + λ (μₖ - xUAV), ‖x - axisₖ‖ &lt;
+rₖ</text:span></text:p>
+<text:p text:style-name="Text_20_body">where rₖ is the estimated object
+radius. These regions enrich the uncertainty map with knowledge about
+the unknown surroundings.</text:p>
+<text:p text:style-name="Text_20_body">Flight safety significance
+coefficient:</text:p>
+<text:p text:style-name="Text_20_body">Token significance ρₖ is a
+function of the semantic class, observation history, and operational
+context:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">ρₖ
+= ρclass(cₖ*) · (1 - exp(-β_ρ · nₖ)) · fcontext(𝒯ₖ,
+xUAV)</text:span></text:p>
+<text:p text:style-name="Text_20_body">where ρclass(cₖ*) is the baseline
+class significance (e.g., ρwire = 0.95, ρtree = 0.6, ρbuilding = 0.8),
+the factor (1 - exp(-β_ρ nₖ)) reflects growing confidence with the
+number of observations, and fcontext accounts for distance and current
+flight conditions.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.12.
+Bayesian Inference about Future Scene States</text:span></text:p>
+<text:p text:style-name="Text_20_body">Implementation status. The
+current executable reference uses a strictly causal probabilistic
+occupancy and motion forecaster driven only by observations available up
+to the prediction time. It produces Bernoulli occupancy probabilities,
+flow means, uncertainty estimates, observability masks, and physically
+timed forecast horizons, including irregular or dropped samples. This
+deterministic causal baseline is preferred for initial validation
+because future-frame leakage is structurally impossible. The DBN and
+particle approximation below define the target probabilistic extension
+for multimodal future-state uncertainty and are not claimed as the
+current default backend.</text:p>
+<text:p text:style-name="Text_20_body">Predicting future scene states is
+a key element of proactive UAV navigation. The system models the scene
+as a Dynamic Bayesian Network (DBN), in which the global scene state at
+time t is defined as:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">St
+= 𝒯ₖ(t)ₖ=1K</text:span></text:p>
+<text:p text:style-name="Text_20_body">Scene state transition
+model:</text:p>
+<text:p text:style-name="Text_20_body">Assuming conditional independence
+of tokens with respect to the common environmental background, the
+transition model factorizes as:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">p(St+Δ
+t | St) = ∏ₖ=1K p(𝒯ₖ(t+Δ t) | 𝒯ₖ(t), δₖ, 𝒢t)</text:span></text:p>
+<text:p text:style-name="Text_20_body">Separate transition models are
+applied for static, dynamic, and periodic tokens:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">p(μₖ(t+Δ
+t) | μₖ(t), δₖ) = begincases 𝒩(μₖ, Σₖ + Qs Δ t) &amp; δₖ = static \4pt]
+𝒩(μₖ + vₖ Δ t, Σₖ + Qd Δ t) &amp; δₖ = dynamic \4pt] ∑ⱼ αⱼ 𝒩(μₖ^(j),
+Σₖ^(j)) &amp; δₖ = periodic endcases</text:span></text:p>
+<text:p text:style-name="Text_20_body">where Qs and Qd are process noise
+matrices for static and dynamic objects, and the periodic model is a
+Gaussian mixture with components μₖ^(j) corresponding to typical
+positions within the cycle.</text:p>
+<text:p text:style-name="Text_20_body">Particle approximation of the
+scene state distribution:</text:p>
+<text:p text:style-name="Text_20_body">Due to the nonlinearity of models
+and multimodality of distributions, the posterior probability of the
+scene state is approximated by a set of Np particles \(st^(i),
+wt^(i))\ᵢ=1Np:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">p(St
+| z₁:t) ≈ ∑ᵢ=1Np wt^(i) δ(St - st^(i))</text:span></text:p>
+<text:p text:style-name="Text_20_body">The particle filter recursion
+proceeds in three steps:</text:p>
+<text:p text:style-name="Text_20_body">Prediction:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">st₊₁^(i)
+sim p(St₊₁ | st^(i))</text:span></text:p>
+<text:p text:style-name="Text_20_body">Weight update:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">wt₊₁^(i)
+∝ wt^(i) · p(zt₊₁ | st₊₁^(i))</text:span></text:p>
+<text:p text:style-name="Text_20_body">Normalization and
+resampling:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">wt₊₁^(i)
+← fracwt₊₁^(i)∑ⱼ wt₊₁^(j), qquad resample when Neff = (1)/(∑ᵢ (wt^(i)))²
+&lt; Np / 2</text:span></text:p>
+<text:p text:style-name="Text_20_body">The predictive occupancy map at
+horizon Δ t is the particle-weighted average:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">O(x,
+t+Δ t) = ∑ᵢ=1Np wt^(i) O(x | st+Δ t^(i))</text:span></text:p>
+<text:p text:style-name="Text_20_body">Inference about occluded
+areas:</text:p>
+<text:p text:style-name="Text_20_body">For the occlusion region Ωₖ
+determined in §5.11, the occupancy probability is inferred from the
+semantic context of the occluding token and spatial environment
+structure statistics:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">p(occupied(x)
+| 𝒯ₖ) = p₀(cₖ*) + (1 - p₀(cₖ*)) exp(-(d(x, ∂Ωₖ)²)/(2σ_Ω²)), quad x ∈
+Ωₖ</text:span></text:p>
+<text:p text:style-name="Text_20_body">where p₀(cₖ) is the baseline
+probability of an obstacle existing behind an object of class cₖ (e.g.,
+p₀(building) = 0.8, p₀(tree) = 0.3), and σ_Ω controls the uncertainty
+range. This inference allows the planner to account for hazards
+invisible to sensors.</text:p>
+<text:p text:style-name="Text_20_body">Anomaly and event
+detection:</text:p>
+<text:p text:style-name="Text_20_body">The deviation of the observed
+state Stobs from the predicted state St is measured by the Mahalanobis
+distance:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">DM(t)
+= √((Stobs) - St)top ΣS^-1 (Stobs - St)</text:span></text:p>
+<text:p text:style-name="Text_20_body">Exceeding the threshold DM(t)
+&gt; Dalarm triggers heightened attention mode, in which the system
+increases processing frequency and directs sensors toward the anomaly
+area.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.13.
+Bayesian Risk Estimation and Trajectory Planning</text:span></text:p>
+<text:p text:style-name="Text_20_body">Implementation status. The
+executable reference planner currently uses deterministic finite-horizon
+beam search over admissible acceleration controls with explicit
+kinematic limits and decomposed collision-risk, energy, time,
+goal-progress, and information-value terms. This approach is more
+auditable than stochastic sampling for early confirmatory experiments
+because identical inputs generate the same candidate evaluation and
+decision trace. MPPI remains a planned backend for richer dynamics and
+will be introduced behind the same planner contract only after direct
+comparison with the deterministic reference.</text:p>
+<text:p text:style-name="Text_20_body">The S4D-TAM system integrates the
+risk map directly into the trajectory planning process, treating
+collision risk as a probabilistic field determined in real time from the
+current Bayesian state.</text:p>
+<text:p text:style-name="Text_20_body">Risk field definition:</text:p>
+<text:p text:style-name="Text_20_body">The risk field ℛ(x, t) at spatial
+point x at time t is the sum of weighted contributions from all tokens,
+including occluded areas:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">ℛ(x,
+t) = ∑ₖ=1K ρₖ · pocc(x, 𝒯ₖ, t) · pcoll(x, 𝒯ₖ)</text:span></text:p>
+<text:p text:style-name="Text_20_body">where the occupancy probability
+pocc comes from the Bayesian prediction (§5.12), and the geometric
+collision probability is modeled as the complementary CDF of the safety
+distance:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">pcoll(x,
+𝒯ₖ) = 1 - Φ(fracd(x, μₖ) - rsafe√(σₖ,r)² + σ_UAV²)</text:span></text:p>
+<text:p text:style-name="Text_20_body">where rsafe is the minimum safety
+radius, σₖ,r is the object size uncertainty, and σUAV accounts for UAV
+position uncertainty.</text:p>
+<text:p text:style-name="Text_20_body">Risk in occluded areas is
+elevated proportionally to the uncertainty of the occluded
+region:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">ℛ(x,
+t) ← ℛ(x, t) + κ_Ω · 1x ∈ ⋃ₖ Ωₖ · maxₖ p₀(cₖ*)</text:span></text:p>
+<text:p text:style-name="Text_20_body">Trajectory cost
+function:</text:p>
+<text:p text:style-name="Text_20_body">The optimal trajectory τ*
+minimizes a multi-component cost function:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">J(τ)
+= wL L(τ) + wE E(τ) + wR ∫_τ ℛ(x(t), t) dt + wU ∫_τ 𝒰(x(t), t) dt - wI
+ℐ(τ)</text:span></text:p>
+<text:p text:style-name="Text_20_body">where:</text:p>
+<text:p text:style-name="P10">• L(τ) - trajectory length</text:p>
+<text:p text:style-name="P10">• E(τ) - energy cost (dependent on UAV
+dynamics)</text:p>
+<text:p text:style-name="P10">• ℛ - integrated collision risk along the
+route</text:p>
+<text:p text:style-name="P10">• 𝒰(x,t) = σp²(x,t) + κ_Ω · 1x ∈ Ω - world
+model uncertainty</text:p>
+<text:p text:style-name="P10">• ℐ(τ) - information gain (rewarding
+active exploration of high-uncertainty zones)</text:p>
+<text:p text:style-name="First_20_paragraph">Information gain is
+expressed through the expected scene entropy reduction:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">ℐ(τ)
+= H(St) - E_τ[H(St | z₁:τ)]</text:span></text:p>
+<text:p text:style-name="Text_20_body">Bayesian trajectory optimization
+(BTO):</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">τ*
+= arg min_τ ∈ ℱ ES[J(τ | S)]</text:span></text:p>
+<text:p text:style-name="Text_20_body">For a future high-dimensional
+stochastic planning backend, direct minimization of the expected value
+may be approximated by particle trajectory sampling via MPPI (Model
+Predictive Path Integral). The following formulation defines that target
+extension; it is not required by the current deterministic reference
+planner:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">τ*
+≈ frac∑m=1M exp(-(1)/(λMPPI) J(τm)) τm∑m=1M exp(-(1)/(λMPPI)
+J(τm))</text:span></text:p>
+<text:p text:style-name="Text_20_body">where M sampled trajectories \τm\
+are generated randomly from a normal distribution around the nominal
+trajectory, and λMPPI is a temperature parameter controlling the
+exploration-exploitation tradeoff.</text:p>
+<text:p text:style-name="Text_20_body">Multi-level decision
+system:</text:p>
+<text:p text:style-name="Text_20_body">The risk field ℛ(x, t) defines
+four decision levels:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">UAV
+Mode = begincases nominal &amp; ℛ(xUAV, t) &lt; ℛsafe \\ alert &amp;
+ℛsafe ≤ ℛ &lt; ℛalert \\ avoidance &amp; ℛalert ≤ ℛ &lt; ℛavoid \\
+emergency &amp; ℛ ≥ ℛavoid endcases</text:span></text:p>
+<text:p text:style-name="Text_20_body">In alert mode, the planner
+selects avoidance trajectories with wider margins; in avoidance mode, an
+immediate maneuver is required; in emergency mode, the UAV initiates a
+safe landing or return procedure.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.14.
+Adaptive World Model with Hierarchical Resolution</text:span></text:p>
+<text:p text:style-name="Text_20_body">Implementation status. The
+current token memory already enforces bounded history and configurable
+limits on token count, map memory, and update time, together with
+lifecycle activation, sleeping, reactivation, merging, and removal
+rules. These mechanisms implement the resource-bounded principle of this
+section. The full adaptive octree and Level-of-Detail storage policy
+described below remains a planned world-model backend and will be
+validated separately before becoming the default
+representation.</text:p>
+<text:p text:style-name="Text_20_body">Uniform tokenization resolution
+is a fundamental bottleneck in systems operating under limited
+computational resources. The S4D-TAM system introduces an Adaptive World
+Occupancy Model (AWOM) based on a hierarchical octree
+structure.</text:p>
+<text:p text:style-name="Text_20_body">Hierarchical octree
+structure:</text:p>
+<text:p text:style-name="Text_20_body">The UAV's operational space is
+represented by an adaptive octree 𝒪 with node resolutions ell ∈ \ell₁,
+ell₂, …, ellL\, where ell₁ &lt; ell₂ &lt; ⋯ &lt; ellL:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">ell₁
+= 0.1 m,quad ell₂ = 0.5 m,quad ell₃ = 2 m,quad ell₄ = 10
+m</text:span></text:p>
+<text:p text:style-name="Text_20_body">Each octree node at level ellⱼ is
+compressed into a Level of Detail (LOD) token representation at level
+j:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">LODₖ
+∈ \0, 1, 2, 3\</text:span></text:p>
+<text:p text:style-name="P11">• LOD 0: token stores only (μₖ, ρₖ, cₖ*) -
+centroid, significance, and dominant class</text:p>
+<text:p text:style-name="P11">• LOD 1: LOD 0 + approximate point cloud
+(up to 64 pts) + pc^(k)</text:p>
+<text:p text:style-name="P11">• LOD 2: LOD 1 + full attention embedding
++ observation history 𝒪ₖ</text:p>
+<text:p text:style-name="P11">• LOD 3: LOD 2 + motion prediction model +
+spatial relations ℛₖ + region Ωₖ</text:p>
+<text:p text:style-name="First_20_paragraph">Resolution adaptation
+criterion:</text:p>
+<text:p text:style-name="Text_20_body">The optimal token resolution ellₖ
+is determined as a trade-off between perception quality, computational
+resources, and location significance:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">ellₖ
+= ell₁ · 2^ Lₖ, qquad Lₖ = leftlfloor Lmax · fdist(dₖ) · frisk(ρₖ)-¹ ·
+fcomp(Cavail)-¹ rightrfloor</text:span></text:p>
+<text:p text:style-name="Text_20_body">where:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">fdist(dₖ)
+= min(1, fracd(μₖ, xUAV)dmax), quad frisk(ρₖ) = ρₖ + ε_ρ, quad
+fcomp(Cavail) = fracCavailCnominal</text:span></text:p>
+<text:p text:style-name="Text_20_body">Interpretation: tokens close to
+the UAV, with high safety significance, and under conditions of good
+resource availability receive higher resolution; distant,
+low-significance tokens, or those during CPU overload, receive lower
+resolution.</text:p>
+<text:p text:style-name="Text_20_body">Dynamic processing
+priorities:</text:p>
+<text:p text:style-name="Text_20_body">Each token 𝒯ₖ has a priority
+scalar πₖ computed at each planning cycle:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">πₖ
+= α_π · ρₖ + β_π · (1)/(λmin)(Σₖ) + ε + γ_π · fage(t - tlast,k) + δ_π ·
+1_δₖ ≠ static</text:span></text:p>
+<text:p text:style-name="Text_20_body">where:</text:p>
+<text:p text:style-name="P12">• ρₖ - safety significance
+(§5.11)</text:p>
+<text:p text:style-name="P12">• λmin(Σₖ) - smallest eigenvalue of the
+covariance matrix (lower value = high confidence, lower update
+priority)</text:p>
+<text:p text:style-name="P12">• fage(t - tlast,k) = 1 - exp(-ν · (t -
+tlast,k)) - aging factor encouraging refresh of stale tokens</text:p>
+<text:p text:style-name="P12">• 1_δₖ ≠ static - priority bonus for
+dynamic and periodic tokens</text:p>
+<text:p text:style-name="First_20_paragraph">Computational budget
+allocation across layers:</text:p>
+<text:p text:style-name="Text_20_body">The total computational budget
+Ctotal is distributed among the processing pipeline layers:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Ctotal
+= Csensor + CSLAM + Ctoken + Cattn + Cpred + Cplan</text:span></text:p>
+<text:p text:style-name="Text_20_body">Constraints: ∑ᵢ Cᵢ ≤ Ctotal and
+Csensor ≥ Csensormin (minimum resources for perception safety). When
+Cavail &lt; Cnominal, reduction occurs in cascade from the layer with
+the lowest safety priority:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Cᵢ
+← max(Cᵢmin, Cᵢ · fracCavailCnominal), qquad i ∈ , pred, plan, token,
+SLAM, sensor\</text:span></text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">5.15.
+Computational Resource Management and Bottleneck
+Elimination</text:span></text:p>
+<text:p text:style-name="Text_20_body">Implementation status. Structured
+telemetry and resource budgets already expose update-time, token-count,
+memory, lifecycle, and decision events needed for profiling and replay.
+Predictive queue-overflow control, EDF-RT scheduling, guaranteed
+safety-critical CPU reservations, and the full survival-mode controller
+described below remain planned real-time systems extensions rather than
+features of the current Python reference.</text:p>
+<text:p text:style-name="Text_20_body">Intelligent resource management
+is a necessary condition for realizing all described S4D-TAM layers on
+embedded-class UAV hardware. This section formalizes the data flow
+model, bottleneck identification, and elimination mechanisms.</text:p>
+<text:p text:style-name="Text_20_body">Processing pipeline throughput
+analysis:</text:p>
+<text:p text:style-name="Text_20_body">The S4D-TAM pipeline consists of
+N sequential stages with processing times Tᵢ and queue sizes qᵢ(t).
+System throughput is limited by the bottleneck stage:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Θsys
+= (1)/(maxᵢ) Tᵢ, qquad i* = arg maxᵢ Tᵢ</text:span></text:p>
+<text:p text:style-name="Text_20_body">For the S4D-TAM pipeline with
+stages: {acquisition, SLAM front-end, tokenization, attention, Bayesian
+prediction, planner}, the nominal cycle time is:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Tcycle
+= ∑ᵢ=1⁶ Tᵢ + Tcomm</text:span></text:p>
+<text:p text:style-name="Text_20_body">where Tcomm accounts for data bus
+latencies between modules.</text:p>
+<text:p text:style-name="Text_20_body">Bottleneck prediction:</text:p>
+<text:p text:style-name="Text_20_body">The system monitors queue lengths
+qᵢ(t) and predicts overload via Bayesian methods. Modeling task arrival
+as a Poisson process with intensity λᵢ(t), the probability of queue
+overflow within horizon Δ t is:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">P(qᵢ(t+Δ
+t) &gt; qmax) = 1 - ∑n=0qmax-qᵢ(t) ((λᵢ · Δ t)n)/(n!) e^-λᵢ Δ
+t</text:span></text:p>
+<text:p text:style-name="Text_20_body">When P &gt; Palarm, the system
+proactively reduces the load of stage i by:</text:p>
+<text:p text:style-name="P13">• Reducing tokenization resolution
+(tokenization stage)</text:p>
+<text:p text:style-name="P13">• Skipping updates of low-priority tokens
+πₖ (attention stage)</text:p>
+<text:p text:style-name="P13">• Shortening the prediction horizon Δ
+tpred (prediction stage)</text:p>
+<text:p text:style-name="P13">• Simplifying the trajectory sampler
+(reducing M in MPPI, planner stage)</text:p>
+<text:p text:style-name="First_20_paragraph">Adaptive processing
+frequency:</text:p>
+<text:p text:style-name="Text_20_body">The effective processing
+frequency is dynamically scaled to available resources:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">fproc(t)
+= min(fnom, fracCavail(t)Cper)</text:span></text:p>
+<text:p text:style-name="Text_20_body">When fproc &lt; fmin, the system
+automatically simplifies the world model: it switches to survival mode
+with only a local attention map within radius rsurvival and a reactive
+planner based on VFH+ (Vector Field Histogram+).</text:p>
+<text:p text:style-name="Text_20_body">Token memory management - TTL and
+LOD-compression policy:</text:p>
+<text:p text:style-name="Text_20_body">Total token memory is bounded by
+the budget:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Mtokens
+= ∑ₖ=1K m(LODₖ) ≤ Mbudget</text:span></text:p>
+<text:p text:style-name="Text_20_body">where m(LODⱼ) is the token size
+at level j (e.g., m(0) = 64 B, m(1) = 512 B, m(2) = 4 KB, m(3) = 32 KB).
+The memory management policy combines three mechanisms:</text:p>
+<text:p text:style-name="Text_20_body">TTL (Time-To-Live): a token is
+deactivated if t - tlast,k &gt; TTTL and ρₖ &lt; ρprune.</text:p>
+<text:p text:style-name="Text_20_body">Merging: static tokens at
+distance dₖl &lt; ellₖ with KL-divergence DKL(pc^(k) ‖ pc^(l)) &lt; εKL
+are merged into a common token:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">μₖl
+= (nₖ μₖ + nl μl)/(nₖ + nl), qquad Σₖl-¹ = Σₖ-¹ +
+Σl-¹</text:span></text:p>
+<text:p text:style-name="Text_20_body">LOD-compression: tokens beyond
+the active processing range are degraded to a lower LOD, freeing
+operational memory.</text:p>
+<text:p text:style-name="Text_20_body">Task scheduling with safety
+guarantee:</text:p>
+<text:p text:style-name="Text_20_body">The task scheduler allocates CPU
+time to S4D-TAM system modules according to an EDF-RT (Earliest Deadline
+First - Real-Time) policy extended with a safety coefficient:</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T2">Priorityᵢ(t)
+= fracρᵢmaxTdeadline,i(t) - t + κsafety · 1ᵢ ∈
+𝒞_safety</text:span></text:p>
+<text:p text:style-name="Text_20_body">where ρᵢmax = maxₖ ρₖ in the task
+queue of stage i, Tdeadline,i(t) is the absolute completion deadline,
+and 𝒞safety is the set of safety-critical stages (sensor acquisition,
+SLAM front-end, collision detection). Safety-critical tasks 𝒞safety have
+a guaranteed minimum CPU time regardless of system load, ensuring
+minimally safe operation even under full resource saturation.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">6.
+Research Hypotheses</text:span></text:p>
+<text:p text:style-name="Text_20_body">The confirmatory mechanism study
+uses seven preregistered hypotheses. Each hypothesis compares the full
+S4D-TAM model with a variant that disables exactly one mechanism while
+data, seeds, preprocessing, optimization budget, and all other settings
+remain fixed. External systems are deliberately excluded from this
+causal ablation family.</text:p>
+<text:p text:style-name="Text_20_body">H1: Semantics improve navigation
+in scenarios containing dynamic objects. The primary endpoint is mission
+success; collisions per kilometer and semantic mIoU are secondary
+outcomes.</text:p>
+<text:p text:style-name="Text_20_body">H2: Temporal state improves 1 s
+future-state prediction. The primary endpoint is forecast occupancy IoU
+at 1 s; flow EPE and temporal flip rate are secondary outcomes.</text:p>
+<text:p text:style-name="Text_20_body">H3: Calibrated uncertainty
+reduces navigation risk. The primary endpoint is collisions per
+kilometer; ECE, NLL, and near misses are secondary outcomes.</text:p>
+<text:p text:style-name="Text_20_body">H4: Topological support increases
+mission success. Path efficiency and ATE RMSE are secondary
+outcomes.</text:p>
+<text:p text:style-name="Text_20_body">H5: Reference-map support reduces
+localization error. The primary endpoint is ATE RMSE; RPE and final
+drift percentage are secondary outcomes.</text:p>
+<text:p text:style-name="Text_20_body">H6: Predictive risk modeling
+reduces collisions. The primary endpoint is collisions per kilometer;
+near misses and minimum clearance are secondary outcomes.</text:p>
+<text:p text:style-name="Text_20_body">H7: Token lifecycle management
+reduces computational cost without materially degrading navigation
+quality. Confirmation requires both lower p95 latency and non-inferior
+mission success with a preregistered margin of 2 percentage points; map
+bytes and peak RSS are secondary outcomes.</text:p>
+<text:p text:style-name="Text_20_body">H1-H6 are superiority hypotheses
+in the preregistered direction. H7 combines efficiency superiority with
+mission-success non-inferiority. The seven confirmatory decisions form
+one family and use the Holm procedure defined in Section 7.4.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">7.
+Proposed Experimental Validation</text:span></text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">7.1.
+Datasets</text:span></text:p>
+<text:p text:style-name="Text_20_body">The validation framework targets
+TartanAir, Blackbird, MARSIM, and AeroVerse, each converted to the
+common SequenceData contract with immutable source version, license
+record, coordinate convention, calibration metadata, and SHA-256
+manifest. The cohort identifier frozen-2026-01 denotes the study cohort
+rather than a vendor release and must resolve to exact source versions
+and file hashes.</text:p>
+<text:p text:style-name="Text_20_body">Data are split at the environment
+or flight level, never by adjacent frames. The train split is the only
+source of learned weight updates; calibration is reserved for
+thresholds, normalization, early stopping, and uncertainty calibration;
+test remains inaccessible until code, artifacts, and analysis are
+frozen.</text:p>
+<text:p text:style-name="Text_20_body">The preregistered offline
+mechanism study uses 20 preselected test sequences per dataset, yielding
+80 paired sequence-level units. Systems validation additionally defines
+30 paired SIL scenarios with five seeds, 20 HIL scenarios with five
+seeds, and 20 paired controlled real-flight missions per variant when
+the safety gate remains open.</text:p>
+<text:p text:style-name="Text_20_body">A dedicated UAV dataset remains
+desirable for synchronized RGB, thermal, IMU, GNSS, point cloud,
+elevation/reference map, static and dynamic labels, visibility or
+observability masks, and controlled sensor-degradation scenarios.
+Metrics that require unavailable ground truth are reported as
+unavailable rather than silently omitted or imputed.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">7.2.
+Two-Level Comparison Design</text:span></text:p>
+<text:p text:style-name="Text_20_body">The evaluation is split into two
+non-interchangeable levels. Both levels use common dataset and metric
+contracts where applicable, but they answer different scientific
+questions and produce separate statistical reports.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">7.2.1.
+External System Comparison</text:span></text:p>
+<text:p text:style-name="Text_20_body">The external comparison asks
+whether the complete S4D-TAM system is competitive with independently
+implemented navigation and SLAM systems under the same data, hardware
+policy, sensor availability, and evaluator definitions.</text:p>
+<text:p text:style-name="Text_20_body">The mandatory primary baseline
+set comprises ORB-SLAM3, VINS-Mono, FAST-LIO2, and LIO-SAM. Each
+baseline is pinned to an upstream revision and fixed environment or
+container, calibration, sensor-topic mapping, loop-closure policy,
+warm-up policy, and hardware configuration. Results enter the benchmark
+only through the common AlgorithmResult artifact schema.</text:p>
+<text:p text:style-name="Text_20_body">Additional external systems may
+be included only when their sensing assumptions are compatible, their
+exact implementation can be reproduced, and their output can be
+normalized without method-specific post-processing. Such additions must
+be frozen before the external study is executed.</text:p>
+<text:p text:style-name="Text_20_body">This level measures
+complete-system competitiveness. A difference relative to an external
+baseline cannot be interpreted as the causal effect of an individual
+S4D-TAM component.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">7.2.2.
+Internal Mechanism Study</text:span></text:p>
+<text:p text:style-name="Text_20_body">The internal comparison tests
+mechanism contribution using the full system and seven single-component
+ablations: H1_no_semantics, H2_no_temporal_state,
+H3_no_calibrated_uncertainty, H4_no_topology, H5_no_reference_map,
+H6_no_risk_prediction, and H7_no_token_lifecycle.</text:p>
+<text:p text:style-name="Text_20_body">Each variant differs from full by
+exactly one switch and uses its own frozen trained artifact. External
+systems never appear in this matrix. This separation prevents
+confounding complete-system identity with the causal effect of removing
+one S4D-TAM mechanism.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">7.3.
+Metrics</text:span></text:p>
+<text:p text:style-name="Text_20_body">Primary endpoints are
+deliberately compact and preregistered: localization uses ATE RMSE after
+SE(3) alignment without scale; forecasting uses occupancy IoU at 1 s
+and, for broader characterization, 3 s; safety uses mission success and
+collisions per kilometer; efficiency uses p95 latency and persistent
+map-memory footprint.</text:p>
+<text:p text:style-name="Text_20_body">Localization and SLAM secondary
+metrics include RPE translation RMSE, final drift in meters and
+percentage of reference path length, and rotation RPE when orientation
+ground truth is available. Relocalization success rate, time to
+relocalize, and post-relocalization pose error are reported when the
+dataset supports those events.</text:p>
+<text:p text:style-name="Text_20_body">Semantic metrics include mIoU and
+macro F1. Forecasting metrics include per-horizon occupancy IoU/F1, flow
+EPE, Brier score, NLL, and ECE. Pose uncertainty is evaluated by NEES,
+95% coverage, and NLL where covariance output is available. Risk
+prediction may additionally report AUROC, false-alarm rate, and miss
+rate.</text:p>
+<text:p text:style-name="Text_20_body">Navigation metrics include
+mission success, collisions per kilometer, near misses, minimum
+clearance, and path efficiency. Efficiency metrics include latency p95,
+map bytes, peak RSS, CPU time, and implementation-specific telemetry
+such as processed-token counts when consistently available.</text:p>
+<text:p text:style-name="Text_20_body">Scale error, embedding quality,
+spatial-relation accuracy, emergency replanning counts, FPS, and energy
+consumption may be reported as secondary or exploratory metrics when
+their ground truth and measurement procedure are explicitly defined.
+They do not become confirmatory endpoints merely because an
+implementation emits them.</text:p>
+<text:p text:style-name="Text_20_body">A missing metric caused by absent
+ground truth or absent algorithm output is recorded as unavailable.
+Algorithm failure, timeout, abort, or collision is not treated as a
+missing observation and remains visible in the safety analysis.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">7.4.
+Confirmatory Protocol and Statistical Analysis</text:span></text:p>
+<text:p text:style-name="Text_20_body">The preregistered H1-H7 study
+uses sequence or mission level inference rather than treating individual
+frames as independent samples. Continuous outcomes are summarized with
+paired mean differences and 95% BCa bootstrap confidence intervals using
+10,000 resamples. Mission success is modeled as a paired scenario-level
+probability outcome, while distance-normalized event counts use Poisson
+or negative-binomial modeling with log distance as an offset according
+to the preregistered overdispersion rule.</text:p>
+<text:p text:style-name="Text_20_body">The seven H1-H7 confirmatory
+decisions form one family and are corrected with the sequential Holm
+procedure at family-wise alpha = 0.05. H1-H6 require the corrected
+result and confidence interval to support the predicted superiority
+direction. H7 additionally requires mission-success non-inferiority
+within 2 percentage points while improving p95 latency.</text:p>
+<text:p text:style-name="Text_20_body">No missing technical result is
+imputed. Aborts and algorithm failures remain in the denominator for
+safety outcomes; complete-case reporting is accompanied by the
+preregistered worst-case sensitivity analysis. Exclusions are limited to
+integrity failures, excessive missing timestamps, independently
+confirmed sensor faults, or operational constraints defined before
+result inspection.</text:p>
+<text:p text:style-name="Text_20_body">The external system comparison is
+reported separately from this H1-H7 inferential family. It uses the same
+frozen datasets and common evaluators, but its effect estimates describe
+differences between complete systems rather than component-level causal
+effects.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">8.
+Discussion</text:span></text:p>
+<text:p text:style-name="Text_20_body">The proposed S4D-TAM system
+represents an attempt to transition from a classical geometric map to a
+predictive spatial memory of the UAV. The key advantage is amortized
+perception - the cost of image analysis is incurred once, while the
+result remains available in spatial memory across many subsequent
+planning cycles [1]. This approach may substantially reduce
+computational redundancy in systems where the same images are repeatedly
+analyzed by different modules [12], [40].</text:p>
+<text:p text:style-name="Text_20_body">The hierarchical token
+representation allows storing large, regular surfaces at low resolution,
+while edges, obstacles, and dynamic objects are retained at higher
+resolution [5], [6], [7], [37], [38]. This is consistent with the
+direction set by Superpoint Transformer, Octree-Graph, and other
+architectures demonstrating that aggregating points into higher-level
+structures can substantially reduce representation complexity.</text:p>
+<text:p text:style-name="Text_20_body">The spatiotemporal attention
+mechanism enables modeling of long-range relations between tokens while
+maintaining computational efficiency by restricting attention to local
+neighborhoods and global landmarks [8], [12], [14], [16].
+Token-uncertainty-weighted attention limits the influence of uncertain
+observations on world model updates, which may improve system stability
+under conditions of partial observability [1], [11].</text:p>
+<text:p text:style-name="Text_20_body">Occupancy and risk forecasting in
+partially observable areas constitutes the most interesting element of
+the system - the transition from detection to prediction [1], [8], [10],
+[14], [17], [21]. The system does not claim to have recognized an object
+it has not seen, but determines the probability of risk existing in
+partially observable space based on geometric context, semantics, and
+observation history. This approach may enable planning that is more
+defensive and risk-aware than classical methods based solely on the
+current sensor field of view.</text:p>
+<text:p text:style-name="Text_20_body">Reference map alignment increases
+localization robustness to periodic GNSS loss or inconsistency [4],
+[19], [20]. The difference between the current map and the reference map
+can indicate not only a localization error, but also an environmental
+change, the appearance of a new object, or the unreliability of the
+current GNSS measurement [1]. The three-step alignment procedure (global
+descriptors, landmarks, local geometric optimization) enables efficient
+map alignment at varying density and resolution.</text:p>
+<text:p text:style-name="Text_20_body">Active perception maximizing
+expected uncertainty reduction relative to energy and computational cost
+may substantially improve system efficiency under resource constraints
+[1], [3], [6]. The IR camera may be activated more frequently in low
+illumination or in regions where prior data indicate the possible
+presence of a thermal object, while the RGB camera need not be processed
+by the full network at every frame.</text:p>
+<text:p text:style-name="Text_20_body">The limitations of the proposed
+approach include:</text:p>
+<text:p text:style-name="P14">1. Implementation complexity - the system
+requires integration of multiple components (SLAM, segmentation,
+transformer, prediction, planning) and their efficient
+synchronization.</text:p>
+<text:p text:style-name="P14">2. Computational requirements - despite
+amortized perception, the spatiotemporal transformer and 4D occupancy
+forecasting may require significant computational resources.</text:p>
+<text:p text:style-name="P14">3. Reference map quality - the
+effectiveness of reference map alignment depends on the availability and
+currency of elevation maps or previous flights.</text:p>
+<text:p text:style-name="P14">4. Uncertainty calibration - determining
+calibrated token uncertainty and risk probability requires careful
+training and validation.</text:p>
+<text:p text:style-name="P14">5. Generalization - the model may require
+fine-tuning for new environments and operational conditions.</text:p>
+<text:p text:style-name="First_20_paragraph">Future work should focus on
+completing and training the learned S4D-TAM model, validating
+public-dataset converters and pinned external baselines, executing the
+preregistered H1-H7 mechanism study, and progressing from offline
+evaluation through SIL, HIL, and controlled real-flight validation.
+Additional engineering work includes the probabilistic DBN/particle
+backend, MPPI planning, adaptive octree/LOD storage, active perception,
+and safety-aware real-time scheduling.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">9.
+Conclusions and Future Research Directions</text:span></text:p>
+<text:p text:style-name="Text_20_body">This paper has proposed S4D-TAM
+(Semantic 4D Token Attention Map) - a novel navigation system
+architecture for unmanned aerial vehicles operating in GNSS-degraded
+environments. The key novelty is the introduction of a persistent memory
+map composed of semantic 4D tokens, which serves as a unified
+representation for localization, environment understanding, future scene
+state prediction, risk estimation, and UAV trajectory planning.</text:p>
+<text:p text:style-name="Text_20_body">The main conceptual contributions
+include:</text:p>
+<text:p text:style-name="P15">1. Definition of the 4D token combining
+geometry, semantics, time, uncertainty, and observation history in a
+single compact representation.</text:p>
+<text:p text:style-name="P15">2. Hierarchical system architecture
+integrating sensor fusion, SLAM, tokenization, spatiotemporal
+transformer, object memory, reference map alignment, occupancy and risk
+forecasting, trajectory planning, and active perception.</text:p>
+<text:p text:style-name="P15">3. Spatiotemporal attention mechanism
+accounting for spatial, temporal, and token uncertainty
+relations.</text:p>
+<text:p text:style-name="P15">4. Risk forecasting in partially
+observable areas based on geometric context, semantics, and observation
+history.</text:p>
+<text:p text:style-name="P15">5. Trajectory planning minimizing length,
+energy cost, collision probability, predicted environmental risk, and
+the cost arising from map uncertainty.</text:p>
+<text:p text:style-name="P15">6. Active perception maximizing expected
+uncertainty reduction relative to energy and computational
+cost.</text:p>
+<text:p text:style-name="First_20_paragraph">Seven preregistered
+mechanism hypotheses have been formulated for semantics, temporal state,
+calibrated uncertainty, topology, reference-map support, predictive
+risk, and token lifecycle. Their causal full-vs-H1-H7 study is
+explicitly separated from the external system comparison against
+ORB-SLAM3, VINS-Mono, FAST-LIO2, and LIO-SAM.</text:p>
+<text:p text:style-name="Text_20_body">Future research directions
+include:</text:p>
+<text:p text:style-name="P16">1. Completion and training of the learned
+S4D-TAM model followed by two-level validation: external system
+comparison on TartanAir, Blackbird, MARSIM, and AeroVerse, and the
+preregistered internal full-vs-H1-H7 mechanism study.</text:p>
+<text:p text:style-name="P16">2. Computational efficiency optimization
+through quantization, pruning, knowledge distillation, and dedicated
+hardware accelerators.</text:p>
+<text:p text:style-name="P16">3. Extension with additional sensor
+modalities (radar, ultrasound, magnetometers) and operational scenarios
+(multi-robot coordination, long-term missions, dynamic
+environments).</text:p>
+<text:p text:style-name="P16">4. Integration with language models for
+natural-language-guided navigation and high-level task
+understanding.</text:p>
+<text:p text:style-name="P16">5. Ablation studies of individual system
+components to identify key factors influencing performance.</text:p>
+<text:p text:style-name="P16">6. Validation under real operational
+conditions on UAV platforms in GNSS-degraded environments.</text:p>
+<text:p text:style-name="First_20_paragraph">The proposed S4D-TAM system
+represents a step toward autonomous UAVs capable of navigating in
+complex, partially observable environments with limited GNSS signal
+availability, by exploiting persistent predictive spatial memory in
+place of repeated analysis of raw sensor streams.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">Acknowledgements</text:span></text:p>
+<text:p text:style-name="Text_20_body">The author thanks the reviewers
+for their valuable comments and the Department of Computer Science and
+Automation of Rzeszów University of Technology for research
+support.</text:p>
+<text:p text:style-name="Text_20_body"><text:span text:style-name="T1">References</text:span></text:p>
+<text:p text:style-name="P17"><text:span text:style-name="T2">Editorial
+note: Numbers [12], [14], [16], [18] contain numbering conflicts (the
+same number used for two different works in different article sections)
+- these require manual confirmation of full bibliographic data in the
+final version.</text:span></text:p>
+<text:p text:style-name="First_20_paragraph">[2] Liu X., van der Lei J.,
+Prabhu A., Tao Y., Spasojević I., &quot;SlideSLAM: Sparse, Lightweight,
+Decentralized Metric-Semantic SLAM for Multi-Robot Navigation,&quot;
+arXiv:2406.17249, 2024.</text:p>
+<text:p text:style-name="Text_20_body">[3] Tao Y., Liu X., Spasojević
+I., Agarwal S., Kumar V., &quot;3D Active Metric-Semantic SLAM,&quot;
+IEEE Robot. Autom. Lett., vol. 9, 2024. DOI:
+10.1109/lra.2024.3363542.</text:p>
+<text:p text:style-name="Text_20_body">[4] Liu X., Nardari G.V., Ojeda
+F.C., Tao Y., Zhou A., Donnelly T., Qu C., Chen S.W., Taylor C.J., Kumar
+V., &quot;Large-Scale Autonomous Flight With Real-Time Semantic SLAM
+Under Dense Forest Canopy,&quot; IEEE Robot. Autom. Lett., vol. 7, no.
+2, 2022. DOI: 10.1109/lra.2022.3154047.</text:p>
+<text:p text:style-name="Text_20_body">[5] Li B., Cai Z., Wu C., Lin P.,
+Zhang Y., Rezatofighi H., &quot;Hi-SLAM: Scaling-up Semantics in SLAM
+with a Hierarchically Categorical Gaussian Splatting,&quot;
+arXiv:2409.12518, 2024.</text:p>
+<text:p text:style-name="Text_20_body">[6] Tian X., Deng Y., Tang Y.,
+Wang J., Dang R., &quot;SAME: Ground-Air Collaborative Semantic Active
+Mapping and Exploration,&quot; Proc. 2024 IEEE Int. Conf. Unmanned
+Systems (ICUS), 2024. DOI: 10.1109/icus61736.2024.10839908.</text:p>
+<text:p text:style-name="Text_20_body">[7] Xiang Z., Su J.,
+&quot;Towards Customizable Robotic Disinfection with Structure-Aware
+Semantic Mapping,&quot; IEEE Access, vol. 9, 2021. DOI:
+10.1109/ACCESS.2021.3062043.</text:p>
+<text:p text:style-name="Text_20_body">[8] Yu Y., Mei J., Jiang X., Yang
+H., Xu Z., Luo Y., Wang Y., Yang Z., Li Z., &quot;Drive-OccWorld:
+Vision-Centric 4D Occupancy Forecasting and Planning via World
+Models,&quot; Proc. AAAI Conf. Artificial Intelligence, vol. 39, no. 9,
+2025. DOI: 10.1609/aaai.v39i9.33010.</text:p>
+<text:p text:style-name="Text_20_body">[9] Feng T., Wang W., Yang Y.,
+&quot;A Survey of World Models for Autonomous Driving,&quot;
+arXiv:2501.11260, 2025.</text:p>
+<text:p text:style-name="Text_20_body">[10] Mei J., Yu Y., Jiang X.,
+Wang S., Li Z., &quot;IR-WM: Vision-Centric 4D Occupancy Forecasting and
+Planning via Implicit Residual World Models,&quot; arXiv:2510.16729,
+2025.</text:p>
+<text:p text:style-name="Text_20_body">[11] Cai Z., Rezatofighi H.,
+Haffari G., Baktashmotlagh M., &quot;NEUSIS: A Compositional
+Neuro-Symbolic Framework for Autonomous Perception, Reasoning, and
+Planning in Complex UAV Search Missions,&quot; arXiv:2409.10196,
+2024.</text:p>
+<text:p text:style-name="Text_20_body">[12] Rosen D.M., Carlone L.,
+&quot;Scene Representations for Robotic Spatial Perception,&quot; Annual
+Review of Control, Robotics, and Autonomous Systems, 2024. DOI:
+10.1146/annurev-control-040423-030709. [Conflict: same number used for
+S2TPVFormer (Silva et al.) in §2.2 - to be verified.]</text:p>
+<text:p text:style-name="Text_20_body">[13] Zhao J., Li C., Guo W., Zhao
+J., &quot;Learning Visual Representation for Autonomous Drone Navigation
+via a Contrastive World Model,&quot; IEEE Trans. Artificial
+Intelligence, vol. 4, no. 6, 2023. DOI:
+10.1109/tai.2023.3283488.</text:p>
+<text:p text:style-name="Text_20_body">[14] Chen M., Zhao D., Xu S.,
+Chen Y., Xu C., Liu J., &quot;DriveWorld: 4D Pre-Trained Scene
+Understanding via World Models for Autonomous Driving,&quot;
+arXiv:2405.04390, 2024. [Conflict: same number used for I2-World in §2.3
+- to be verified.]</text:p>
+<text:p text:style-name="Text_20_body">[15] Chen D., Han W., Fang J.,
+Shen J., &quot;AdaOcc: Adaptive Forward View Transformation and Flow
+Modeling for 3D Occupancy and Flow Prediction,&quot; arXiv preprint,
+2024.</text:p>
+<text:p text:style-name="Text_20_body">[16] Liao Z., Zhong F., Zhang Z.,
+Fu Y., Sun J., Li X., Cheng X., &quot;I2-World: Intra-Inter Tokenization
+for Efficient Dynamic 4D Scene Forecasting,&quot; arXiv:2507.09144,
+2025. [Conflict: same number used for PCPNet in §2.2 - to be
+verified.]</text:p>
+<text:p text:style-name="Text_20_body">[17] Zheng W., Zhou B., Liu Y.,
+Wang J., &quot;GaussianAD: Gaussian-Centric End-to-End Autonomous
+Driving,&quot; arXiv:2412.10371, 2024.</text:p>
+<text:p text:style-name="Text_20_body">[18] Zheng W., Chen Y., Huang Z.,
+Zhong Y., Lei W., Sun Z., Zhan J., Liu Y., &quot;OccWorld: Learning a 3D
+Occupancy World Model for Autonomous Driving,&quot; Proc. ECCV, Springer
+LNCS, 2024. [Conflict: same number used for DriveWorld in §2.4 - to be
+verified.]</text:p>
+<text:p text:style-name="Text_20_body">[19] Yue W., Nie Y., Song X.,
+Zhao Z., Wang J., Shang Z., &quot;Air-Ground Collaborative Navigation
+for UAVs in Complex Urban Environments,&quot; Drones, vol. 9, no. 6,
+2025. DOI: 10.3390/drones9060442.</text:p>
+<text:p text:style-name="Text_20_body">[20] Radwan N., Olivares-Mendez
+M.A., Voos H., Burgard W., &quot;UAV-Assisted Visual SLAM with Scene
+Graphs for Outdoor Navigation,&quot; Proc. 2024 Int. Conf. Unmanned
+Aircraft Systems (ICUAS), 2024. DOI:
+10.1109/icuas60882.2024.10556948.</text:p>
+<text:p text:style-name="Text_20_body">[21] Liu H., Zhao R., Ma Y., Liu
+X., Fu T., Zhao Z., Wang S., Chen S., Ye M., Chen X.,
+&quot;Hybrid-Prediction Integrated Planning for Autonomous
+Driving,&quot; IEEE Trans. Pattern Anal. Mach. Intell., 2025. DOI:
+10.1109/tpami.2025.3526936.</text:p>
+<text:p text:style-name="Text_20_body">[22] Wang L., Zheng W., Huang Z.,
+Chen Y., Chen B., Li H., &quot;OccSora: 4D Occupancy Generation Models
+as World Simulators for Autonomous Driving,&quot; arXiv preprint,
+2024.</text:p>
+<text:p text:style-name="Text_20_body">[23] Ma J., Chen X., Deschaud
+J.E., Marcotegui B., Goulette F., Hu X., &quot;Cam4DOcc: Benchmark for
+Camera-Only 4D Occupancy Forecasting in Autonomous Driving Scenes,&quot;
+arXiv preprint, 2023.</text:p>
+<text:p text:style-name="Text_20_body">[24] Wang J., Gao P., Zhou X.,
+Guo Z., &quot;TartanAir: A Dataset to Push the Limits of Visual
+SLAM,&quot; Proc. IEEE/RSJ Int. Conf. Intelligent Robots and Systems
+(IROS), 2020.</text:p>
+<text:p text:style-name="Text_20_body">[25] Chen J., Wei Z., Ruan K.,
+Yang J., Zhang C., &quot;Risk Occupancy: A New and Efficient Paradigm
+through Vehicle-Road-Cloud Collaboration,&quot; arXiv:2408.07367,
+2024.</text:p>
+<text:p text:style-name="Text_20_body">[26] Nieuwenhuisen M., Droeschel
+D., Stückler J., Behnke S., &quot;Autonomous Navigation for Micro Aerial
+Vehicles in Complex GNSS-Denied Environments,&quot; Proc. IEEE Int.
+Symp. Safety, Security, and Rescue Robotics (SSRR), 2015. DOI:
+10.1109/SSRR.2015.7443012.</text:p>
+<text:p text:style-name="Text_20_body">[27] Hu C., Liu N., Chen X., Lyu
+C., &quot;SGS-SLAM: Semantic Gaussian Splatting for Neural Dense
+SLAM,&quot; arXiv:2402.03246, 2024.</text:p>
+<text:p text:style-name="Text_20_body">[28] Yugay V., Wang Y., Pollefeys
+M., Rezatofighi H., &quot;GaussianSLAM: Photo-realistic Dense SLAM with
+Gaussian Splatting,&quot; arXiv:2312.10070, 2023. [to be verified -
+cited in text as GS4; check association with this work.]</text:p>
+<text:p text:style-name="Text_20_body">[29] Zou Y., He Z., Xu B., Cheng
+H., &quot;SemGauss-SLAM: Dense Semantic Gaussian Splatting SLAM,&quot;
+arXiv:2403.07494, 2024.</text:p>
+<text:p text:style-name="Text_20_body">[30] Huang H., Li L., Cheng H.,
+Yeung S.K., &quot;Photo-SLAM: Real-time Simultaneous Localization And
+Photorealistic Mapping for Monocular, Stereo, and RGB-D Cameras,&quot;
+Proc. IEEE/CVF CVPR, 2024. [to be verified - cited in text as SAP-SLAM;
+check association.]</text:p>
+<text:p text:style-name="Text_20_body">[31] Placed J.A., Strader J.,
+Carrillo H., Atanasov N., Indelman V., Carlone L., Castellanos J.A.,
+&quot;A Survey on Active Simultaneous Localization and Mapping: State of
+the Art and New Frontiers,&quot; arXiv:2209.06428, 2022.</text:p>
+<text:p text:style-name="Text_20_body">[32] Wu G., Yi T., Fang J., Xie
+L., Zhang C., Wei W., Liu W., Tian Q., &quot;4D Gaussian Splatting for
+Real-Time Dynamic Scene Rendering,&quot; Proc. IEEE/CVF CVPR, 2024. [to
+be verified - cited in text as DynaGS-SLAM; check association.]</text:p>
+<text:p text:style-name="Text_20_body">[33] Pan X., Shao W., Zhu Z.,
+Wang Q., Wang T., &quot;GSFF-SLAM: 3D Semantic Gaussian Splatting for
+Feature-Field SLAM,&quot; arXiv preprint, 2024. [to be
+verified]</text:p>
+<text:p text:style-name="Text_20_body">[34] Haghighi S., Huang J., Kim
+B., &quot;OVO-SLAM: Open Vocabulary Online Simultaneous Localization and
+Mapping,&quot; arXiv preprint, 2024. [to be verified]</text:p>
+<text:p text:style-name="Text_20_body">[35] Li S., Xue T., Li J., He B.,
+Wu H., &quot;MSGS-SLAM: Multi-Session Gaussian Splatting SLAM,&quot;
+arXiv preprint, 2024. [to be verified]</text:p>
+<text:p text:style-name="Text_20_body">[36] Li X., Yuan C., Zheng L.,
+Xie J., Zhang J., &quot;NIS-SLAM: Neural Implicit Semantic RGB-D SLAM
+for 3D Consistent Scene Understanding,&quot; arXiv preprint, 2024. [to
+be verified]</text:p>
+<text:p text:style-name="Text_20_body">[37] Zhang C., Chen Y., Jian M.,
+Hu G., &quot;You Only Group Once: Efficient Point-Cloud Processing with
+Token Representation and Relation Inference Module,&quot; Proc. IEEE/RSJ
+Int. Conf. Intelligent Robots and Systems (IROS), 2021.</text:p>
+<text:p text:style-name="Text_20_body">[38] He M., Guo Y., Ma L., Chen
+L., Jiang S., &quot;Efficient Point Transformer for Large-Scale 3D Scene
+Understanding,&quot; arXiv:2405.15827, 2024.</text:p>
+<text:p text:style-name="Text_20_body">[39] Guo M.H., Cai J.X., Liu
+Z.N., Mu T.J., Martin R.R., Hu S.M., &quot;PCT: Point Cloud
+Transformer,&quot; Comput. Visual Media, vol. 7, no. 2, pp. 187–199,
+2021. DOI: 10.1007/s41095-021-0229-5.</text:p>
+<text:p text:style-name="Text_20_body">[40] Ding Z., Yang B., Fan X.,
+Zhou Z., Fan Z., Zhou B., &quot;A Survey of World Models for Embodied
+Agents,&quot; arXiv:2510.16732, 2025.</text:p>
+<text:p text:style-name="Text_20_body">[41] Tordesillas J., Lopez B.T.,
+How J.P., &quot;FASTER: Fast and Safe Trajectory Planner for Navigation
+in Unknown Environments,&quot; IEEE Trans. Robot., vol. 38, no. 2, pp.
+922–938, 2022. DOI: 10.1109/TRO.2021.3080623. [to be verified - cited in
+context of risk-aware trajectory planning.]</text:p>
+<text:p text:style-name="Text_20_body">[42] Ji W., Li J., Bi Q., Liu W.,
+Cheng L., &quot;Point Attention Network for Semantic Segmentation of 3D
+Point Clouds,&quot; Pattern Recognition, vol. 107, 2020. [to be verified
+- cited in text as SAT3D; check association.]</text:p>
+<text:p text:style-name="Text_20_body">[43] Yu X., Tang L., Rao Y.,
+Huang T., Zhou J., Lu J., &quot;Point-BERT: Pre-Training 3D Point Cloud
+Transformers with Masked Point Modeling,&quot; Proc. IEEE/CVF CVPR,
+2022. DOI: 10.1109/CVPR52688.2022.01111.</text:p>
+<text:p text:style-name="Text_20_body">[44] Kong F., Liu Z., Zhang F.,
+&quot;MARSIM: A Light-weight Point-realistic Simulator for LiDAR-based
+UAVs,&quot; IEEE Robot. Autom. Lett., vol. 8, no. 5, 2023. DOI:
+10.1109/LRA.2023.3264163.</text:p>
+<text:p text:style-name="Text_20_body">[45] Dai Y., Xu H., Ni S., Yin
+X., Chen B., &quot;NEDS-SLAM: A Novel Neural Explicit Dense Semantic
+SLAM Framework Using 3D Gaussian Splatting,&quot; IEEE Robot. Autom.
+Lett., 2024. [to be verified]</text:p>
+<text:p text:style-name="Text_20_body">[46] Keetha N., Karhade J.,
+Jatavallabhula K.M., Yang G., Scherer S., Ramanan D., Marques J.,
+&quot;SplaTAM: Splat, Track &amp; Map 3D Gaussians for Dense RGB-D
+SLAM,&quot; Proc. IEEE/CVF CVPR, 2024. [to be verified - cited in
+context of Hi-SLAM [5]; check association.]</text:p>
+<text:p text:style-name="Text_20_body">[47] Delmerico J., Scaramuzza D.,
+&quot;A Benchmark Comparison of Monocular Visual-Inertial Odometry
+Algorithms for Flying Robots,&quot; Proc. IEEE Int. Conf. Robotics and
+Automation (ICRA), 2018. DOI: 10.1109/ICRA.2018.8460664. [to be
+verified]</text:p>
+<text:p text:style-name="Text_20_body">[48] Qin T., Li P., Shen S.,
+&quot;VINS-Mono: A Robust and Versatile Monocular Visual-Inertial State
+Estimator,&quot; IEEE Trans. Robot., vol. 34, no. 4, pp. 1004–1020,
+2018. DOI: 10.1109/TRO.2018.2853729.</text:p>
+<text:p text:style-name="Text_20_body">[49] Alcantarilla P.F., Nuevo J.,
+Bartoli A., &quot;Fast Explicit Diffusion for Accelerated Features in
+Nonlinear Scale Spaces,&quot; Proc. British Machine Vision Conference
+(BMVC), 2013. [to be verified - cited in context of KAZE feature-based
+SLAM.]</text:p>
+<text:p text:style-name="Text_20_body">[50] Shan T., Englot B., Meyers
+D., Wang W., Ratti C., Rus D., &quot;LIO-SAM: Tightly-Coupled Lidar
+Inertial Odometry via Smoothing and Mapping,&quot; Proc. IEEE/RSJ IROS,
+2020. DOI: 10.1109/IROS45743.2020.9341176. [to be verified]</text:p>
+<text:p text:style-name="Text_20_body">[51] Zhang J., Singh S.,
+&quot;LOAM: Lidar Odometry and Mapping in Real-time,&quot; Proc.
+Robotics: Science and Systems (RSS), 2014. [to be verified]</text:p>
+<text:p text:style-name="Text_20_body">[52] Xu W., Cai Y., He D., Lin
+J., Zhang F., &quot;Fast-LIO2: Fast Direct LiDAR-Inertial
+Odometry,&quot; IEEE Trans. Robot., vol. 38, no. 4, pp. 2053–2073, 2022.
+DOI: 10.1109/TRO.2022.3141876. [to be verified]</text:p>
+<text:p text:style-name="Text_20_body">[53] Nieuwenhuisen M., Droeschel
+D., Holz D., Behnke S., &quot;Autonomous Navigation for Micro Aerial
+Vehicles in Complex GNSS-Denied Environments,&quot; J. Intell. Robot.
+Syst., vol. 84, no. 1–4, pp. 199–216, 2016. DOI:
+10.1007/s10846-015-0274-3.</text:p>
+<text:p text:style-name="Text_20_body">[54] Yue W., Nie Y., Song X., Liu
+G., Wang J., &quot;Semantic-Driven Visual Navigation for Unmanned Aerial
+Vehicles in Unknown Environments,&quot; IEEE Trans. Ind. Electron., vol.
+71, no. 11, pp. 13780–13790, 2024. DOI:
+10.1109/tie.2024.3363761.</text:p>
+<text:p text:style-name="Text_20_body">[55] Delmerico J., Cieslewski T.,
+Rebecq H., Faessler M., Scaramuzza D., &quot;Are We Ready for Autonomous
+Drone Racing? The UZH-FPV Drone Racing Dataset,&quot; Proc. IEEE ICRA,
+2019. [to be verified - cited in context of UAV platforms for
+search-and-rescue missions; check association.]</text:p>
+<text:p text:style-name="Text_20_body">[56] Brossard M., Barrau A.,
+Bonnabel S., &quot;AI-IMU Dead-Reckoning,&quot; IEEE Trans. Intell.
+Veh., vol. 5, no. 4, pp. 585–595, 2020. DOI: 10.1109/TIV.2020.2980758.
+[to be verified - cited in context of map-aided navigation and dead
+reckoning.]</text:p>
+<text:p text:style-name="Text_20_body">[57] Hu J., Ou J., Liu X., Xue
+B., &quot;A Review of Vision-Based UAV Localization and Path Planning
+Based on Optimization for GPS-Denied Environments,&quot; Engineering
+Research Express, 2025. DOI: 10.1088/2631-8695/ae305b.</text:p>
+<text:p text:style-name="Text_20_body">[58] Faessler M., Fontana F.,
+Forster C., Scaramuzza D., &quot;Automatic Re-Initialization and Failure
+Recovery for Aggressive Flight with a Monocular Vision-Based
+Quadrotor,&quot; Proc. IEEE ICRA, 2015. [to be verified - cited in
+context of UAV GNSS-denied; check association.]</text:p>
+<text:p text:style-name="Text_20_body">[59] Castano A., &quot;Autonomous
+UAV Navigation in GPS-Denied Environments Using LiDAR Point Clouds for
+Localization and Mapping,&quot; Proc. AIAA AVIATION Forum, 2023. DOI:
+10.2514/6.2023-3626.</text:p>
+</office:text>
+</office:body>
+</office:document-content>
