@@ -1,34 +1,85 @@
 # Roadmap
 
+The roadmap distinguishes between **software components that exist as executable research references** and **components that are complete at publication or deployment quality**. The detailed maturity boundary is described in [Project status](project-status.md).
+
 ## Milestone 1: benchmark foundation
 
 - [x] normalized dataset and algorithm contracts
 - [x] executable synthetic smoke benchmark
-- [x] core trajectory, semantic, forecast, navigation, efficiency, and statistical metrics
-- [x] paper-oriented CSV, LaTeX, PDF, PNG, and run-manifest outputs
-- [x] CI and numerical unit tests
+- [x] core trajectory, semantic, forecasting, navigation, efficiency and statistical metrics
+- [x] paper-oriented CSV, LaTeX, plot and run-manifest outputs
+- [x] CI across supported Python versions
+- [x] strict MkDocs documentation build and GitHub Pages deployment
+- [x] reproduction-package and release-integrity utilities
 
-## Milestone 2: data converters and baseline wrappers
+## Milestone 2: data converters and baseline reproduction
 
-- [ ] TartanAir converter with frame and calibration checks
-- [ ] Blackbird ROS bag converter and time synchronization validation
-- [ ] MARSIM scenario exporter and deterministic seed control
-- [ ] AeroVerse adapter after release and license verification
-- [ ] pinned wrappers for ORB-SLAM3, VINS-Mono, FAST-LIO2, and LIO-SAM
+The adapter architecture exists, but public dataset and baseline validation must still be completed against exact upstream releases.
 
-## Milestone 3: full S4D-TAM
+- [ ] complete TartanAir conversion with frame and calibration checks
+- [ ] complete Blackbird ROS bag conversion and time-synchronization validation
+- [ ] complete MARSIM scenario export with deterministic seed control
+- [ ] verify AeroVerse release identity, licensing and conversion path
+- [ ] reproduce pinned ORB-SLAM3 baseline configuration
+- [ ] reproduce pinned VINS-Mono baseline configuration
+- [ ] reproduce pinned FAST-LIO2 baseline configuration
+- [ ] reproduce pinned LIO-SAM baseline configuration
+- [ ] verify normalized external-result artifacts against common evaluators
 
-- [ ] RGB, thermal, LiDAR, IMU, and GNSS encoders with missing-modality masks
-- [ ] semantic token proposal and learned data association
-- [ ] hierarchical spatiotemporal attention and token pruning
-- [ ] calibrated covariance and out-of-distribution uncertainty
-- [ ] reference-map and topological matching
-- [ ] multi-horizon occupancy and motion forecasting
-- [ ] risk, energy, and information-aware planner
+## Milestone 3: S4D-TAM research implementation
 
-## Milestone 4: validation and release
+### Executable reference components
 
-- [ ] preregistered ablations corresponding to hypotheses H1-H7
-- [ ] SIL, HIL, and real-flight safety protocol
-- [ ] independent reproducibility run
-- [ ] versioned dataset manifests, container images, model weights, and DOI release
+- [x] persistent 4D token state and lifecycle infrastructure
+- [x] token proposal module
+- [x] feature, radial and fallback association paths
+- [x] multimodal encoder interfaces and missing-modality masking infrastructure
+- [x] attention-related processing module
+- [x] calibration utilities and modality noise model infrastructure
+- [x] reference-map representation
+- [x] topological matching infrastructure
+- [x] causal forecasting utilities
+- [x] predictive-map and trajectory-planning infrastructure
+- [x] versioned token-event telemetry
+- [x] integrated `S4DTAMReference` execution path
+
+### Remaining research-quality work
+
+- [ ] train and validate learned RGB, thermal, LiDAR, IMU and GNSS encoders
+- [ ] implement and validate learned semantic token proposal where required by the final model
+- [ ] implement and validate learned data association against fixed baselines
+- [ ] finalize hierarchical spatiotemporal attention architecture and training procedure
+- [ ] calibrate predictive covariance and out-of-distribution uncertainty on held-out data
+- [ ] validate reference-map and topological matching on public sequences
+- [ ] validate multi-horizon occupancy and motion forecasting
+- [ ] validate risk, energy and information-aware planning objectives
+- [ ] establish numerical parity tests for future optimized PyTorch/CUDA paths
+
+## Milestone 4: confirmatory evaluation
+
+- [ ] freeze publication dataset versions and immutable sequence lists
+- [ ] reproduce all selected baselines using pinned environments
+- [ ] execute preregistered ablations corresponding to hypotheses H1-H7
+- [ ] generate final paired statistical comparisons and confidence intervals
+- [ ] review unavailable metrics and failure records before publication
+- [ ] freeze publication figures, tables and run manifests
+
+## Milestone 5: systems validation and release
+
+The protocol documents exist; execution of the validation campaign remains pending.
+
+- [x] define SIL validation protocol
+- [x] define HIL validation protocol
+- [x] define controlled real-flight protocol
+- [x] define independent reproduction-package contract
+- [ ] execute SIL campaign
+- [ ] execute HIL campaign
+- [ ] execute controlled real-flight campaign
+- [ ] complete independent reproducibility run
+- [ ] publish versioned dataset manifests and validated conversion metadata
+- [ ] publish pinned container images and validated model weights
+- [ ] create archival release and DOI
+
+## Definition of research readiness
+
+A green CI pipeline is necessary but not sufficient for publication readiness. The project should be treated as confirmatory-study ready only when dataset conversions, baseline reproductions, learned-model configuration, preregistered experiments and statistical reporting are frozen together under one versioned release.

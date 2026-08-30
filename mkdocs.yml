@@ -7,6 +7,9 @@ edit_uri: edit/main/docs/
 
 copyright: Copyright &copy; S4D-TAM contributors
 
+extra_css:
+  - stylesheets/extra.css
+
 theme:
   name: material
   language: en
@@ -16,6 +19,7 @@ theme:
     - navigation.tracking
     - navigation.tabs
     - navigation.sections
+    - navigation.indexes
     - navigation.top
     - toc.follow
     - search.suggest
@@ -64,7 +68,9 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Getting started: getting-started.md
   - Benchmark:
+      - Project status: project-status.md
       - Architecture: architecture.md
       - Methodology: methodology.md
       - Metrics: metrics.md
