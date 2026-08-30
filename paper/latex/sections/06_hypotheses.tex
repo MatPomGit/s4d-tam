@@ -1,0 +1,16 @@
+\section{Research Hypotheses}
+\label{sec:hypotheses}
+
+The confirmatory mechanism study uses seven preregistered hypotheses. Each hypothesis compares the full S4D-TAM model with a variant that disables exactly one mechanism while data, seeds, preprocessing, optimization budget, and all other settings remain fixed. External systems are deliberately excluded from this causal ablation family.
+
+\begin{itemize}
+  \item \textbf{H1: Semantics improve navigation in scenarios containing dynamic objects.} The primary endpoint is mission success; collisions per kilometer and semantic mIoU are secondary outcomes.
+  \item \textbf{H2: Temporal state improves 1\,s future-state prediction.} The primary endpoint is forecast occupancy IoU at 1\,s; flow EPE and temporal flip rate are secondary outcomes.
+  \item \textbf{H3: Calibrated uncertainty reduces navigation risk.} The primary endpoint is collisions per kilometer; ECE, NLL, and near misses are secondary outcomes.
+  \item \textbf{H4: Topological support increases mission success.} Path efficiency and ATE RMSE are secondary outcomes.
+  \item \textbf{H5: Reference-map support reduces localization error.} The primary endpoint is ATE RMSE; RPE and final drift percentage are secondary outcomes.
+  \item \textbf{H6: Predictive risk modeling reduces collisions.} The primary endpoint is collisions per kilometer; near misses and minimum clearance are secondary outcomes.
+  \item \textbf{H7: Token lifecycle management reduces computational cost without materially degrading navigation quality.} Confirmation requires both lower p95 latency and non-inferior mission success with a preregistered margin of 2 percentage points; map bytes and peak RSS are secondary outcomes.
+\end{itemize}
+
+Hypotheses H1--H6 are superiority hypotheses in the preregistered direction. H7 combines efficiency superiority with mission-success non-inferiority. The seven confirmatory decisions form one family and use the Holm procedure defined in Section~\ref{subsec:statistical_analysis}.

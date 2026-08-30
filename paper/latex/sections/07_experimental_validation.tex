@@ -1,0 +1,69 @@
+\section{Proposed Experimental Validation}
+\label{sec:experiments}
+
+\subsection{Datasets}
+\label{subsec:datasets}
+
+The validation framework targets four distinct benchmark datasets: TartanAir~\cite{wang2020tartanair}, Blackbird, MARSIM~\cite{kong2023marsim}, and AeroVerse. Each dataset is converted to the common \texttt{SequenceData} contract with immutable source version, license record, coordinate convention, calibration metadata, and SHA-256 manifest. The cohort identifier \texttt{frozen-2026-01} denotes the study cohort rather than a vendor release and resolves to exact source versions and file hashes.
+
+Data are split at the environment or flight level, never across adjacent temporal frames. The training split is the only source of learned weight updates; calibration splits are strictly reserved for hyperparameter thresholds, normalization, early stopping, and uncertainty calibration; the test split remains inaccessible until code, artifacts, and analysis scripts are frozen.
+
+The preregistered offline mechanism study uses 20 preselected test sequences per dataset, yielding 80 paired sequence-level units. Systems validation additionally defines 30 paired Software-in-the-Loop (SIL) scenarios with five random seeds, 20 Hardware-in-the-Loop (HIL) scenarios with five seeds, and 20 paired controlled real-flight missions per variant when safety gates remain open.
+
+A dedicated UAV dataset remains desirable for synchronized RGB, thermal, IMU, GNSS, point cloud, elevation/reference maps, static/dynamic ground truth labels, visibility masks, and controlled sensor degradation scenarios. Metrics that require unavailable ground truth are reported as unavailable rather than silently omitted or imputed.
+
+\subsection{Two-Level Comparison Design}
+\label{subsec:comparison_design}
+
+The evaluation is decoupled into two non-interchangeable levels. Both levels use common dataset and metric contracts where applicable, but they address distinct scientific questions and produce separate statistical reports.
+
+\subsubsection{External System Comparison}
+\label{subsubsec:external_comparison}
+
+The external comparison evaluates whether the complete S4D-TAM system is competitive with independently implemented navigation and SLAM systems under identical data, hardware constraints, sensor availability, and evaluator definitions.
+
+The mandatory primary baseline set comprises:
+\begin{itemize}
+  \item \textbf{ORB-SLAM3},
+  \item \textbf{VINS-Mono}~\cite{qin2018vinsmono},
+  \item \textbf{FAST-LIO2}~\cite{xu2022fastlio2},
+  \item \textbf{LIO-SAM}~\cite{shan2020liosam}.
+\end{itemize}
+Each baseline is pinned to an upstream git commit revision, fixed containerized environment, calibration profile, sensor-topic mapping, loop-closure policy, warm-up policy, and hardware execution budget. Results enter the benchmark exclusively through the common \texttt{AlgorithmResult} schema.
+
+This level measures complete-system competitiveness. Observed differences relative to external baselines cannot be interpreted as the isolated causal effect of an individual S4D-TAM component.
+
+\subsubsection{Internal Mechanism Study}
+\label{subsubsec:internal_study}
+
+The internal comparison isolates mechanism contributions using the full system and seven single-component ablation variants:
+\begin{itemize}
+  \item \texttt{H1\_no\_semantics},
+  \item \texttt{H2\_no\_temporal\_state},
+  \item \texttt{H3\_no\_calibrated\_uncertainty},
+  \item \texttt{H4\_no\_topology},
+  \item \texttt{H5\_no\_reference\_map},
+  \item \texttt{H6\_no\_risk\_prediction},
+  \item \texttt{H7\_no\_token\_lifecycle}.
+\end{itemize}
+Each variant differs from the full system by exactly one switch and utilizes its own frozen trained artifact. External systems are excluded from this matrix to avoid confounding complete-system identity with the causal effect of removing an individual mechanism.
+
+\subsection{Metrics}
+\label{subsec:metrics}
+
+Primary endpoints are preregistered:
+\begin{itemize}
+  \item \textbf{Localization}: Absolute Trajectory Error (ATE) RMSE after $\mathrm{SE}(3)$ rigid alignment without scale optimization.
+  \item \textbf{Forecasting}: Occupancy IoU at $1\,\text{s}$ (and $3\,\text{s}$ for multi-step characterization).
+  \item \textbf{Safety}: Mission success rate and collision count per kilometer.
+  \item \textbf{Efficiency}: 95th percentile (p95) processing latency and persistent map-memory footprint.
+\end{itemize}
+
+Secondary localization metrics include Relative Pose Error (RPE) translation RMSE, final drift in meters and percentage of traveled distance, rotation RPE, relocalization success rate, and time-to-relocalize. Semantic metrics encompass mIoU and macro F1 score. Forecasting secondary metrics include flow End-Point Error (EPE), Brier score, Negative Log-Likelihood (NLL), and Expected Calibration Error (ECE). Navigation metrics include near misses, minimum obstacle clearance, and path efficiency.
+
+\subsection{Confirmatory Protocol and Statistical Analysis}
+\label{subsec:statistical_analysis}
+
+The preregistered H1--H7 mechanism study conducts sequence- or mission-level inference rather than treating individual frames as independent samples. Continuous outcomes are evaluated via paired mean differences and $95\%$ BCa bootstrap confidence intervals using $10{,}000$ resamples. Mission success is modeled as a paired scenario-level binary probability outcome, while distance-normalized event counts utilize Poisson or negative-binomial generalized linear models with log-distance offset.
+
+The seven H1--H7 confirmatory decisions form one family controlled by the sequential Holm step-down procedure at family-wise error rate $\alpha = 0.05$. Hypotheses H1--H6 require the adjusted $p$-value and confidence interval to demonstrate superiority in the preregistered direction. Hypothesis H7 additionally requires non-inferiority in mission success within a $2$ percentage-point margin while demonstrating p95 latency reduction.

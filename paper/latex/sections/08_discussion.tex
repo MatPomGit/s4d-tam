@@ -1,0 +1,26 @@
+\section{Discussion}
+\label{sec:discussion}
+
+The proposed S4D-TAM system represents an attempt to transition from a classical geometric map to a predictive spatial memory for autonomous UAVs. The primary advantage is \emph{amortized perception} -- the computational cost of deep image analysis is incurred once during token instantiation and update, while the synthesized semantic representation remains persistently accessible in spatial memory across subsequent planning iterations~\cite{pomianek2026s4dtam}. This structure minimizes computational redundancy where identical raw frames are repeatedly processed by independent downstream modules~\cite{rosen2024scene, ding2025survey}.
+
+The hierarchical token representation enables storing expansive, regular terrain surfaces at coarse resolutions while concentrating high-resolution representation on structural edges, obstacles, and dynamic entities~\cite{li2024hislam, tian2024same, xiang2021customizable, zhang2021you, he2024efficient}. This paradigm aligns with recent advances in superpoint and octree graph transformers showing that aggregating geometric points into structured primitives substantially reduces model parameter footprint and attention complexity.
+
+The spatiotemporal attention mechanism models long-range dependencies across the environment while constraining computational overhead by restricting query-key interaction to local topological neighborhoods and globally salient landmarks~\cite{yu2025driveoccworld, silva2024s2tpvformer, liao2025i2world, pcpnet2024}. Uncertainty-gated attention prevents noisy or degraded measurements from destabilizing the persistent world state, which is crucial under intermittent sensing or partial visibility~\cite{pomianek2026s4dtam, cai2024neusis}.
+
+Occupancy and risk forecasting in unobserved regions marks a transition from reactive detection to proactive prediction~\cite{pomianek2026s4dtam, yu2025driveoccworld, mei2025irwm, liao2025i2world, zheng2024gaussianad, liu2025hybrid}. Rather than hallucinating unseen obstacles, the system computes rigorous probabilistic hazard distributions informed by topological continuity, semantic class priors, and historical dynamic flows. This enables defensive trajectory planning that anticipates emerging threats before they enter direct line of sight.
+
+Reference map co-registration provides robust drift mitigation during prolonged GNSS dropouts~\cite{liu2022largescale, yue2025airground, radwan2024uav}. Map residuals simultaneously serve as diagnostic indicators for localization errors, structural scene modifications, and GNSS spoofing anomalies~\cite{pomianek2026s4dtam}.
+
+Active perception dynamically allocates sensor and computing bandwidth by maximizing information gain relative to energetic cost~\cite{pomianek2026s4dtam, tao2024active, tian2024same}. Modality selection (e.g., triggering thermal sensors in low illumination or throttling RGB deep encoders) ensures predictable real-time execution on resource-constrained embedded platforms.
+
+\subsection{Limitations}
+\label{subsec:limitations}
+
+Current limitations of the architecture include:
+\begin{enumerate}
+  \item \textbf{System Complexity}: Tight integration and synchronization across SLAM, open-vocabulary segmentation, transformer backbones, forecasting models, and trajectory planners require strict lifecycle management.
+  \item \textbf{Computational Demand}: Although perception is amortized, transformer attention and dense probabilistic forecasting remain computationally demanding on embedded hardware.
+  \item \textbf{Reference Map Dependency}: The efficacy of reference alignment depends on the accuracy and resolution of prior elevation or point cloud databases.
+  \item \textbf{Uncertainty Calibration}: Ensuring reliable calibration of token confidence and risk bounds across diverse environmental conditions requires extensive calibration validation.
+  \item \textbf{Domain Generalization}: Adapting semantic priors across extreme shifts in weather, vegetation, and urban topography may require targeted domain adaptation.
+\end{enumerate}

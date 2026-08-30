@@ -1,0 +1,63 @@
+\documentclass[10pt,a4paper]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsfonts,bm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{microtype}
+\usepackage{authblk}
+\usepackage{abstract}
+\usepackage[hidelinks,unicode,pdfcreator={LaTeX}]{hyperref}
+
+\hypersetup{
+  pdftitle={S4D-TAM: Semantic 4D Token Attention Map for Autonomous Navigation of Unmanned Aerial Vehicles in GNSS-Degraded Environments},
+  pdfauthor={Mateusz Pomianek},
+  pdfkeywords={unmanned aerial vehicles, semantic SLAM, 4D tokens, spatiotemporal transformer, autonomous navigation, GNSS degradation, world model, occupancy forecasting}
+}
+
+% --- Document Information ---
+\title{\textbf{S4D-TAM: Semantic 4D Token Attention Map for Autonomous Navigation of Unmanned Aerial Vehicles in GNSS-Degraded Environments}}
+
+\author{Mateusz Pomianek}
+\affil{Department of Computer and Control Engineering, Rzeszów University of Technology, Poland\\
+\texttt{m.pomianek@prz.edu.pl}}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We propose S4D-TAM (Semantic 4D Token Attention Map), a novel navigation system architecture for unmanned aerial vehicles (UAVs) operating in GNSS-degraded environments. Unlike classical methods that repeatedly analyze raw image streams, the proposed system transforms sensor data (RGB, thermal, IMU, GNSS) into a persistent map of semantic 4D tokens. Each token represents a spatial fragment or object instance and contains its geometry, semantic embedding, dynamics, observation history, and calibrated uncertainty. A hierarchical spatiotemporal transformer updates the world model, aligns it with reference maps, and forecasts occupancy in partially observable regions. The predictive map is then used by a planner that accounts for risk, energy cost, and information value of future observations. The proposed representation aims to reduce image processing redundancy, increase robustness to GNSS degradation, and enable decision-making based on persistent spatial memory rather than solely on the current sensor field of view. The article presents the system concept, literature review, mathematical description, an executable auditable reference implementation, and a two-level experimental methodology separating external system comparison from internal mechanism ablation. Confirmatory experimental results are not yet reported.
+\end{abstract}
+
+\textbf{Keywords:} unmanned aerial vehicles, semantic SLAM, 4D tokens, spatiotemporal transformer, autonomous navigation, GNSS degradation, world model, occupancy forecasting
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+% --- Content Sections ---
+\input{sections/01_introduction}
+\input{sections/02_literature_review}
+\input{sections/03_research_gap}
+\input{sections/04_system_concept}
+\input{sections/05_mathematical_description}
+\input{sections/06_hypotheses}
+\input{sections/07_experimental_validation}
+\input{sections/08_discussion}
+\input{sections/09_conclusions}
+\input{sections/acknowledgements}
+
+% --- Bibliography ---
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

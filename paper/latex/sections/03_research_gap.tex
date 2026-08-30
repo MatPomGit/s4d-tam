@@ -1,0 +1,10 @@
+\section{Research Gap and Motivation}
+\label{sec:research_gap}
+
+Contemporary solutions perform pose estimation, map construction, semantic segmentation, object recognition, occupancy prediction, trajectory planning, and risk assessment as separate, independent modules~\cite{feng2025survey, placed2022survey, ding2025survey}. Systems such as LVI-SAM integrate LiDAR, camera, and IMU in a factor graph, while Kimera constructs metric-semantic 3D models. Neither, however, constitutes a complete, learned world model that exploits persistent map tokens for predicting unseen hazards and guiding sensor attention~\cite{rosen2024scene}.
+
+OpenScene enables assigning language-image embedding space features to point cloud points. Open3DSG extends such approaches with inter-object relationships, while Octree-Graph combines semantics, occupancy, and graph structure. These solutions, however, primarily address scene understanding rather than closed-loop UAV control operating under limited computational resources and partial observability~\cite{tian2024same, xiang2021customizable}.
+
+Research on 4D occupancy forecasting has demonstrated that predicting the future state of space can serve as an effective planning foundation~\cite{yu2025driveoccworld, mei2025irwm, chen2024driveworld, zheng2024gaussianad}. Nevertheless, automotive applications, dense voxel representations, and full sensor sequence processing still dominate. The proposed S4D-TAM system fills the gap between semantic SLAM, 4D world models, and risk-aware planning for UAVs in GNSS-degraded environments.
+
+The key motivation is to transition from a classical geometric map to a predictive spatial memory of the UAV -- one that not only records where objects are, but also predicts where they may appear, which areas are unobservable, and what risk they pose to flight safety. This approach can be termed a \emph{SLAM-native world model}: a world model whose primary representation space is the SLAM map rather than the raw image stream~\cite{pomianek2026s4dtam}.

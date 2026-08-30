@@ -1,0 +1,450 @@
+\section{Mathematical Description}
+\label{sec:math_description}
+
+\subsection{Sensor Layer and Data Fusion}
+\label{subsec:sensor_fusion}
+
+The system employs a multi-modal sensor suite $\mathcal{S} = \{s_1, s_2, \dots, s_n\}$, where each sensor $s_i$ provides a measurement $\mathbf{z}_i(t)$ at time $t$ characterized by covariance $\mathbf{\Sigma}_i(t)$. Sensor data are tightly fused within a factor graph formulation:
+\begin{equation}
+  F_{\text{total}} = F_{\text{VO}} + F_{\text{IMU}} + F_{\text{GNSS}} + F_{\text{alt}} + F_{\text{sem}} + F_{\text{ref}}
+\end{equation}
+where the individual factors correspond to:
+\begin{itemize}
+  \item $F_{\text{VO}}$ -- visual odometry factor,
+  \item $F_{\text{IMU}}$ -- inertial measurement preintegration factor,
+  \item $F_{\text{GNSS}}$ -- GNSS position factor (with adaptive covariance under signal degradation),
+  \item $F_{\text{alt}}$ -- barometric / LiDAR altimeter factor,
+  \item $F_{\text{sem}}$ -- semantic loop-closure factor,
+  \item $F_{\text{ref}}$ -- reference map alignment factor.
+\end{itemize}
+Each factor is formulated as a Mahalanobis distance penalty:
+\begin{equation}
+  F_i = \sum_k \| \mathbf{e}_{ik} \|_{\mathbf{\Sigma}_{ik}}^2
+\end{equation}
+where $\mathbf{e}_{ik}$ is the residual error and $\mathbf{\Sigma}_{ik}$ is the corresponding measurement covariance matrix~\cite{liu2024slideslam, tao2024active, liu2022largescale}.
+
+\subsection{SLAM Front-End}
+\label{subsec:slam_frontend}
+
+The SLAM front-end jointly estimates the UAV trajectory $\mathbf{X} = \{\mathbf{x}_1, \mathbf{x}_2, \dots, \mathbf{x}_T\}$ and the spatial point map $\mathcal{M} = \{\mathbf{m}_1, \mathbf{m}_2, \dots, \mathbf{m}_N\}$ by minimizing the robustified cost:
+\begin{equation}
+  \mathbf{X}^*, \mathcal{M}^* = \arg\min_{\mathbf{X}, \mathcal{M}} \sum_{i,j} \rho\left( \| \mathbf{z}_{ij} - h(\mathbf{x}_i, \mathbf{m}_j) \|_{\mathbf{\Sigma}_{ij}}^2 \right)
+\end{equation}
+where $h(\mathbf{x}_i, \mathbf{m}_j)$ denotes the projective measurement function of 3D landmark $\mathbf{m}_j$ from pose $\mathbf{x}_i$, and $\rho(\cdot)$ is a robust M-estimator kernel (e.g., Huber loss)~\cite{liu2024slideslam, liu2022largescale}.
+
+Metric scale is resolved and stabilized via:
+\begin{equation}
+  s^* = \arg\min_s \sum_k w_k \| s \cdot d_k^{\text{VO}} - d_k^{\text{ref}} \|^2
+\end{equation}
+where $d_k^{\text{VO}}$ is the distance measured by visual odometry, $d_k^{\text{ref}}$ is the metric reference baseline obtained from IMU double-integration, altimeter, GNSS, known object dimensions, or digital elevation models, and $w_k$ denotes the reliability weight~\cite{pomianek2026s4dtam, liu2022largescale}.
+
+\subsection{Point Cloud Tokenization}
+\label{subsec:tokenization}
+
+The continuous point cloud $\mathcal{M}$ is partitioned into $K$ spatial tokens $\{T_1, T_2, \dots, T_K\}$ via hierarchical segmentation:
+\begin{equation}
+  \mathcal{M} = \bigcup_{i=1}^K \mathcal{P}_i
+\end{equation}
+where $\mathcal{P}_i$ is the point cluster associated with token $T_i$. Partitioning strategies include:
+\begin{enumerate}
+  \item Superpoints -- grouping points of homogeneous geometry and semantics~\cite{zhang2021you, he2024efficient},
+  \item Object segments -- instance bounding boxes and 3D masks~\cite{li2024hislam, haghighi2024ovoslam},
+  \item Adaptive octrees -- hierarchical volumetric spatial decomposition~\cite{tian2024same, xiang2021customizable},
+  \item Local surface patches -- planar surfaces, edges, and corners~\cite{liu2022largescale},
+  \item Dynamic instances -- detected moving entities~\cite{zheng2024gaussianad, wang2024occsora}.
+\end{enumerate}
+
+For each token $T_i$, canonical spatial and semantic attributes are extracted:
+\begin{align}
+  \mathbf{p}_i &= \frac{1}{|\mathcal{P}_i|} \sum_{\mathbf{m} \in \mathcal{P}_i} \mathbf{m} \\
+  \mathbf{\Sigma}_i &= \frac{1}{|\mathcal{P}_i|} \sum_{\mathbf{m} \in \mathcal{P}_i} (\mathbf{m} - \mathbf{p}_i)(\mathbf{m} - \mathbf{p}_i)^\top \\
+  \mathbf{g}_i &= \mathrm{GeomEncoder}(\mathcal{P}_i) \\
+  \mathbf{s}_i &= \mathrm{SemEncoder}(\mathcal{I}_i, \mathcal{P}_i)
+\end{align}
+where $\mathcal{I}_i$ is the set of image views observing point set $\mathcal{P}_i$~\cite{li2024hislam, pcpnet2024, he2024efficient}.
+
+\subsection{Spatiotemporal Attention Mechanism}
+\label{subsec:attention}
+
+The hierarchical spatiotemporal transformer refines token embeddings via self- and cross-attention:
+\begin{equation}
+  T_i' = T_i + \mathrm{Attention}(\mathbf{Q}_i, \mathbf{K}, \mathbf{V})
+\end{equation}
+with linear projections $\mathbf{Q}_i = \mathbf{W}_Q T_i$, $\mathbf{K} = \mathbf{W}_K T$, and $\mathbf{V} = \mathbf{W}_V T$.
+
+Local attention restricts query keys to the spatial neighborhood:
+\begin{equation}
+  \mathcal{N}_i^{\text{local}} = \{j : \|\mathbf{p}_i - \mathbf{p}_j\| < r_{\text{local}}\}
+\end{equation}
+while global attention incorporates key landmarks, dynamic entities, and critical safety hazards:
+\begin{equation}
+  \mathcal{N}_i^{\text{global}} = \{j : \mathrm{landmark}(j) \lor \mathrm{dynamic}(j) \lor u_j > \theta_u \lor r_j > \theta_r\}
+\end{equation}
+
+The unified attention weights incorporate spatial, temporal, and uncertainty gates:
+\begin{equation}
+  \alpha_{ij} = \frac{\exp\left( \frac{\mathbf{Q}_i^\top \mathbf{K}_j}{\sqrt{d_k}} \cdot \varphi(\mathbf{p}_i, \mathbf{p}_j, t_i, t_j) \cdot \psi(u_i, u_j) \right)}{\sum_{k \in \mathcal{N}_i} \exp\left( \frac{\mathbf{Q}_i^\top \mathbf{K}_k}{\sqrt{d_k}} \cdot \varphi(\mathbf{p}_i, \mathbf{p}_k, t_i, t_k) \cdot \psi(u_i, u_k) \right)}
+\end{equation}
+where $\varphi(\cdot)$ embeds relative spatial displacement and time intervals, while $\psi(\cdot)$ modulates attention based on observation confidence~\cite{yu2025driveoccworld, silva2024s2tpvformer, liao2025i2world, pcpnet2024}.
+
+\subsection{Object Memory and Semantics}
+\label{subsec:object_memory}
+
+Upon detecting a recognized object instance, an instance token is instantiated:
+\begin{equation}
+  O_k = [\mathbf{p}_k, \mathbf{\Sigma}_k, \mathbf{b}_k, \mathbf{s}_k, P(c_k \mid \mathbf{z}_{1:t}), \mathbf{h}_k]
+\end{equation}
+where $\mathbf{b}_k$ is the 3D bounding box, and $P(c_k \mid \mathbf{z}_{1:t})$ is the class posterior probability over categorical classes $c_k$.
+
+The semantic class distribution is updated recursively via Bayesian filtering:
+\begin{equation}
+  P(c_k \mid \mathbf{z}_{1:t}) = \frac{P(\mathbf{z}_t \mid c_k) P(c_k \mid \mathbf{z}_{1:t-1})}{\sum_{c'} P(\mathbf{z}_t \mid c') P(c' \mid \mathbf{z}_{1:t-1})}
+\end{equation}
+Open-vocabulary embeddings provide zero-shot classification capabilities for novel obstacle classes without closed-set retraining~\cite{li2024hislam, cai2024neusis, haghighi2024ovoslam}.
+
+\subsection{Reference Map Alignment}
+\label{subsec:refmap_alignment}
+
+The system co-registers the active local map $M_t$ with an a priori reference map $M_{\text{ref}}$ via a three-tier optimization scheme:
+\begin{enumerate}
+  \item \textbf{Global Alignment} -- Coarse transform estimation via global descriptor matching:
+  \begin{equation}
+    T_{\text{global}} = \arg\min_T \sum_i \| \mathbf{d}_i^t - \mathbf{d}_{\sigma(i)}^{\text{ref}} \|^2
+  \end{equation}
+  where $\mathbf{d}_i^t$ and $\mathbf{d}_{\sigma(i)}^{\text{ref}}$ denote topological and elevation descriptors~\cite{liu2022largescale, yue2025airground, radwan2024uav}.
+  \item \textbf{Landmark Matching} -- Transform refinement using prominent semantic landmarks $\mathcal{L}$:
+  \begin{equation}
+    T_{\text{landmark}} = \arg\min_T \sum_{j \in \mathcal{L}} \| T \mathbf{p}_j^t - \mathbf{p}_{\sigma(j)}^{\text{ref}} \|_{\mathbf{\Sigma}_j}^2
+  \end{equation}
+  \item \textbf{Local Geometric Optimization} -- Fine registration via semantic ICP:
+  \begin{equation}
+    T_{\text{final}} = \arg\min_T \sum_{i,j} w_{ij} \| T \mathbf{p}_i^t - \mathbf{p}_j^{\text{ref}} \|^2
+  \end{equation}
+  where $w_{ij}$ enforces semantic compatibility between matched patches~\cite{liu2022largescale, li2024hislam}.
+\end{enumerate}
+
+Map discrepancies provide direct diagnostic cues: structural changes, newly appeared obstacles, or localized GNSS measurement offsets~\cite{pomianek2026s4dtam, yue2025airground}.
+
+\subsection{Occupancy and Risk Forecasting}
+\label{subsec:occupancy_forecasting_math}
+
+Future volumetric occupancy and operational risk are forecasted forward over horizon $\Delta t$:
+\begin{equation}
+  \mathcal{O}(t+\Delta t) = f_{\text{pred}}(T_{1:K}(t), \mathbf{a}(t))
+\end{equation}
+where $\mathcal{O}(t+\Delta t)$ represents forecasted occupancy grids/voxels, $T_{1:K}(t)$ is the current token set, and $\mathbf{a}(t)$ is the planned UAV action~\cite{yu2025driveoccworld, mei2025irwm, liao2025i2world, zheng2024gaussianad}.
+
+The spatial risk map is defined as:
+\begin{equation}
+  R(\mathbf{p}, t+\Delta t) = P(H_{\mathbf{p}, t+\Delta t} \mid M_{1:t}, M_{\text{ref}}, C_t)
+\end{equation}
+where $H_{\mathbf{p}, t+\Delta t}$ denotes a collision hazard at position $\mathbf{p}$ and $C_t$ represents environmental context~\cite{pomianek2026s4dtam, liu2025hybrid}.
+
+Occluded region risk is inferred from semantic contextual priors:
+\begin{equation}
+  R_{\text{occluded}}(\mathbf{p}) = \sum_{c \in \mathcal{C}} P(c \mid T_{\text{visible}}) \cdot P(H \mid c, \mathrm{geometry}(\mathbf{p}))
+\end{equation}
+where $\mathcal{C}$ encapsulates contextual categories (e.g., roads, intersections, building perimeters)~\cite{pomianek2026s4dtam, cai2024neusis, liu2025hybrid}.
+
+\subsection{Trajectory Planning}
+\label{subsec:trajectory_planning}
+
+The trajectory planner computes an optimal control trajectory $\xi(t)$ minimizing a composite functional:
+\begin{equation}
+  J(\xi) = \int_0^T \left[ L(\xi(t)) + E(\xi(t), \dot{\xi}(t)) + \lambda_H P_H(\xi(t)) + \lambda_R R(\xi(t), t) + \lambda_U U(\xi(t)) \right] dt
+\end{equation}
+where:
+\begin{itemize}
+  \item $L(\xi(t))$ -- trajectory path length,
+  \item $E(\xi(t), \dot{\xi}(t))$ -- aerodynamic and propulsion energy expenditure,
+  \item $P_H(\xi(t)) = 1 - \prod_i (1 - P(\text{collision} \mid \xi(t), T_i(t)))$ -- cumulative collision probability,
+  \item $R(\xi(t), t)$ -- predicted environmental risk field,
+  \item $U(\xi(t)) = \sum_{i \in \mathcal{N}(\xi(t))} u_i \exp\left(-\frac{\|\xi(t) - \mathbf{p}_i\|^2}{2\sigma^2}\right)$ -- map uncertainty penalty,
+  \item $\lambda_H, \lambda_R, \lambda_U$ -- weighting hyperparameters.
+\end{itemize}
+
+The selected action $\mathbf{a}^*$ minimizes the evaluated path cost:
+\begin{equation}
+  \mathbf{a}^* = \arg\min_{\mathbf{a} \in \mathcal{A}} J(\xi(\mathbf{a}))
+\end{equation}
+over admissible maneuvers (altitude change, heading adjustment, hovering, backtracking, or active information gathering)~\cite{pomianek2026s4dtam, cai2024neusis, yue2025airground, tordesillas2022faster}.
+
+\subsection{Active Perception}
+\label{subsec:active_perception}
+
+The active perception module selects sensory action $\mathbf{a}_{\text{sense}}^*$ maximizing uncertainty reduction per unit cost:
+\begin{equation}
+  \mathbf{a}_{\text{sense}}^* = \arg\max_{\mathbf{a} \in \mathcal{A}_{\text{sense}}} \frac{I(T; \mathbf{z} \mid \mathbf{a})}{C(\mathbf{a})}
+\end{equation}
+where mutual information is approximated by token entropy reduction:
+\begin{equation}
+  I(T; \mathbf{z} \mid \mathbf{a}) \approx H(T) - \mathbb{E}_{\mathbf{z} \mid \mathbf{a}}[H(T \mid \mathbf{z})]
+\end{equation}
+and $C(\mathbf{a})$ denotes computational and gimbal energy costs~\cite{pomianek2026s4dtam, tao2024active, tian2024same}.
+
+\subsection{Metrological Error Analysis of the S4D-TAM System}
+\label{subsec:metrological_analysis}
+
+\subsubsection{Sensor Layer Error Model}
+Each sensor measurement $\mathbf{z}_i(t)$ conforms to:
+\begin{equation}
+  \mathbf{z}_i(t) = h_i(\mathbf{x}(t)) + \mathbf{n}_i(t) + \mathbf{b}_i(t)
+\end{equation}
+with zero-mean noise $\mathbf{n}_i(t) \sim \mathcal{N}(\mathbf{0}, \mathbf{R}_i)$ and time-varying bias $\mathbf{b}_i(t)$.
+
+For IMU sensors (gyroscope and accelerometer):
+\begin{align}
+  \boldsymbol{\omega}(t) &= \boldsymbol{\omega}_{\text{true}}(t) + \mathbf{b}_g(t) + \mathbf{n}_g(t), \quad \mathbf{n}_g \sim \mathcal{N}(\mathbf{0}, \sigma_g^2 \mathbf{I}_3) \\
+  \mathbf{a}(t) &= \mathbf{a}_{\text{true}}(t) + \mathbf{b}_a(t) + \mathbf{n}_a(t), \quad \mathbf{n}_a \sim \mathcal{N}(\mathbf{0}, \sigma_a^2 \mathbf{I}_3)
+\end{align}
+Biases follow Brownian motion random walks: $\dot{\mathbf{b}}_g = \mathbf{n}_{bg}$ and $\dot{\mathbf{b}}_a = \mathbf{n}_{ba}$. IMU dead-reckoning drift grows cubically over unconstrained intervals:
+\begin{equation}
+  \sigma_{\text{IMU}}(t) = \frac{1}{2}\sigma_a t^2 + \frac{1}{6}\sigma_{ba} t^3
+\end{equation}
+
+In degraded GNSS regimes, signal quality $q_{\text{GNSS}}(t) \in [0, 1]$ scales measurement covariance:
+\begin{equation}
+  \mathbf{R}_{\text{GNSS}}(t) = \frac{\mathbf{R}_{\text{GNSS}}^{(0)}}{q_{\text{GNSS}}(t) + \varepsilon}
+\end{equation}
+Visual odometry drift accumulates with traveled distance $d$:
+\begin{equation}
+  \sigma_{\text{VO}}(d) = \alpha_{\text{VO}} d + \beta_{\text{VO}} \sqrt{d}
+\end{equation}
+Barometric altimeters introduce slow thermal bias drift:
+\begin{equation}
+  z_{\text{baro}}(t) = z_{\text{true}}(t) + b_{\text{baro}} + n_{\text{baro}}(t)
+\end{equation}
+
+\subsubsection{Error Propagation in the Factor Graph}
+Let $\boldsymbol{\xi} = [\mathbf{p}^\top, \mathbf{v}^\top, \boldsymbol{\phi}^\top, \mathbf{b}_g^\top, \mathbf{b}_a^\top]^\top \in \mathbb{R}^{15}$ denote the state vector. The Cram\'er-Rao Lower Bound (CRLB) bounds estimator covariance:
+\begin{equation}
+  \mathrm{Cov}(\boldsymbol{\xi}) \ge \mathbf{J}^{-1}(\boldsymbol{\xi})
+\end{equation}
+where $\mathbf{J}(\boldsymbol{\xi}) = \sum_i \mathbf{H}_i^\top \mathbf{R}_i^{-1} \mathbf{H}_i + \mathbf{J}_{\text{prior}}$ is the Fisher Information Matrix (FIM). Marginal position variance satisfies:
+\begin{equation}
+  \sigma_p^2 \ge [\mathbf{J}^{-1}(\boldsymbol{\xi})]_{pp}
+\end{equation}
+
+Fusing all factors yields cumulative information:
+\begin{equation}
+  \mathbf{J}_{\text{fused}} = \mathbf{J}_{\text{IMU}} + \mathbf{J}_{\text{VO}} + q_{\text{GNSS}}\mathbf{J}_{\text{GNSS}} + \mathbf{J}_{\text{alt}} + \mathbf{J}_{\text{sem}} + \mathbf{J}_{\text{ref}}
+\end{equation}
+
+\subsubsection{Quantization and Discretization Error of Tokens}
+Spatial quantization into grid cells of cell length $\ell$ introduces bounded centroid error $\boldsymbol{\varepsilon}_q = \mathbf{p} - \mathbf{c}_k$ with $\|\boldsymbol{\varepsilon}_q\| \le \frac{\ell\sqrt{3}}{2}$. Across three dimensions:
+\begin{equation}
+  \sigma_{q,1\text{D}}^2 = \frac{\ell^2}{12}, \qquad \sigma_q^2 = \frac{\ell^2}{4}
+\end{equation}
+Semantic assignment error is measured by the conditional entropy:
+\begin{equation}
+  \varepsilon_{\text{sem}}^{(k)} = -\sum_{c=1}^C p(c \mid \mathcal{T}_k) \log p(c \mid \mathcal{T}_k) = H(c \mid \mathcal{T}_k)
+\end{equation}
+
+\subsubsection{Lower Bound on Localization Error}
+Under complete GNSS denial ($q_{\text{GNSS}} = 0$), position error is bounded by:
+\begin{equation}
+  \sigma_p^2(t) = \sigma_{p,0}^2 + \alpha_{\text{VO}}^2 d(t)^2 + \gamma_{\text{sem}} N_{\text{loop}}^{-1}
+\end{equation}
+where $N_{\text{loop}}$ is the number of semantic loop closures and $\gamma_{\text{sem}}$ is the semantic correction factor.
+
+\subsubsection{Occupancy Forecasting Error}
+Modeling token propagation as a stochastic Gauss-Markov process:
+\begin{equation}
+  \mathbf{\Sigma}_{\text{pred}}(\Delta t) = \mathbf{\Phi}(\Delta t) \mathbf{\Sigma}_k(t) \mathbf{\Phi}(\Delta t)^\top + \mathbf{Q}_{\text{dyn}}(\Delta t)
+\end{equation}
+Binary occupancy prediction accuracy is evaluated via the Brier Score:
+\begin{equation}
+  \mathrm{BS}(\Delta t) = \frac{1}{|\mathcal{V}|} \sum_{\mathbf{x} \in \mathcal{V}} \left( \mathcal{O}(\mathbf{x}, t+\Delta t) - \mathcal{O}_{\text{true}}(\mathbf{x}, t+\Delta t) \right)^2
+\end{equation}
+
+\subsubsection{Cumulative Error Budget}
+Table~\ref{tab:error_budget} presents the cumulative error budget for the target UAV platform operating in GNSS-degraded conditions.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Cumulative error budget of the S4D-TAM system layers.}
+  \label{tab:error_budget}
+  \begin{tabular}{llll}
+    \toprule
+    \textbf{Error Source} & \textbf{Characteristic} & \textbf{Typical Value ($1\sigma$)} & \textbf{Time/Distance Dependency} \\
+    \midrule
+    IMU noise (accelerometer) & White noise $\sigma_a$ & $0.05\,\text{m/s}^2$ & $\sigma \propto t^2$ \\
+    IMU bias drift & Random walk $\sigma_{ba}$ & $0.002\,\text{m/s}^2/\sqrt{\text{s}}$ & $\sigma \propto t^{3/2}$ \\
+    Visual odometry & Linear drift $\alpha_{\text{VO}}$ & $1\%$ per meter & $\sigma \propto d$ \\
+    GNSS (full signal) & $\sigma_{\text{GNSS}}^{(0)}$ & $1.5\,\text{m}$ (horizontal) & Constant \\
+    GNSS (degraded) & $\sigma_{\text{GNSS}}(q)$ & $5$--$50\,\text{m}$ & $\propto 1/q_{\text{GNSS}}$ \\
+    Barometric altimeter & $\sigma_{\text{baro}} + \text{bias}$ & $0.3\,\text{m} + 2\,\text{m}$ & Thermal drift \\
+    Token quantization & $\sigma_q$ & $\ell/2$ ($0.5\,\text{m}$ for $\ell=1\,\text{m}$) & Constant \\
+    Semantic classification & Classifier entropy $H(c \mid \mathcal{T})$ & $0.1$--$0.8\,\text{bit}$ & Bounded \\
+    Occupancy prediction ($\Delta t = 1\,\text{s}$) & $\mathrm{BS}(\Delta t)$ & $0.05$--$0.15$ & $\propto \Delta t$ \\
+    Total error (IMU+VO only, $d=100\,\text{m}$) & CRLB $\sigma_p$ & $\approx 2$--$5\,\text{m}$ & $\propto d$ \\
+    Total error (IMU+VO+sem, $N_{\text{loop}}=5$) & CRLB $\sigma_p$ & $\approx 0.5$--$1.5\,\text{m}$ & Loop bounded \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Extended Semantic Token Model}
+\label{subsec:extended_token}
+
+The generalized semantic-temporal token is defined as a 9-tuple:
+\begin{equation}
+  \mathcal{T}_k = \langle \boldsymbol{\mu}_k, \mathbf{\Sigma}_k, \mathbf{p}_c^{(k)}, \mathcal{O}_k, \delta_k, \mathbf{v}_k, \mathcal{R}_k, \Omega_k, \rho_k \rangle
+\end{equation}
+where:
+\begin{itemize}
+  \item $\boldsymbol{\mu}_k \in \mathbb{R}^3$ -- estimated centroid in world coordinates,
+  \item $\mathbf{\Sigma}_k \in \mathbb{R}^{3 \times 3}$ -- spatial covariance matrix,
+  \item $\mathbf{p}_c^{(k)} = (p(c_j \mid \mathcal{T}_k))_{j=1}^C$ -- categorical semantic class distribution,
+  \item $\mathcal{O}_k = \{(t_i, s_i, w_i, \mathbf{z}_i)\}_{i=1}^{n_k}$ -- observation history with timestamps, sensor IDs, weights, and measurements,
+  \item $\delta_k \in \{\text{static}, \text{dynamic}, \text{periodic}\}$ -- motion state classification,
+  \item $\mathbf{v}_k \in \mathbb{R}^3$ -- linear velocity vector,
+  \item $\mathcal{R}_k = \{r_{kl}\}$ -- spatial-semantic relations to neighboring tokens,
+  \item $\Omega_k$ -- geometric occlusion cone,
+  \item $\rho_k \in [0, 1]$ -- flight safety significance coefficient.
+\end{itemize}
+
+Observations in $\mathcal{O}_k$ are weighted according to sensor characteristics, detection confidence, and temporal decay:
+\begin{equation}
+  w_i = w_{\text{base}}(s_i) \cdot \mathrm{conf}_i \cdot \exp(-\lambda_s (t - t_i))
+\end{equation}
+Centroid and covariance updates follow weighted information fusion:
+\begin{equation}
+  \mathbf{\Sigma}_k^{-1} = \sum_{i=1}^{n_k} w_i \mathbf{\Sigma}_i^{-1}, \qquad \boldsymbol{\mu}_k = \mathbf{\Sigma}_k \sum_{i=1}^{n_k} w_i \mathbf{\Sigma}_i^{-1} \mathbf{z}_i^{(k)}
+\end{equation}
+
+Dynamic classification tests displacement sequence $\Delta \boldsymbol{\mu}_k^{(i)} = \boldsymbol{\mu}_k(t_i) - \boldsymbol{\mu}_k(t_{i-1})$:
+\begin{equation}
+  \delta_k = \begin{cases}
+    \text{static}, & \text{if } \|\bar{\Delta \boldsymbol{\mu}}_k\| < \varepsilon_s \text{ and } \sigma_{\Delta} < \varepsilon_\sigma \\
+    \text{periodic}, & \text{if } \mathrm{FFT}(\|\Delta \boldsymbol{\mu}_k^{(i)}\|) \text{ has dominant frequency } f^* \\
+    \text{dynamic}, & \text{otherwise}
+  \end{cases}
+\end{equation}
+
+Spatial relation $r_{kl} = \langle d_{kl}, \mathbf{e}_{kl}, \psi_{kl}, \alpha_{kl} \rangle$ defines edge attributes in scene graph $\mathcal{G} = (\mathcal{V}, \mathcal{E})$. Occlusion cone $\Omega_k(\mathbf{x}_{\text{UAV}})$ models unobserved volumes behind obstacles:
+\begin{equation}
+  \Omega_k(\mathbf{x}_{\text{UAV}}) = \left\{ \mathbf{x} \in \mathbb{R}^3 : \exists \lambda > 1, \mathbf{x} = \mathbf{x}_{\text{UAV}} + \lambda(\boldsymbol{\mu}_k - \mathbf{x}_{\text{UAV}}), \|\mathbf{x} - \mathbf{axis}_k\| < r_k \right\}
+\end{equation}
+
+Safety significance is evaluated as:
+\begin{equation}
+  \rho_k = \rho_{\text{class}}(c_k^*) \cdot (1 - \exp(-\beta_\rho n_k)) \cdot f_{\text{context}}(\mathcal{T}_k, \mathbf{x}_{\text{UAV}})
+\end{equation}
+
+\subsection{Bayesian Inference about Future Scene States}
+\label{subsec:bayesian_inference}
+
+\emph{Implementation status.} The current executable reference uses a strictly causal probabilistic occupancy and motion forecaster driven only by observations available up to the prediction time. It produces Bernoulli occupancy probabilities, flow means, uncertainty estimates, observability masks, and physically timed forecast horizons. The Dynamic Bayesian Network (DBN) and particle approximation below define the target probabilistic extension for multimodal future-state uncertainty.
+
+The scene state at time $t$ is modeled as $S_t = \{\mathcal{T}_k(t)\}_{k=1}^K$ with transition factorization:
+\begin{equation}
+  p(S_{t+\Delta t} \mid S_t) = \prod_{k=1}^K p(\mathcal{T}_k(t+\Delta t) \mid \mathcal{T}_k(t), \delta_k, \mathcal{G}_t)
+\end{equation}
+Individual state transitions follow:
+\begin{equation}
+  p(\boldsymbol{\mu}_k(t+\Delta t) \mid \boldsymbol{\mu}_k(t), \delta_k) = \begin{cases}
+    \mathcal{N}(\boldsymbol{\mu}_k, \mathbf{\Sigma}_k + \mathbf{Q}_s \Delta t), & \delta_k = \text{static} \\
+    \mathcal{N}(\boldsymbol{\mu}_k + \mathbf{v}_k \Delta t, \mathbf{\Sigma}_k + \mathbf{Q}_d \Delta t), & \delta_k = \text{dynamic} \\
+    \sum_j \alpha_j \mathcal{N}(\boldsymbol{\mu}_k^{(j)}, \mathbf{\Sigma}_k^{(j)}), & \delta_k = \text{periodic}
+  \end{cases}
+\end{equation}
+
+Particle filtering approximates the state posterior $p(S_t \mid \mathbf{z}_{1:t}) \approx \sum_{i=1}^{N_p} w_t^{(i)} \delta(S_t - \mathbf{s}_t^{(i)})$ with effective sample size resampling:
+\begin{equation}
+  N_{\text{eff}} = \frac{1}{\sum_{i=1}^{N_p} (w_t^{(i)})^2} < \frac{N_p}{2}
+\end{equation}
+
+Occluded zone occupancy is inferred via:
+\begin{equation}
+  p(\text{occupied}(\mathbf{x}) \mid \mathcal{T}_k) = p_0(c_k^*) + (1 - p_0(c_k^*)) \exp\left(-\frac{d(\mathbf{x}, \partial \Omega_k)^2}{2\sigma_\Omega^2}\right), \quad \mathbf{x} \in \Omega_k
+\end{equation}
+Anomalies trigger alert modes when Mahalanobis distance exceeds threshold:
+\begin{equation}
+  D_M(t) = \sqrt{(S_t^{\text{obs}} - S_t)^\top \mathbf{\Sigma}_S^{-1} (S_t^{\text{obs}} - S_t)} > D_{\text{alarm}}
+\end{equation}
+
+\subsection{Bayesian Risk Estimation and Trajectory Planning}
+\label{subsec:bayesian_risk_planning}
+
+\emph{Implementation status.} The executable reference planner currently uses deterministic finite-horizon beam search over admissible acceleration controls with explicit kinematic limits and decomposed collision-risk, energy, time, goal-progress, and information-value terms. MPPI remains a planned backend for richer dynamics and will be introduced behind the same planner contract.
+
+The risk field $\mathcal{R}(\mathbf{x}, t)$ accumulates risk across tokens:
+\begin{equation}
+  \mathcal{R}(\mathbf{x}, t) = \sum_{k=1}^K \rho_k \cdot p_{\text{occ}}(\mathbf{x}, \mathcal{T}_k, t) \cdot p_{\text{coll}}(\mathbf{x}, \mathcal{T}_k)
+\end{equation}
+with collision probability:
+\begin{equation}
+  p_{\text{coll}}(\mathbf{x}, \mathcal{T}_k) = 1 - \Phi\left(\frac{d(\mathbf{x}, \boldsymbol{\mu}_k) - r_{\text{safe}}}{\sqrt{\sigma_{k,r}^2 + \sigma_{\text{UAV}}^2}}\right)
+\end{equation}
+and occlusion augmentation $\mathcal{R}(\mathbf{x}, t) \leftarrow \mathcal{R}(\mathbf{x}, t) + \kappa_\Omega \cdot \mathbf{1}_{\mathbf{x} \in \bigcup \Omega_k} \cdot \max_k p_0(c_k^*)$.
+
+The multi-objective trajectory cost is:
+\begin{equation}
+  J(\tau) = w_L L(\tau) + w_E E(\tau) + w_R \int_\tau \mathcal{R}(\mathbf{x}(t), t) dt + w_U \int_\tau \mathcal{U}(\mathbf{x}(t), t) dt - w_I \mathcal{I}(\tau)
+\end{equation}
+where information gain $\mathcal{I}(\tau) = H(S_t) - \mathbb{E}_\tau[H(S_t \mid \mathbf{z}_{1:\tau})]$.
+
+In the target MPPI formulation:
+\begin{equation}
+  \tau^* \approx \frac{\sum_{m=1}^M \exp\left(-\frac{1}{\lambda_{\text{MPPI}}} J(\tau_m)\right) \tau_m}{\sum_{m=1}^M \exp\left(-\frac{1}{\lambda_{\text{MPPI}}} J(\tau_m)\right)}
+\end{equation}
+
+Operational risk defines four UAV flight modes:
+\begin{equation}
+  \text{UAV Mode} = \begin{cases}
+    \text{nominal}, & \mathcal{R}(\mathbf{x}_{\text{UAV}}, t) < \mathcal{R}_{\text{safe}} \\
+    \text{alert}, & \mathcal{R}_{\text{safe}} \le \mathcal{R} < \mathcal{R}_{\text{alert}} \\
+    \text{avoidance}, & \mathcal{R}_{\text{alert}} \le \mathcal{R} < \mathcal{R}_{\text{avoid}} \\
+    \text{emergency}, & \mathcal{R} \ge \mathcal{R}_{\text{avoid}}
+  \end{cases}
+\end{equation}
+
+\subsection{Adaptive World Model with Hierarchical Resolution}
+\label{subsec:adaptive_world_model}
+
+\emph{Implementation status.} The current token memory enforces bounded history and configurable limits on token count, map memory, and update time. The full adaptive octree and Level-of-Detail (LOD) storage policy described below represents a planned world-model backend.
+
+Operational space is structured as an octree $\mathcal{O}$ with hierarchical voxel resolutions $\ell \in \{\ell_1 = 0.1\,\text{m}, \ell_2 = 0.5\,\text{m}, \ell_3 = 2\,\text{m}, \ell_4 = 10\,\text{m}\}$ mapped to LOD levels:
+\begin{itemize}
+  \item \textbf{LOD 0}: $(\boldsymbol{\mu}_k, \rho_k, c_k^*)$ -- centroid, risk, dominant class ($64\,\text{B}$).
+  \item \textbf{LOD 1}: LOD 0 + subsampled points ($\le 64$ pts) + $\mathbf{p}_c^{(k)}$ ($512\,\text{B}$).
+  \item \textbf{LOD 2}: LOD 1 + attention embedding + observation history $\mathcal{O}_k$ ($4\,\text{KB}$).
+  \item \textbf{LOD 3}: LOD 2 + dynamic prediction model + relations $\mathcal{R}_k$ + occlusion cone $\Omega_k$ ($32\,\text{KB}$).
+\end{itemize}
+
+Optimal token resolution adapts to distance, risk, and CPU availability:
+\begin{equation}
+  \ell_k = \ell_1 \cdot 2^{L_k}, \qquad L_k = \left\lfloor L_{\max} \cdot f_{\text{dist}}(d_k) \cdot f_{\text{risk}}(\rho_k)^{-1} \cdot f_{\text{comp}}(C_{\text{avail}})^{-1} \right\rfloor
+\end{equation}
+Token update priority is scheduled by:
+\begin{equation}
+  \pi_k = \alpha_\pi \rho_k + \beta_\pi \frac{1}{\lambda_{\min}(\mathbf{\Sigma}_k) + \varepsilon} + \gamma_\pi (1 - \exp(-\nu(t - t_{\text{last},k}))) + \delta_\pi \mathbf{1}_{\delta_k \ne \text{static}}
+\end{equation}
+
+Computational budget allocation enforces cascade degradation under CPU load:
+\begin{equation}
+  C_{\text{total}} = C_{\text{sensor}} + C_{\text{SLAM}} + C_{\text{token}} + C_{\text{attn}} + C_{\text{pred}} + C_{\text{plan}}
+\end{equation}
+
+\subsection{Computational Resource Management and Bottleneck Elimination}
+\label{subsec:resource_management}
+
+\emph{Implementation status.} Structured telemetry and resource budgets expose update-time, token-count, memory, lifecycle, and decision events needed for profiling and replay. Predictive queue-overflow control, EDF-RT scheduling, and survival-mode control define target extensions.
+
+Pipeline throughput is constrained by the bottleneck stage:
+\begin{equation}
+  \Theta_{\text{sys}} = \frac{1}{\max_i T_i}, \qquad T_{\text{cycle}} = \sum_{i=1}^6 T_i + T_{\text{comm}}
+\end{equation}
+
+Queue overflow probability is modeled as a Poisson arrival process:
+\begin{equation}
+  P(q_i(t+\Delta t) > q_{\max}) = 1 - \sum_{n=0}^{q_{\max}-q_i(t)} \frac{(\lambda_i \Delta t)^n}{n!} e^{-\lambda_i \Delta t}
+\end{equation}
+
+Dynamic processing frequency adapts as $f_{\text{proc}}(t) = \min(f_{\text{nom}}, \frac{C_{\text{avail}}(t)}{C_{\text{per}}})$. Memory is governed by TTL deactivation, spatial-semantic merging ($\|\boldsymbol{\mu}_k - \boldsymbol{\mu}_l\| < \ell_k$ and $D_{\text{KL}}(\mathbf{p}_c^{(k)} \| \mathbf{p}_c^{(l)}) < \varepsilon_{\text{KL}}$), and LOD compression.
+
+Real-time scheduling prioritizes safety-critical tasks via:
+\begin{equation}
+  \mathrm{Priority}_i(t) = \frac{\rho_i^{\max}}{T_{\text{deadline},i}(t) - t} + \kappa_{\text{safety}} \cdot \mathbf{1}_{i \in \mathcal{C}_{\text{safety}}}
+\end{equation}
+guaranteeing minimal CPU reservations for sensor acquisition, SLAM tracking, and collision avoidance.

@@ -1,0 +1,24 @@
+\section{Conclusions and Future Research Directions}
+\label{sec:conclusions}
+
+This paper has presented S4D-TAM (Semantic 4D Token Attention Map), a novel autonomous navigation architecture for unmanned aerial vehicles operating in GNSS-degraded environments. The foundational contribution is the persistent 4D semantic token map, unifying localization, semantic scene understanding, spatiotemporal occupancy forecasting, risk estimation, and motion planning into a single coherent spatial representation.
+
+The key conceptual contributions include:
+\begin{enumerate}
+  \item \textbf{4D Semantic Token Model}: Compactly integrating spatial geometry, continuous semantics, dynamic state, observation history, and calibrated uncertainty.
+  \item \textbf{Hierarchical Multi-Layer Architecture}: Unifying multi-sensor fusion, SLAM front-end, tokenization, transformer attention, memory persistence, reference map alignment, probabilistic forecasting, risk-aware trajectory planning, and active perception.
+  \item \textbf{Spatiotemporal Attention Mechanism}: Gating attention by spatial proximity, temporal decay, and uncertainty bounds to guarantee robust state estimation.
+  \item \textbf{Proactive Occlusion and Risk Forecasting}: Inferring hazard probabilities in unobserved spatial volumes conditioned on semantic topology and dynamic flows.
+  \item \textbf{Multi-Objective Risk-Aware Planning}: Optimizing flight trajectories against safety risk, path length, energy expenditure, and spatial uncertainty.
+  \item \textbf{Information-Theoretic Active Perception}: Dynamically allocating sensor modalities and processing rates based on mutual information gain and energy constraints.
+\end{enumerate}
+
+Seven preregistered mechanism hypotheses (H1--H7) have been defined to causally isolate the impact of individual architectural features from complete-system baseline comparisons against ORB-SLAM3, VINS-Mono, FAST-LIO2, and LIO-SAM.
+
+Future research directions will concentrate on:
+\begin{enumerate}
+  \item Executing the prospective two-level validation study across TartanAir, Blackbird, MARSIM, and AeroVerse datasets, progressing from offline benchmarks to SIL, HIL, and field flight tests.
+  \item Embedded model optimization through post-training quantization, structured token pruning, and hardware-accelerated attention backends.
+  \item Expanding multi-sensor modalities to millimeter-wave radar and ultrasound, and evaluating multi-UAV cooperative mapping teams.
+  \item Integrating multimodal large language models (LLMs) for high-level semantic reasoning and natural language mission command.
+\end{enumerate}
