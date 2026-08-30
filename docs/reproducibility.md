@@ -31,3 +31,7 @@
 Publish the tagged source, environment lock, configuration files, dataset manifests,
 normalized non-restricted outputs, per-sequence metrics, statistical scripts, plots, LaTeX
 tables, failure log, and a model card. Do not publish restricted dataset content.
+
+The normative hand-off contract is in
+[independent-reproduction-package.md](independent-reproduction-package.md), and every
+released result must satisfy [compliance-report.md](compliance-report.md).
