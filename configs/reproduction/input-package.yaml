@@ -1,0 +1,29 @@
+schema_version: 1
+package_id: s4dtam-independent-reproduction-v1
+release_identity: release-metadata.json
+python: "3.10"
+install: "python -m pip install --no-index --require-hashes -r wheelhouse/requirements.lock"
+network_policy: disabled
+cache_policy: reject
+required_paths:
+  - configs/experiments/ablation.yaml
+  - configs/reproduction/input-package.yaml
+  - configs/reproduction/release-metadata.schema.yaml
+  - docs/preregistration.md
+  - docs/sil-protocol.md
+  - docs/hil-protocol.md
+  - docs/real-flight-protocol.md
+  - docs/compliance-report.md
+  - docs/methodology.md
+  - docs/templates/compliance-results.csv
+  - datasets/MANIFEST.sha256
+  - artifacts/MANIFEST.sha256
+  - wheelhouse/requirements.lock
+  - wheelhouse/MANIFEST.sha256
+forbidden_paths: [.git, .venv, __pycache__, .pytest_cache, .mypy_cache, .ruff_cache, outputs]
+required_metadata:
+  - release-metadata.json
+  - hardware.json
+  - dataset_versions.json
+  - artifact_provenance.json
+  - checksums.sha256

@@ -1,18 +1,71 @@
+schema_version: 1
 name: s4dtam_ablation
-seed: 2026
+preregistration: docs/preregistration.md
+seeds: [2026, 2027, 2028, 2029, 2030]
 output_dir: outputs/ablation
+
+# Every hypothesis is tested against `full`.  Each variant below changes exactly
+# one switch; all unlisted training and evaluation settings remain frozen.
+components:
+  semantics: true
+  temporal_state: true
+  calibrated_uncertainty: true
+  topology: true
+  reference_map: true
+  risk_prediction: true
+  token_lifecycle: true
+
 variants:
-  - full
-  - no_semantics
-  - no_temporal_state
-  - no_uncertainty
-  - no_topology
-  - no_reference_map
-  - no_risk_prediction
+  - name: full
+    hypothesis: control
+    overrides: {}
+    artifact: s4dtam-full-v1
+  - name: H1_no_semantics
+    hypothesis: H1
+    overrides: {semantics: false}
+    artifact: s4dtam-h1-no-semantics-v1
+  - name: H2_no_temporal_state
+    hypothesis: H2
+    overrides: {temporal_state: false}
+    artifact: s4dtam-h2-no-temporal-state-v1
+  - name: H3_no_calibrated_uncertainty
+    hypothesis: H3
+    overrides: {calibrated_uncertainty: false}
+    artifact: s4dtam-h3-no-calibrated-uncertainty-v1
+  - name: H4_no_topology
+    hypothesis: H4
+    overrides: {topology: false}
+    artifact: s4dtam-h4-no-topology-v1
+  - name: H5_no_reference_map
+    hypothesis: H5
+    overrides: {reference_map: false}
+    artifact: s4dtam-h5-no-reference-map-v1
+  - name: H6_no_risk_prediction
+    hypothesis: H6
+    overrides: {risk_prediction: false}
+    artifact: s4dtam-h6-no-risk-prediction-v1
+  - name: H7_no_token_lifecycle
+    hypothesis: H7
+    overrides: {token_lifecycle: false}
+    artifact: s4dtam-h7-no-token-lifecycle-v1
+
+artifact_provenance:
+  s4dtam-full-v1: {trained_on_splits: [train], data_version: frozen-2026-01}
+  s4dtam-h1-no-semantics-v1: {trained_on_splits: [train], data_version: frozen-2026-01}
+  s4dtam-h2-no-temporal-state-v1: {trained_on_splits: [train], data_version: frozen-2026-01}
+  s4dtam-h3-no-calibrated-uncertainty-v1: {trained_on_splits: [train], data_version: frozen-2026-01}
+  s4dtam-h4-no-topology-v1: {trained_on_splits: [train], data_version: frozen-2026-01}
+  s4dtam-h5-no-reference-map-v1: {trained_on_splits: [train], data_version: frozen-2026-01}
+  s4dtam-h6-no-risk-prediction-v1: {trained_on_splits: [train], data_version: frozen-2026-01}
+  s4dtam-h7-no-token-lifecycle-v1: {trained_on_splits: [train], data_version: frozen-2026-01}
+
+evaluation_splits: [test]
 primary_metrics:
   - trajectory/ate_rmse_m
   - forecast/1s/iou
   - navigation/mission_success
   - navigation/collisions_per_km
   - efficiency/latency_p95_ms
+secondary_metrics:
   - efficiency/map_bytes
+multiple_comparisons: holm

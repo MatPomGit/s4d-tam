@@ -27,6 +27,11 @@ The smoke run is synthetic and verifies software only. Scientific experiments mu
 registered dataset versions, immutable sequence lists, repeated seeds, and the protocol
 in [docs/reproducibility.md](docs/reproducibility.md).
 
+Confirmatory ablations follow the frozen [preregistration](docs/preregistration.md) and
+[methodology](docs/methodology.md). Independent teams should use the validated offline
+[reproduction package contract](docs/independent-reproduction-package.md), not a working
+directory or an author's local environment.
+
 ## Benchmark scope
 
 |Domain|Metrics|
@@ -77,4 +82,3 @@ Use [CITATION.cff](CITATION.cff)
 ## License
 
 Apache-2.0. Dataset and baseline licenses remain with their respective owners.
-
