@@ -66,7 +66,6 @@ jobs:
     name: Code quality (advisory)
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-    continue-on-error: true
 
     steps:
       - name: Checkout
@@ -83,7 +82,26 @@ jobs:
         run: python -m pip install -e ".[dev]"
 
       - name: Ruff diagnostics
-        run: ruff check src tests --output-format=github
+        run: |
+          set +e
+          ruff check src tests --output-format=concise | tee ruff-report.txt
+          ruff_status=${PIPESTATUS[0]}
+          set -e
+
+          if [[ "$ruff_status" -eq 0 ]]; then
+            echo "Ruff: no issues found." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::Ruff reported code-quality findings. They are advisory during active development and do not fail CI."
+            {
+              echo "### Ruff diagnostics"
+              echo
+              echo "Ruff reported code-quality findings. These are currently advisory and do not block development."
+              echo
+              echo '```text'
+              head -n 120 ruff-report.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   smoke:
     name: Smoke benchmark
