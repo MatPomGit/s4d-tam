@@ -21,6 +21,12 @@ jobs:
         run: python -m pip install python-docx
       - name: Update manuscript
         run: python tools/update_paper_0830_v2.py
+      - name: Upload original manuscript
+        uses: actions/upload-artifact@v7
+        with:
+          name: original-paper-0830
+          path: paper/S4D_TAM_draft_0830.docx
+          retention-days: 1
       - name: Upload manuscript for review
         uses: actions/upload-artifact@v7
         with:
