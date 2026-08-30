@@ -3,21 +3,38 @@ name: CodeQL
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+    paths:
+      - "src/**"
+      - "pyproject.toml"
+      - ".github/workflows/codeql.yml"
   schedule:
     - cron: "17 4 * * 1"
+  workflow_dispatch:
 
 permissions:
-  security-events: write
   contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   analyze:
-    runs-on: ubuntu-latest
+    name: Security analysis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+
     steps:
-      - uses: actions/checkout@v7
-      - uses: github/codeql-action/init@v4
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
         with:
           languages: python
-      - uses: github/codeql-action/analyze@v4
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v4
