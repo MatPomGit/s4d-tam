@@ -112,6 +112,7 @@ nav:
       - Independent reproduction package: independent-reproduction-package.md
       - Compliance report: compliance-report.md
   - Development:
+      - Next steps: next-steps.md
       - Roadmap: roadmap.md
       - Contributing: contributing.md
       - Changelog: changelog.md
