@@ -5,6 +5,11 @@ revision: 90dabb5d09c326d23f83a1c2aa0e81f6f3f5ed12
 container: ghcr.io/s4d-tam/vins-mono@sha256:894f4600e68a7bc4a7821078b5e6758a421982daf99894d505ef474017efd648
 result_root: outputs/baselines/vins_mono
 artifact_format: s4dtam-algorithm-result-npz/v1
+validation:
+  status: pending_reproduction
+  validated_datasets: []
+  evidence_manifest: null
+  note: Revision and environment are pinned specifications; publication readiness requires execution on the frozen compatible cohort and normalized artifact verification.
 input_mapping:
   camera: /cam0/image_raw
   imu: /imu0

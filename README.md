@@ -29,6 +29,7 @@ Start with:
 - [Project status](https://matpomgit.github.io/s4d-tam/project-status/) for implementation maturity;
 - [Architecture](https://matpomgit.github.io/s4d-tam/architecture/) for the normalized benchmark contracts;
 - [Methodology](https://matpomgit.github.io/s4d-tam/methodology/) and [Comparison protocol](docs/comparison-protocol.md) for the two-level scientific evaluation;
+- [Dataset and baseline readiness](docs/readiness.md) for sensor-compatible comparison cells and execution gates;
 - [Modules](docs/modules.md) for implemented reference components and planned research backends;
 - [Datasets](https://matpomgit.github.io/s4d-tam/datasets/) and [Metrics](https://matpomgit.github.io/s4d-tam/metrics/) for experiment design.
 
@@ -47,6 +48,16 @@ s4dtam-bench run configs/experiments/smoke.yaml
 
 The smoke configuration uses synthetic data. It verifies the software path, evaluators and report generation, but it is not a scientific performance result.
 
+Before real confirmatory work, use the explicit research gates:
+
+```bash
+s4dtam-bench validate-readiness configs/readiness/dataset_baseline_matrix.yaml
+s4dtam-bench preflight-tartanair data/raw/tartanair-converted
+s4dtam-bench validate-freeze path/to/confirmatory_freeze.yaml
+```
+
+The supplied confirmatory-freeze template is intentionally incomplete and must fail until real dataset hashes, baseline evidence and `full`/H1-H7 model artifacts have been frozen.
+
 ## What the benchmark evaluates
 
 | Domain | Representative metrics |
@@ -64,7 +75,7 @@ Metric availability is determined by the available ground truth. Missing metrics
 
 The benchmark targets TartanAir, Blackbird UAV Dataset, MARSIM and AeroVerse through dataset-specific or manifest-based adapters. Internal datasets can be evaluated after conversion to the normalized contract. Dataset files are not redistributed by this repository.
 
-External baseline integration is based on a normalized result artifact. This allows systems such as ORB-SLAM3, VINS-Mono, FAST-LIO2 and LIO-SAM to run in their native C++/ROS environments while being evaluated by the same Python metrics and reporting stack.
+External baseline integration is based on a normalized result artifact. This allows systems such as ORB-SLAM3, VINS-Mono, FAST-LIO2 and LIO-SAM to run in their native C++/ROS environments while being evaluated by the same Python metrics and reporting stack. A pinned baseline revision or container is treated as a specification, not as reproduction evidence; every baseline remains pending until execution on its frozen compatible cohort is recorded.
 
 ## Current S4D-TAM reference modules
 
@@ -93,7 +104,7 @@ Scientific experiments should use version-controlled configurations, immutable s
 ## Repository structure
 
 ```text
-configs/                  experiment, dataset and algorithm configuration
+configs/                  experiment, dataset, readiness and algorithm configuration
 docs/                     MkDocs documentation and validation protocols
 paper/                    versioned manuscript in PDF and editable DOCX
 src/s4dtam_benchmark/     benchmark core, algorithms, adapters and reporting

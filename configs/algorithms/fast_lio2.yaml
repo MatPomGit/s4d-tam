@@ -5,6 +5,11 @@ revision: 7a7cf9b0df52c25f69e4c4f8e92d3552cbe59c29
 container: ghcr.io/s4d-tam/fast-lio2@sha256:29187acbe2282620ff673b241b3d2b5169279d53275aa000e791656c4fc95f10
 result_root: outputs/baselines/fast_lio2
 artifact_format: s4dtam-algorithm-result-npz/v1
+validation:
+  status: pending_reproduction
+  validated_datasets: []
+  evidence_manifest: null
+  note: Revision and environment are pinned specifications; publication readiness requires execution on the frozen compatible cohort and normalized artifact verification.
 input_mapping:
   lidar: /points_raw
   imu: /imu

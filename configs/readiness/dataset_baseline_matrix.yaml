@@ -1,0 +1,142 @@
+schema_version: 1
+freeze_policy: prospective
+
+# Sensors list only streams that may be consumed by an algorithm. Ground-truth-only
+# channels are listed separately and must never be exposed through the algorithm adapter.
+datasets:
+  tartanair:
+    release_frozen: false
+    sensors: [rgb, depth]
+    ground_truth: [pose, depth, segmentation, optical_flow]
+    metrics:
+      localization: supported
+      semantics: supported
+      forecasting_flow: derived
+      occupancy_forecasting: blocked
+      navigation: unavailable
+    blockers:
+      - pin exact downloaded release and sequence list
+      - validate canonical TartanAir-to-sequence conversion against real upstream files
+      - define and freeze any depth-to-occupancy derivation before using occupancy metrics
+
+  blackbird:
+    release_frozen: false
+    sensors: [rgb, imu]
+    ground_truth: [pose]
+    metrics:
+      localization: supported
+      semantics: unavailable
+      forecasting_flow: unavailable
+      occupancy_forecasting: unavailable
+      navigation: unavailable
+    blockers:
+      - pin selected trajectories and ROS bag checksums
+      - validate camera/IMU/ground-truth synchronization on downloaded bags
+
+  marsim:
+    release_frozen: false
+    sensors: [lidar, imu]
+    ground_truth: [pose]
+    metrics:
+      localization: supported
+      semantics: blocked
+      forecasting_flow: blocked
+      occupancy_forecasting: blocked
+      navigation: derived
+    blockers:
+      - pin simulator commit and scenario configuration
+      - freeze deterministic seeds and exported sensor topics
+      - document ground-truth products used for forecasting and navigation metrics
+
+  aeroverse:
+    release_frozen: false
+    sensors: [rgb]
+    ground_truth: [pose]
+    metrics:
+      localization: blocked
+      semantics: blocked
+      forecasting_flow: blocked
+      occupancy_forecasting: blocked
+      navigation: blocked
+    blockers:
+      - verify official release identity and license terms
+      - audit actual sensor and annotation inventory before enabling any benchmark pair
+
+baselines:
+  orb_slam3:
+    upstream: UZ-SLAMLab/ORB_SLAM3
+    required_sensors: [rgb]
+    optional_sensors: [imu, depth]
+    pin_required: true
+  vins_mono:
+    upstream: HKUST-Aerial-Robotics/VINS-Mono
+    required_sensors: [rgb, imu]
+    optional_sensors: []
+    pin_required: true
+  fast_lio2:
+    upstream: hku-mars/FAST_LIO
+    required_sensors: [lidar, imu]
+    optional_sensors: []
+    pin_required: true
+  lio_sam:
+    upstream: TixiaoShan/LIO-SAM
+    required_sensors: [lidar, imu]
+    optional_sensors: []
+    pin_required: true
+
+matrix:
+  tartanair:
+    orb_slam3:
+      state: blocked
+      reason: scientifically compatible RGB/RGB-D pairing, but upstream sequence conversion and pinned ORB-SLAM3 environment are not frozen yet
+    vins_mono:
+      state: not_applicable
+      reason: no benchmark IMU stream is currently declared for the frozen TartanAir contract
+    fast_lio2:
+      state: not_applicable
+      reason: no LiDAR and IMU pair in the current TartanAir benchmark contract
+    lio_sam:
+      state: not_applicable
+      reason: no LiDAR and IMU pair in the current TartanAir benchmark contract
+
+  blackbird:
+    orb_slam3:
+      state: blocked
+      reason: RGB pairing is compatible, but exact trajectories, calibration and pinned ORB-SLAM3 environment remain to be frozen
+    vins_mono:
+      state: blocked
+      reason: RGB+IMU pairing is compatible, but ROS synchronization validation and pinned VINS-Mono environment remain open
+    fast_lio2:
+      state: not_applicable
+      reason: Blackbird benchmark contract does not expose LiDAR
+    lio_sam:
+      state: not_applicable
+      reason: Blackbird benchmark contract does not expose LiDAR
+
+  marsim:
+    orb_slam3:
+      state: not_applicable
+      reason: current MARSIM benchmark contract is LiDAR+IMU and does not expose RGB
+    vins_mono:
+      state: not_applicable
+      reason: current MARSIM benchmark contract does not expose RGB
+    fast_lio2:
+      state: blocked
+      reason: LiDAR+IMU pairing is compatible, but simulator commit, exported topics and pinned FAST-LIO2 environment remain open
+    lio_sam:
+      state: blocked
+      reason: LiDAR+IMU pairing is compatible, but simulator commit, exported topics and pinned LIO-SAM environment remain open
+
+  aeroverse:
+    orb_slam3:
+      state: blocked
+      reason: RGB is tentatively available, but official release inventory and license gate must be verified before enabling the pair
+    vins_mono:
+      state: not_applicable
+      reason: IMU availability is not part of the currently verified AeroVerse contract
+    fast_lio2:
+      state: not_applicable
+      reason: LiDAR+IMU availability is not part of the currently verified AeroVerse contract
+    lio_sam:
+      state: not_applicable
+      reason: LiDAR+IMU availability is not part of the currently verified AeroVerse contract

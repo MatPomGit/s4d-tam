@@ -5,6 +5,11 @@ revision: a4f2af6c7b6f61d8c4b5176d81e9cafe22b72cc8
 container: ghcr.io/s4d-tam/lio-sam@sha256:21d018ffd37a6480b427ec8267fd8d42219298b059536991a927adcc42ebc9a7
 result_root: outputs/baselines/lio_sam
 artifact_format: s4dtam-algorithm-result-npz/v1
+validation:
+  status: pending_reproduction
+  validated_datasets: []
+  evidence_manifest: null
+  note: Revision and environment are pinned specifications; publication readiness requires execution on the frozen compatible cohort and normalized artifact verification.
 input_mapping:
   lidar: /points_raw
   imu: /imu

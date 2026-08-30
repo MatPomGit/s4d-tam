@@ -5,6 +5,11 @@ revision: 4452a3c4d6d9d7333b30f1e6f2e67a4311a7c991
 container: ghcr.io/s4d-tam/orb-slam3@sha256:5c02f44e8738891a64056c44fe26fb90d1cf48f44c0f9c340fad22c80f4f78fb
 result_root: outputs/baselines/orb_slam3
 artifact_format: s4dtam-algorithm-result-npz/v1
+validation:
+  status: pending_reproduction
+  validated_datasets: []
+  evidence_manifest: null
+  note: Revision and environment are pinned specifications; publication readiness requires execution on the frozen compatible cohort and normalized artifact verification.
 input_mapping:
   camera: /camera/image_raw
   imu: /imu
