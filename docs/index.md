@@ -1,75 +1,124 @@
+<div class="hero" markdown>
+
 # S4D-TAM Benchmark
 
-**Semantic 4D Token Attention Map for autonomous UAV navigation in GNSS-degraded environments.**
+**Reproducible evaluation infrastructure and transparent reference implementation for Semantic 4D Token Attention Map UAV navigation in GNSS-degraded environments.**
 
-S4D-TAM Benchmark is a reproducible Python benchmark and transparent reference implementation accompanying the S4D-TAM research methodology. The repository provides a common evaluation contract for visual, visual-inertial, LiDAR-inertial and S4D-TAM-based navigation systems.
+The project provides one auditable evaluation path for S4D-TAM and external navigation baselines, from dataset registration to publication-ready statistics and artifacts.
+
+[Get started](getting-started.md){ .md-button .md-button--primary }
+[Project status](project-status.md){ .md-button }
+[GitHub repository](https://github.com/MatPomGit/s4d-tam){ .md-button }
+
+</div>
 
 !!! warning "Research software"
-    The current `S4DTAMReference` is an executable CPU reference of the token lifecycle and evaluation interfaces. It is not yet the trained hierarchical transformer described in the paper and is not flight-certified.
+    `S4DTAMReference` is an executable research reference. It is not yet the final trained hierarchical transformer and is not flight-certified. The [project status](project-status.md) page distinguishes implemented software from pending scientific validation.
 
-## What the benchmark provides
+<div class="grid cards" markdown>
 
-The evaluation pipeline is designed to produce auditable, machine-readable results rather than isolated headline metrics. A benchmark run can generate:
+-   :material-run-fast: **Run the benchmark**
 
-- normalized trajectory, semantic, forecasting, navigation and efficiency metrics;
-- paired statistical comparisons and confidence intervals;
-- LaTeX-ready tables and vector plots;
-- experiment manifests and provenance records;
-- explicit failure logs;
-- explicit records of metrics that cannot be computed for a given dataset.
+    ---
 
-## Quick start
+    Install the package, inspect available adapters and execute the deterministic smoke configuration.
 
-```bash
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
-python -m pip install -e ".[dev]"
-s4dtam-bench doctor
-s4dtam-bench run configs/experiments/smoke.yaml
-```
+    [Getting started →](getting-started.md)
 
-The smoke run is synthetic and validates the software stack only. Scientific experiments should use registered dataset versions, immutable sequence lists, repeated seeds and the protocol defined in [Reproducibility](reproducibility.md).
+-   :material-vector-polyline: **Understand the architecture**
 
-## Evaluation scope
+    ---
 
-| Domain | Representative outputs |
+    Follow the normalized `SequenceData → AlgorithmResult → evaluators` contract and S4D-TAM reference modules.
+
+    [Architecture →](architecture.md)
+
+-   :material-chart-box-outline: **Design an experiment**
+
+    ---
+
+    Select datasets, metrics, seeds and statistical procedures under a reproducible protocol.
+
+    [Methodology →](methodology.md)
+
+-   :material-shield-check-outline: **Validate claims**
+
+    ---
+
+    Progress from software regression through SIL, HIL, controlled flight and independent reproduction.
+
+    [Evaluation protocols →](reproducibility.md)
+
+</div>
+
+## Current capability
+
+| Area | Current state |
 | --- | --- |
-| Localization | ATE, RPE, final drift, drift percentage |
-| Semantics | mIoU, class IoU, macro F1, accuracy, temporal label-flip rate |
-| Forecasting | occupancy IoU, precision, recall, F1, Brier score, NLL, ECE, flow EPE |
-| Navigation | mission success, collisions, near misses, clearance, path efficiency, energy |
-| Efficiency | latency percentiles, FPS, peak memory, map size, token count, energy |
-| Statistical inference | paired bootstrap confidence intervals, effect sizes, multiplicity correction |
+| Benchmark core | Operational normalized contracts, experiment execution, metrics and reports |
+| Automated testing | Python 3.10 and 3.12 plus synthetic smoke benchmark on `main` |
+| S4D-TAM reference | Executable modular research implementation with token lifecycle, association, attention-related processing, forecasting, map/topology support, telemetry and planning |
+| Public datasets | Adapter and manifest infrastructure available; dataset-specific conversion and validation remain active work |
+| Baseline comparison | Common external-result contract available; pinned end-to-end baseline reproductions remain a validation milestone |
+| Scientific evidence | Experimental and preregistration protocols exist; confirmatory comparison is not yet complete |
 
-Metric availability depends on ground-truth annotations. Missing values are not silently imputed. See [Metrics](metrics.md).
-
-## Supported data sources
-
-The benchmark targets public autonomous-navigation datasets including TartanAir, Blackbird UAV Dataset, MARSIM and AeroVerse through the repository's dataset adapters and manifest system. Internal datasets can also be evaluated after conversion to the normalized data contract.
-
-See [Datasets](datasets.md) for dataset-specific requirements, licensing checks and conversion rules.
-
-## Evaluation workflow
+## Evaluation pipeline
 
 ```mermaid
 flowchart LR
-    A[Dataset manifest] --> B[Algorithm or baseline]
-    B --> C[Normalized result artifact]
-    C --> D[Metric evaluators]
-    D --> E[Statistical comparison]
-    E --> F[Tables, plots and reports]
-    C --> G[Provenance and failure logs]
+    A[Dataset or manifest] --> B[Dataset adapter]
+    B --> C[SequenceData]
+    C --> D[S4D-TAM reference]
+    C --> E[External baseline]
+    D --> F[AlgorithmResult]
+    E --> F
+    F --> G[Common evaluators]
+    G --> H[Statistics]
+    H --> I[CSV, LaTeX, plots, reports]
+    F --> J[Provenance and failure records]
 ```
+
+The central design principle is evaluator symmetry: methods are converted to the same result contract before metrics are computed. This limits method-specific post-processing and makes comparison logic auditable.
+
+## Evaluation scope
+
+<span class="metric-chip">ATE / RPE</span>
+<span class="metric-chip">semantic mIoU</span>
+<span class="metric-chip">occupancy forecasting</span>
+<span class="metric-chip">mission success</span>
+<span class="metric-chip">collision risk</span>
+<span class="metric-chip">latency / FPS</span>
+<span class="metric-chip">memory / map size</span>
+<span class="metric-chip">bootstrap CI</span>
+
+Detailed definitions, availability rules and aggregation procedures are documented in [Metrics](metrics.md). Missing ground truth is represented explicitly rather than silently imputed.
+
+## Data and baseline strategy
+
+The benchmark targets TartanAir, Blackbird UAV Dataset, MARSIM and AeroVerse through dataset-specific or manifest-driven adapters. External systems such as ORB-SLAM3, VINS-Mono, FAST-LIO2 and LIO-SAM can remain in their native C++/ROS environments and export a normalized result artifact for common evaluation.
+
+This separation keeps upstream implementations intact while standardizing timestamps, poses, predictions, telemetry, provenance and evaluation.
+
+## From code to scientific evidence
+
+```mermaid
+flowchart LR
+    A[Unit tests] --> B[Synthetic smoke]
+    B --> C[Dataset validation]
+    C --> D[Baseline reproduction]
+    D --> E[Preregistered ablations]
+    E --> F[SIL]
+    F --> G[HIL]
+    G --> H[Controlled flight]
+    H --> I[Independent reproduction]
+```
+
+A green CI run is evidence of software health, not evidence of scientific superiority or flight safety. See [Project status](project-status.md) for the current maturity boundary.
 
 ## Documentation map
 
-Use the top navigation to move from system design to experimental validation:
-
-1. **Benchmark** describes architecture, methodology, metrics, datasets and artifact contracts.
-2. **Evaluation protocols** defines reproducible SIL, HIL and real-flight validation.
-3. **Reproduction and compliance** supports independent verification and reporting.
-4. **Development** tracks roadmap, contribution rules, releases and citation metadata.
+Use **Getting started** for execution, **Benchmark** for technical contracts, **Evaluation protocols** for experimental validation, and **Development** for maturity, roadmap and contribution rules.
 
 ## Citation
 
-If you use this benchmark in scientific work, follow the metadata described on the [Citation](citation.md) page and the repository `CITATION.cff` file.
+If you use this benchmark in scientific work, follow [Citation](citation.md) and the repository `CITATION.cff` metadata.
