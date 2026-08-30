@@ -1,0 +1,38 @@
+Zamrozić macierz eksperymentalną danych i sensorów. Przed dalszym kodowaniem trzeba jednoznacznie określić, które datasety obsługują które systemy i modalności. Nie należy na siłę porównywać np. FAST-LIO2 na danych bez LiDAR. Powinna powstać macierz dataset × modality × baseline × metric, z informacją supported / unavailable / derived. To jest teraz najważniejszy brak organizacyjny.
+Dokończyć i zwalidować konwertery danych. Kolejność sugerowałabym: TartanAir → MARSIM → Blackbird → AeroVerse. Dla każdego zbioru trzeba sprawdzić układy współrzędnych, timestampy, kalibrację, GT, jednostki, kolejność ramek, dropped frames i deterministyczność konwersji, a następnie zamrozić manifest SHA-256. Roadmapa nadal oznacza wszystkie cztery konwertery jako niedokończone.
+Uruchomić pierwsze rzeczywiste benchmarki na obecnym S4DTAMReference. Nie po to, aby publikować wyniki, tylko aby wykryć błędy kontraktów na realnych sekwencjach. Najpierw 1–2 krótkie sekwencje każdego datasetu. Powinny powstać pełne AlgorithmResult, metryki, telemetry, failure records i raport.
+Zreprodukować cztery baseline'y zewnętrzne. ORB-SLAM3, VINS-Mono, FAST-LIO2 i LIO-SAM powinny dostać przypięty upstream commit/tag, kontener lub dokładne środowisko, konfigurację sensora i wrapper eksportujący wyłącznie normalizowany AlgorithmResult. Dopiero po tym możemy mówić o prawdziwym poziomie external. Obecny protokół słusznie wymaga tego jako bramki wykonawczej.
+Zbudować minimalną publikacyjną wersję uczonego S4D-TAM. Tu priorytety są ważne. Najpierw:
+uczone encodery,
+finalna hierarchical spatiotemporal attention,
+proposal/association w wersji potrzebnej do modelu,
+temporal state,
+semantyka,
+uncertainty calibration,
+reference map/topology,
+forecasting i risk prediction,
+token lifecycle.
+To są elementy bezpośrednio potrzebne do full oraz H1–H7. Katalog modułów pokazuje, że interfejsy i wersje referencyjne już istnieją, ale finalne modele uczone jeszcze nie.
+Nie blokować pierwszej publikacji przez wszystkie ambitne rozszerzenia. DBN/particle backend, MPPI, octree/LOD, active perception i safety-aware real-time scheduler należy rozwijać po ustabilizowaniu modelu bazowego. Są już poprawnie opisane jako target research modules.  Możemy je później kolejno porównywać z istniejącą referencją. Szczególnie beam planner warto zachować nawet po implementacji MPPI jako kontrolny, deterministyczny baseline wewnętrzny.
+Przeprowadzić development dry-run całego badania. Jeszcze bez używania zamrożonego test setu. Trzeba sprawdzić:
+external: S4D-TAM + baseline'y,
+internal: full + H1–H7,
+wszystkie metryki,
+pairing,
+5 seedów,
+statystyki,
+Holm,
+H7 non-inferiority,
+generowanie tabel i wykresów.
+To powinien być test „czy da się wygenerować cały przyszły Results section jednym pipeline'em”.
+Dopiero wtedy zamrozić wersję badawczą. Powinny zostać przypięte razem: commit kodu, wersje datasetów, listy sekwencji, kontenery baseline'ów, model full, siedem artefaktów H1–H7, seed list, konfiguracje i prerejestracja. Roadmapa trafnie definiuje właśnie taki stan jako confirmatory-study ready.
+Uruchomić właściwe badanie potwierdzające. Najpierw offline:
+osobno external comparison,
+osobno internal H1–H7.
+Nie mieszać ich później nawet w tabelach statystycznych. Mogą znaleźć się obok siebie w Results, ale jako dwa różne pytania naukowe.
+Automatycznie wygenerować Results i materiały publikacyjne. Z wyników powinny powstać tabele LaTeX, CSV, wykresy, CI, effect sizes, Holm-adjusted p-values, raport failure cases oraz manifest reprodukcji. Dopiero te liczby trafiają do DOCX/PDF. Nie powinno się ręcznie przepisywać wyników.
+Potem SIL → HIL → lot rzeczywisty. Protokoły już istnieją, więc następna faza po offline validation jest przygotowana. Roadmapa pokazuje, że definicje SIL/HIL/real-flight są ukończone, natomiast kampanie jeszcze nie zostały wykonane.
+Na samym końcu independent reproduction + release/DOI. Po powtórzeniu eksperymentu ze świeżego środowiska można zamrozić release, kontenery, model weights, manifesty i utworzyć archiwalny DOI.
+Najbliższy konkretny etap nie powinien więc brzmieć „implementujemy kolejny algorytm”, tylko:
+Etap A: dataset/baseline readiness → Etap B: learned S4D-TAM → Etap C: full/H1–H7 freeze → Etap D: confirmatory offline study → Etap E: SIL/HIL/flight.
+Jeżeli mamy teraz od razu kontynuować rozwój repozytorium, rozpoczęłabym od Etapu A: stworzenia formalnej macierzy dataset–sensor–baseline–metric i doprowadzenia TartanAir do pierwszego w pełni zwalidowanego end-to-end benchmarku. To da nam pierwszy rzeczywisty pionowy przekrój całego eksperymentu i ujawni problemy, zanim zainwestujemy dużo pracy w trening finalnego modelu.
