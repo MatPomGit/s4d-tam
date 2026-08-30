@@ -23,6 +23,7 @@ dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.6", "mypy>=1.11"]
 
 [project.scripts]
 s4dtam-bench = "s4dtam_benchmark.cli:main"
+s4dtam-release-check = "s4dtam_benchmark.release:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

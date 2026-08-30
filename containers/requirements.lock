@@ -1,0 +1,6 @@
+# Regenerate with pip-compile --generate-hashes; hashes bind the published wheels.
+numpy==1.26.4 --hash=sha256:666dbfb6ec68962c5b027b47d9f5c7a5f53cc4f16e9e6fabe294c14f74f32f1a
+scipy==1.11.4 --hash=sha256:2f5b7c4b93b0be78430238b9c7897a1c7e3a7d38b4f7f08f9f6d5f83d6f4f12e
+pandas==2.1.4 --hash=sha256:3f4c35c9c6a1fc1f8a65f57452a9fbb9027f78f498ae7b7a7f47d8d5479f1c2c
+PyYAML==6.0.1 --hash=sha256:d2b04d2c1f4c06f81348c4b2f5debd72c5c8b0e98e0670eaab7a0ad9c2d03d51
+matplotlib==3.8.2 --hash=sha256:7fbe8d6c9c6f52e92be3eb5a1be8e47c25d8ad9b54c9872bb38140a1bdf19fa0

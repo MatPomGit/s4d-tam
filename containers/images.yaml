@@ -1,0 +1,12 @@
+release_version: 0.1.0
+images:
+  benchmark:
+    dockerfile: containers/benchmark.Dockerfile
+    repository: ghcr.io/owner/s4dtam-benchmark
+    tag: 0.1.0
+    base_image: python:3.12.11-slim-bookworm@sha256:27f90d79cc85e9b7b2560063ef44fa0e9eaae7a7c3f5a9f74563065c5477cc24
+  baselines:
+    dockerfile: containers/baseline.Dockerfile
+    repository: ghcr.io/owner/s4dtam-baselines
+    tag: 0.1.0
+    base_image: python:3.12.11-slim-bookworm@sha256:27f90d79cc85e9b7b2560063ef44fa0e9eaae7a7c3f5a9f74563065c5477cc24

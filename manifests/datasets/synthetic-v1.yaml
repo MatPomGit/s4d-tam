@@ -1,0 +1,51 @@
+schema_version: 1.0.0
+manifest_version: 1.0.0
+release_version: 0.1.0
+dataset:
+  id: s4dtam-synthetic-fixture
+  version: 1.0.0
+  source: repository:manifests/fixtures
+  acquired_at: "2026-08-29T00:00:00Z"
+  modalities: [synthetic-text-event, camera-calibration]
+  coordinate_frames:
+    - id: world
+      convention: right-handed ENU; metres and radians
+    - id: camera
+      convention: right-handed optical frame; x right, y down, z forward
+  sampling:
+    unit: hertz
+    nominal_rate: 1.0
+scientific_scope:
+  purpose: Exercise release plumbing, checksum verification and split isolation only.
+  population: One deterministic, repository-owned synthetic sequence with no human subjects.
+  inclusion_criteria: [A readable event record with an associated camera calibration.]
+  exclusion_criteria: [Any externally acquired or stochastic observation.]
+  known_limitations:
+    - This fixture has no ecological validity and must not be used to report navigation accuracy.
+    - Its single sequence cannot estimate variance or generalisation performance.
+  leakage_policy: The fixture is test-only and may not be used to select algorithms or parameters.
+license:
+  spdx: Apache-2.0
+  text_or_url: ../../LICENSE
+  redistribution: true
+splits:
+  test: [fixture-001]
+files:
+  - path: manifests/fixtures/sequence.txt
+    sequence_id: fixture-001
+    media_type: text/plain
+    bytes: 18
+    sha256: 2e872263e12593bf0c92feeb8cad3a84609a638af7515696ed3356631249a6d8
+calibrations:
+  - id: synthetic-camera-v1
+    kind: camera-intrinsics
+    file: manifests/fixtures/calibration.yaml
+    bytes: 81
+    sha256: ff326a8da8ca89c8eac2ab649628889ece3cbb178fbe28ead519537bf159954e
+    valid_for: [fixture-001]
+conversion_tools:
+  - name: identity-fixture-converter
+    version: 1.0.0
+    source_commit: b1a863b5366b37b5dd2839cf9aa5040fc0b1c988
+    container: python:3.12.11-slim-bookworm@sha256:27f90d79cc85e9b7b2560063ef44fa0e9eaae7a7c3f5a9f74563065c5477cc24
+    command: [python, -c, "from pathlib import Path; Path('output').write_bytes(Path('input').read_bytes())"]
