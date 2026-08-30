@@ -31,6 +31,14 @@ from .telemetry import EventLogConfig, JsonlEventLogger
 from .reference_map import ReferenceMap
 from .topology import TopologicalGraph
 from .forecasting import CausalForecaster
+from .planner import (
+    DynamicsConstraints,
+    PlannerConfig,
+    PlannerGoal,
+    PlannerState,
+    PredictiveMap,
+    plan_trajectory,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -389,6 +397,44 @@ class S4DTAMReference(AlgorithmAdapter):
         }
         if memory.budgets.max_update_time_ms is not None:
             resource["update_time_budget_ms"] = float(memory.budgets.max_update_time_ms)
+        planned_trajectory = None
+        planner_cost: dict[str, float] = {}
+        risk_pred = None
+        if occupancy_pred:
+            # Use the newest causal prediction at every horizon as the planning map.
+            predictive_map = PredictiveMap(
+                {h: values[-1] for h, values in occupancy_pred.items()},
+                {h: values[-1] for h, values in flow_pred.items()},
+                {h: values[-1] for h, values in occupancy_uncertainty.items()},
+                origin=np.asarray(sequence.metadata.get("occupancy_origin", np.zeros(3))),
+                resolution_m=float(sequence.metadata.get("occupancy_resolution_m", 1.0)),
+            )
+            for token in memory.tokens:
+                token.risk = predictive_map.risk(token.position, min(predictive_map.occupancy))
+            risk_pred = np.asarray(
+                [
+                    predictive_map.risk(position, min(predictive_map.occupancy))
+                    for position in estimates
+                ]
+            )
+            goal_value = sequence.navigation_gt.get(
+                "goal_position", sequence.metadata.get("planner_goal")
+            )
+            if goal_value is not None and estimates:
+                planner_options = context.config.get("planner", {})
+                dynamics = DynamicsConstraints(**planner_options.get("dynamics", {}))
+                config = PlannerConfig.from_mapping(planner_options.get("config", {}))
+                plan = plan_trajectory(
+                    PlannerState(np.asarray(estimates[-1]), time_s=0.0),
+                    PlannerGoal(
+                        np.asarray(goal_value), float(planner_options.get("goal_tolerance_m", 0.25))
+                    ),
+                    dynamics,
+                    predictive_map,
+                    config,
+                )
+                planned_trajectory = plan.trajectory
+                planner_cost = plan.cost_diagnostics
         if event_logger is not None:
             completion_fields: dict[str, object] = {
                 "token_count": len(memory.tokens),
@@ -420,8 +466,11 @@ class S4DTAMReference(AlgorithmAdapter):
             occupancy_uncertainty=occupancy_uncertainty,
             flow_uncertainty=flow_uncertainty,
             forecast_observable_mask=forecast_masks,
+            risk_pred=risk_pred,
             latency_ms=np.asarray(latency),
             resource=resource,
+            planned_trajectory=planned_trajectory,
+            planner_cost_diagnostics=planner_cost,
             metadata={
                 "implementation": "reference_cpu",
                 "input_mode": "legacy_reference" if reference_mode else "multimodal_encoded",

@@ -23,7 +23,9 @@ def evaluate_result(
 ) -> tuple[dict[str, float], list[str]]:
     metrics = trajectory_metrics(sequence.gt_positions, result.estimated_positions)
     unavailable: list[str] = []
-    metrics.update(efficiency_metrics(result.latency_ms, result.resource))
+    metrics.update(
+        efficiency_metrics(result.latency_ms, result.resource, result.planner_cost_diagnostics)
+    )
     if sequence.gt_quaternions is not None and result.estimated_quaternions is not None:
         metrics["trajectory/rpe_rotation_rmse_deg"] = rotation_rpe_deg(
             sequence.gt_quaternions, result.estimated_quaternions
@@ -101,8 +103,15 @@ def evaluate_result(
         else:
             unavailable.append(f"flow/{horizon:g}s: prediction absent")
 
-    if result.navigation:
-        metrics.update(navigation_metrics(result.navigation, sequence.navigation_gt))
+    if result.navigation or result.planned_trajectory is not None:
+        metrics.update(
+            navigation_metrics(
+                result.navigation,
+                sequence.navigation_gt,
+                result.planned_trajectory,
+                result.planner_cost_diagnostics,
+            )
+        )
     else:
         unavailable.append("navigation: closed-loop trace absent")
     if sequence.risk_gt is not None and result.risk_pred is not None:

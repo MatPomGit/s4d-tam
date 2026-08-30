@@ -45,6 +45,7 @@ class SequenceData:
     availability_masks: dict[str, np.ndarray] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        """Normalize sequence arrays and validate synchronized sample contracts."""
         self.timestamps = np.asarray(self.timestamps, dtype=float)
         self.gt_positions = np.asarray(self.gt_positions, dtype=float)
         if self.timestamps.ndim != 1 or not np.all(np.isfinite(self.timestamps)):
@@ -125,9 +126,12 @@ class AlgorithmResult:
     latency_ms: np.ndarray | None = None
     resource: dict[str, float] = field(default_factory=dict)
     navigation: dict[str, Any] = field(default_factory=dict)
+    planned_trajectory: np.ndarray | None = None
+    planner_cost_diagnostics: dict[str, float] = field(default_factory=dict)
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        """Normalize arrays and reject malformed algorithm output early."""
         self.timestamps = np.asarray(self.timestamps, dtype=float)
         self.estimated_positions = np.asarray(self.estimated_positions, dtype=float)
         if self.timestamps.ndim != 1 or not np.all(np.isfinite(self.timestamps)):
@@ -153,6 +157,21 @@ class AlgorithmResult:
             if scores.shape != (count,) or not np.all(np.isfinite(scores)):
                 raise ValueError("ood_scores must be a finite vector with one value per estimate")
             self.ood_scores = scores
+        if self.planned_trajectory is not None:
+            trajectory = np.asarray(self.planned_trajectory, dtype=float)
+            if (
+                trajectory.ndim != 2
+                or trajectory.shape[1] != 3
+                or not np.all(np.isfinite(trajectory))
+            ):
+                raise ValueError("planned_trajectory must be a finite array with shape [M,3]")
+            self.planned_trajectory = trajectory
+        diagnostics = {
+            str(key): float(value) for key, value in self.planner_cost_diagnostics.items()
+        }
+        if not all(np.isfinite(value) for value in diagnostics.values()):
+            raise ValueError("planner cost diagnostics must be finite")
+        self.planner_cost_diagnostics = diagnostics
 
 
 @dataclass(slots=True)
