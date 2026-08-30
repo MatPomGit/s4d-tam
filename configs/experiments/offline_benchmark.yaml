@@ -1,16 +1,22 @@
 name: offline_multidataset
+comparison_level: external
+comparison_id: external-system-comparison-v1
 seed: 2026
 candidate_algorithm: s4d_tam_reference
 bootstrap_resamples: 10000
 output_dir: outputs/offline_multidataset
+
 datasets:
   - {type: manifest, name: tartanair, root: data/normalized/tartanair}
   - {type: manifest, name: blackbird, root: data/normalized/blackbird}
   - {type: manifest, name: marsim, root: data/normalized/marsim}
   - {type: manifest, name: aeroverse, root: data/normalized/aeroverse}
+
+# External comparison measures system-level competitiveness. Baselines are independent
+# implementations and must never be mixed with the H1-H7 component-ablation matrix.
 algorithms:
-  - {type: s4dtam_reference, name: s4d_tam_reference, association_radius_m: 0.35}
-  - {type: external_artifact, name: orb_slam3, result_root: outputs/baselines/orb_slam3}
-  - {type: external_artifact, name: vins_mono, result_root: outputs/baselines/vins_mono}
-  - {type: external_artifact, name: fast_lio2, result_root: outputs/baselines/fast_lio2}
-  - {type: external_artifact, name: lio_sam, result_root: outputs/baselines/lio_sam}
+  - {type: s4dtam_reference, name: s4d_tam_reference, role: candidate, association_radius_m: 0.35}
+  - {type: external_artifact, name: orb_slam3, role: baseline, result_root: outputs/baselines/orb_slam3}
+  - {type: external_artifact, name: vins_mono, role: baseline, result_root: outputs/baselines/vins_mono}
+  - {type: external_artifact, name: fast_lio2, role: baseline, result_root: outputs/baselines/fast_lio2}
+  - {type: external_artifact, name: lio_sam, role: baseline, result_root: outputs/baselines/lio_sam}

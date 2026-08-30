@@ -1,11 +1,14 @@
 schema_version: 1
 name: s4dtam_ablation
+comparison_level: internal
+comparison_id: internal-mechanism-h1-h7-v1
 preregistration: docs/preregistration.md
 seeds: [2026, 2027, 2028, 2029, 2030]
 output_dir: outputs/ablation
 
-# Every hypothesis is tested against `full`.  Each variant below changes exactly
-# one switch; all unlisted training and evaluation settings remain frozen.
+# Internal comparison estimates the contribution of S4D-TAM mechanisms. Every
+# hypothesis is tested against `full`; external systems belong to the separate
+# external comparison protocol and must not appear in this matrix.
 components:
   semantics: true
   temporal_state: true

@@ -94,3 +94,17 @@ zgodności, a szczegóły obliczeń — `docs/methodology.md`.
 
 Konfigurację wykonawczą stanowi `configs/experiments/ablation.yaml`; walidator musi
 zaakceptować ją przed uruchomieniem.
+
+## Aneks A: rozdzielenie porównania zewnętrznego i wewnętrznego
+
+**Data aneksu:** 2026-08-30
+
+Aneks nie zmienia żadnej hipotezy H1-H7, metryki głównej, liczebności, reguły decyzyjnej ani
+wariantu zdefiniowanego powyżej. Doprecyzowuje wyłącznie zakres dokumentu: niniejsza
+prerejestracja dotyczy **wewnętrznego badania mechanizmu S4D-TAM**, czyli `full` vs H1-H7.
+
+Porównanie S4D-TAM z niezależnymi systemami ORB-SLAM3, VINS-Mono, FAST-LIO2 i LIO-SAM jest
+odrębnym **porównaniem zewnętrznym**. Nie wchodzi ono do rodziny siedmiu decyzji H1-H7 i nie
+może być użyte do potwierdzania przyczynowego wkładu pojedynczego komponentu S4D-TAM.
+Konfiguracje obu poziomów mają jawne pole `comparison_level` i są walidowane przez wspólny
+kontrakt opisany w `docs/comparison-protocol.md`.

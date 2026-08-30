@@ -72,6 +72,8 @@ nav:
   - Benchmark:
       - Project status: project-status.md
       - Architecture: architecture.md
+      - Module catalog: modules.md
+      - Two-level comparison protocol: comparison-protocol.md
       - Methodology: methodology.md
       - Metrics: metrics.md
       - Datasets: datasets.md

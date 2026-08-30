@@ -38,6 +38,29 @@ flowchart TD
 | Reporting | machine-readable outputs, statistics, plots, tables and provenance |
 | Reproduction | release integrity, package validation and immutable research artifacts |
 
+## Two-level evaluation architecture
+
+The common evaluator boundary is shared, but the scientific comparison is deliberately split in two.
+
+```mermaid
+flowchart LR
+    D[SequenceData] --> X[External system comparison]
+    D --> I[Internal mechanism study]
+    X --> XC[S4D-TAM candidate]
+    X --> XB[ORB-SLAM3 / VINS-Mono / FAST-LIO2 / LIO-SAM]
+    I --> IF[Full S4D-TAM]
+    I --> IA[H1-H7 ablations]
+    XC --> R[AlgorithmResult]
+    XB --> R
+    IF --> R
+    IA --> R
+    R --> M[Common evaluators]
+    M --> SX[External system report]
+    M --> SI[Internal causal-mechanism report]
+```
+
+`comparison_level: external` answers whether the complete S4D-TAM system is competitive with independent systems. `comparison_level: internal` answers which S4D-TAM mechanisms contribute to the full model. The configuration validator rejects matrices that mix those roles. See [Two-level comparison protocol](comparison-protocol.md).
+
 ## Current S4D-TAM reference structure
 
 The reference implementation has progressed beyond the original token-lifecycle skeleton. The source tree currently contains dedicated modules for:
@@ -51,13 +74,13 @@ The reference implementation has progressed beyond the original token-lifecycle 
 - `calibration.py`: calibration parameter handling and fitting utilities;
 - `reference_map.py`: versioned reference-map representation and coordinate handling;
 - `topology.py`: topological graph and verified matching support;
-- `forecasting.py`: causal forecasting utilities;
-- `planner.py`: predictive-map and trajectory-planning structures;
+- `forecasting.py`: causal probabilistic occupancy and motion forecasting;
+- `planner.py`: deterministic predictive-map trajectory planning with explicit risk, energy, time, goal-progress and information-value costs;
 - `telemetry.py`: structured event logging;
 - `pipeline.py`: integration of the reference execution path.
 
 !!! note "Implementation maturity"
-    These modules are executable research components. They are not equivalent to a fully trained, optimized and experimentally validated final S4D-TAM model. See [Project status](project-status.md).
+    These modules are executable research components. They are not equivalent to a fully trained, optimized and experimentally validated final S4D-TAM model. See [Project status](project-status.md) and [S4D-TAM module catalog](modules.md).
 
 ## Reference pipeline
 
@@ -69,15 +92,28 @@ flowchart LR
     D --> E[Token memory]
     E --> F[Attention / state update]
     F --> G[Map / topology]
-    F --> H[Forecasting]
-    G --> I[Planning]
+    F --> H[Causal forecasting]
+    G --> I[Deterministic planning]
     H --> I
     E --> J[Telemetry]
     F --> J
     I --> J
 ```
 
-The Python implementation favors traceability and numerical inspection over throughput. Optimized PyTorch/CUDA implementations can be introduced behind the same algorithm contract once numerical parity is demonstrated.
+The Python implementation favors traceability and numerical inspection over throughput. In particular, the current deterministic planner is advantageous for initial confirmatory studies because candidate evaluation can be replayed exactly. A future MPPI backend may improve performance for richer dynamics, but should be introduced behind the same planner contract and compared against the deterministic reference before becoming the default.
+
+## Target research extensions
+
+Several mechanisms in the paper describe the target architecture rather than already completed production-quality modules. The explicit planned boundaries are:
+
+- learned hierarchical multimodal encoders and spatiotemporal attention;
+- a probabilistic scene-state backend supporting DBN/particle or equivalent multimodal inference;
+- an optional MPPI planning backend;
+- adaptive octree/LOD world-model storage;
+- a closed-loop active-perception controller;
+- a safety-aware real-time scheduler with queue/deadline monitoring and graceful degradation.
+
+They are tracked in [S4D-TAM module catalog](modules.md) and the [Roadmap](roadmap.md). Empty placeholder modules are intentionally avoided until an executable contract and tests can be provided.
 
 ## Auditability
 
