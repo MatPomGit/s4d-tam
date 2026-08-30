@@ -1,1 +1,37 @@
-placeholder
+:root {
+  --md-primary-fg-color: #24324a;
+  --md-accent-fg-color: #3f6f8f;
+}
+
+.md-typeset .hero {
+  padding: 1.2rem 0 0.5rem;
+}
+
+.md-typeset .hero h1 {
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+}
+
+.md-typeset .hero p {
+  max-width: 54rem;
+  font-size: 1.05rem;
+  color: var(--md-default-fg-color--light);
+}
+
+.md-typeset .grid.cards > ul > li {
+  border-radius: 0.35rem;
+}
+
+.md-typeset .status-table td:first-child {
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.md-typeset .metric-chip {
+  display: inline-block;
+  margin: 0.12rem 0.16rem 0.12rem 0;
+  padding: 0.12rem 0.42rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
