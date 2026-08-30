@@ -19,6 +19,18 @@ def _normalize(value: str) -> str:
     return " ".join(value.replace("\xa0", " ").replace("\u2011", "-").split())
 
 
+def robust_replace_exact(doc, old: str, new: str, occurrence: str = "last") -> None:
+    matches = [p for p in doc.paragraphs if p.text.strip() == old]
+    if not matches:
+        raise ValueError(f"Paragraph not found: {old}")
+    if old == "7.2. System Variants":
+        for paragraph in matches:
+            paragraph.text = new
+        return
+    paragraph = matches[0] if occurrence == "first" else matches[-1]
+    paragraph.text = new
+
+
 def robust_replace_contains(doc, needle: str, new: str) -> None:
     wanted = _normalize(needle)
     for element in doc.element.iter(qn("w:p")):
@@ -26,8 +38,9 @@ def robust_replace_contains(doc, needle: str, new: str) -> None:
         if wanted in _normalize(paragraph.text):
             paragraph.text = new
             return
-    print(f"Deferred XML-level replacement: {needle}")
+    raise ValueError(f"Text fragment not found after normalization: {needle}")
 
 
+updater.replace_exact = robust_replace_exact
 updater.replace_contains = robust_replace_contains
 updater.main()
