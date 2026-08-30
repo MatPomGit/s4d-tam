@@ -1,7 +1,9 @@
 name: aeroverse
-adapter: manifest
+type: aeroverse
 root: data/normalized/aeroverse
-paper: https://arxiv.org/abs/2408.15511
-recommended_capabilities: [embodied_tasks, world_model]
-release_status: verify_before_use
+input_root: data/raw/aeroverse
+axis_convention: enu
+required_version: paper-release-v1
+accepted_license: AeroVerse-release-terms
+source: https://github.com/ai4ce/AeroVerse
 license_review_required: true

@@ -21,7 +21,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.command == "doctor":
-        print("datasets: synthetic, normalized-manifest (TartanAir/Blackbird/MARSIM/AeroVerse)")
+        print("datasets: synthetic, manifest, tartanair, blackbird, marsim, aeroverse")
         print("algorithms: s4dtam_reference, dead_reckoning, external_artifact")
         return 0
     output = run_experiment(args.config)

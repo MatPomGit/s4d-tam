@@ -1,6 +1,13 @@
 name: blackbird
-adapter: manifest
-root: data/normalized/blackbird
+type: blackbird
+root: data/raw/blackbird
+output_root: data/normalized/blackbird
+sync_tolerance_s: 0.005
+axis_convention: enu
+topics:
+  camera: /blackbird/camera/image_raw
+  imu: /blackbird/imu
+  ground_truth: /blackbird/ground_truth/pose
+required_version: 2018-06
 source: https://github.com/mit-aera/Blackbird-Dataset
-recommended_capabilities: [trajectory, visual_inertial, aggressive_flight]
-license_review_required: true
+license_id: CC-BY-NC-SA-3.0

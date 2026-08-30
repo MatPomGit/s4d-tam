@@ -32,7 +32,20 @@ def _latex_table(frame: pd.DataFrame) -> str:
     return "\n".join(lines)
 
 
-def write_paper_assets(records: list[dict[str, Any]], output_dir: Path, run_config: dict[str, Any]) -> None:
+def write_paper_assets(
+    records: list[dict[str, Any]],
+    output_dir: Path,
+    run_config: dict[str, Any],
+    executions: list[dict[str, Any]] | None = None,
+) -> None:
+    """Write aggregate tables, figures, and an auditable run manifest.
+
+    Args:
+        records: Long-form metric records produced by sequence evaluation.
+        output_dir: Destination directory for all report artifacts.
+        run_config: Fully resolved experiment configuration.
+        executions: Optional per-execution metadata, including calibration provenance.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
     frame = pd.DataFrame(records)
     frame.to_csv(output_dir / "metrics_long.csv", index=False)
@@ -90,7 +103,9 @@ def write_paper_assets(records: list[dict[str, Any]], output_dir: Path, run_conf
 
     selected = frame[frame["metric"] == "trajectory/ate_rmse_m"]
     if not selected.empty:
-        pivot = selected.pivot_table(index="algorithm", columns="dataset", values="value", aggfunc="mean")
+        pivot = selected.pivot_table(
+            index="algorithm", columns="dataset", values="value", aggfunc="mean"
+        )
         axis = pivot.plot(kind="bar", ylabel="ATE RMSE [m]", rot=20)
         axis.grid(axis="y", alpha=0.3)
         axis.figure.tight_layout()
@@ -98,10 +113,43 @@ def write_paper_assets(records: list[dict[str, Any]], output_dir: Path, run_conf
         axis.figure.savefig(output_dir / "ate_rmse.png", dpi=200)
         plt.close(axis.figure)
 
+    calibration = frame[frame["metric"].str.startswith("calibration/coverage_")]
+    if not calibration.empty:
+        plot = calibration.copy()
+        plot["nominal"] = plot["metric"].str.extract(r"(\d+)pct")[0].astype(float) / 100
+        plot = plot.groupby("nominal", as_index=False)["value"].mean().sort_values("nominal")
+        figure, axis = plt.subplots()
+        axis.plot([0, 1], [0, 1], "--", color="gray", label="ideal")
+        axis.plot(plot["nominal"], plot["value"], marker="o", label="observed")
+        axis.set(xlabel="Nominal coverage", ylabel="Observed coverage", xlim=(0, 1), ylim=(0, 1))
+        axis.legend()
+        figure.tight_layout()
+        figure.savefig(output_dir / "pose_calibration.png", dpi=200)
+        figure.savefig(output_dir / "pose_calibration.pdf")
+        plt.close(figure)
+
+    execution_records = executions or []
+    calibration_records = [
+        {
+            "algorithm": execution["algorithm"],
+            **execution["calibration"],
+        }
+        for execution in execution_records
+        if execution.get("calibration", {}).get("artifact") is not None
+    ]
+    # Deduplicate repeated sequence executions referencing the same model artifact.
+    calibration_by_artifact = {record["artifact"]: record for record in calibration_records}
     manifest = {
         "config": run_config,
         "python": sys.version,
         "platform": platform.platform(),
+        "hardware": {
+            "machine": platform.machine(),
+            "processor": platform.processor(),
+            "node": platform.node(),
+        },
+        "executions": execution_records,
+        "calibration_artifacts": list(calibration_by_artifact.values()),
         "note": "Report unavailable metrics explicitly; do not impute them.",
     }
     (output_dir / "run_manifest.json").write_text(

@@ -14,8 +14,8 @@ jobs:
       matrix:
         python-version: ["3.10", "3.12"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -24,7 +24,7 @@ jobs:
       - run: ruff check src tests
       - run: pytest --cov=s4dtam_benchmark --cov-report=term-missing
       - run: s4dtam-bench run configs/experiments/smoke.yaml
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: smoke-results-py${{ matrix.python-version }}
           path: outputs/smoke/
