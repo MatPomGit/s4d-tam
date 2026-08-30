@@ -1,0 +1,29 @@
+name: Update paper draft
+
+on:
+  push:
+    branches: [research/two-level-validation-paper]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-paper:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install DOCX tooling
+        run: python -m pip install python-docx
+      - name: Update manuscript
+        run: python tools/update_paper_0830.py
+      - name: Upload manuscript for review
+        uses: actions/upload-artifact@v7
+        with:
+          name: updated-paper-0830
+          path: paper/S4D_TAM_draft_0830_updated.docx
+          retention-days: 1
