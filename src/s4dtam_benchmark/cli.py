@@ -6,6 +6,7 @@ from pathlib import Path
 
 from s4dtam_benchmark import __version__
 from s4dtam_benchmark.ablation import validate_ablation_config
+from s4dtam_benchmark.baseline_evidence import validate_and_freeze_baseline_evidence
 from s4dtam_benchmark.comparison import validate_comparison_config
 from s4dtam_benchmark.config import load_yaml
 from s4dtam_benchmark.datasets import TartanAirDataset
@@ -78,6 +79,18 @@ def build_parser() -> argparse.ArgumentParser:
     freeze_tartanair.add_argument("converted_root", type=Path)
     freeze_tartanair.add_argument("output_dir", type=Path)
 
+    baseline = subparsers.add_parser(
+        "validate-baseline-evidence",
+        help="validate a reproduced external baseline cohort and freeze its evidence manifest",
+    )
+    baseline.add_argument("baseline")
+    baseline.add_argument("dataset")
+    baseline.add_argument("sequence_list", type=Path)
+    baseline.add_argument("result_root", type=Path)
+    baseline.add_argument("config", type=Path)
+    baseline.add_argument("run_metadata", type=Path)
+    baseline.add_argument("output_dir", type=Path)
+
     package = subparsers.add_parser("verify-package", help="verify a reproduction package")
     package.add_argument("root", type=Path)
     package.add_argument("spec", type=Path)
@@ -93,7 +106,7 @@ def main(argv: list[str] | None = None) -> int:
         print("comparison levels: external, internal")
         print(
             "readiness gates: dataset-baseline matrix, TartanAir convert/preflight/freeze, "
-            "confirmatory freeze"
+            "baseline evidence, confirmatory freeze"
         )
         return 0
     if args.command == "validate-ablation":
@@ -145,6 +158,23 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  manifest_sha256={summary.manifest_sha256}")
         print(f"  sequence_list_sha256={summary.sequence_list_sha256}")
         print(f"  output={summary.output_dir}")
+        return 0
+    if args.command == "validate-baseline-evidence":
+        summary = validate_and_freeze_baseline_evidence(
+            baseline=args.baseline,
+            dataset=args.dataset,
+            sequence_list=args.sequence_list,
+            result_root=args.result_root,
+            config_path=args.config,
+            run_metadata_path=args.run_metadata,
+            output_dir=args.output_dir,
+        )
+        print(
+            f"Valid baseline evidence: baseline={summary.baseline} dataset={summary.dataset} "
+            f"sequences={summary.sequences}"
+        )
+        print(f"  evidence={summary.evidence_path}")
+        print(f"  evidence_sha256={summary.evidence_sha256}")
         return 0
     if args.command == "verify-package":
         verify_reproduction_package(args.root, load_yaml(args.spec))
