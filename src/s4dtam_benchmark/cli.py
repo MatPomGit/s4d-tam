@@ -13,6 +13,7 @@ from s4dtam_benchmark.experiment import run_experiment
 from s4dtam_benchmark.readiness import render_readiness_summary, validate_readiness_matrix
 from s4dtam_benchmark.reproduction import verify_reproduction_package
 from s4dtam_benchmark.study_freeze import validate_confirmatory_freeze
+from s4dtam_benchmark.tartanair_ingestion import convert_tartanair_v1, freeze_tartanair_cohort
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -38,6 +39,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="validate an immutable confirmatory-study freeze manifest",
     )
     freeze.add_argument("config", type=Path)
+
+    convert_tartanair = subparsers.add_parser(
+        "convert-tartanair",
+        help="convert TartanAir V1-style pose_left/image_left trajectories to sequence.json",
+    )
+    convert_tartanair.add_argument("raw_root", type=Path)
+    convert_tartanair.add_argument("output_root", type=Path)
+    convert_tartanair.add_argument(
+        "--fps",
+        type=float,
+        default=10.0,
+        help="sampling rate used to derive timestamps when the V1 source has no timestamp file",
+    )
+    convert_tartanair.add_argument(
+        "--link-mode",
+        choices=("symlink", "hardlink", "copy"),
+        default="symlink",
+        help="how converted frame entries materialize source RGB images",
+    )
+    convert_tartanair.add_argument("--overwrite", action="store_true")
+
     tartanair = subparsers.add_parser(
         "preflight-tartanair",
         help="strictly validate converted TartanAir sequence descriptors and source files",
@@ -48,6 +70,14 @@ def build_parser() -> argparse.ArgumentParser:
         default="tartanair_ned_to_enu",
         choices=("tartanair_ned_to_enu", "identity"),
     )
+
+    freeze_tartanair = subparsers.add_parser(
+        "freeze-tartanair",
+        help="validate and hash a converted TartanAir cohort into immutable evidence files",
+    )
+    freeze_tartanair.add_argument("converted_root", type=Path)
+    freeze_tartanair.add_argument("output_dir", type=Path)
+
     package = subparsers.add_parser("verify-package", help="verify a reproduction package")
     package.add_argument("root", type=Path)
     package.add_argument("spec", type=Path)
@@ -61,7 +91,10 @@ def main(argv: list[str] | None = None) -> int:
         print("datasets: synthetic, manifest, tartanair, blackbird, marsim, aeroverse")
         print("algorithms: s4dtam_reference, dead_reckoning, external_artifact")
         print("comparison levels: external, internal")
-        print("readiness gates: dataset-baseline matrix, TartanAir preflight, confirmatory freeze")
+        print(
+            "readiness gates: dataset-baseline matrix, TartanAir convert/preflight/freeze, "
+            "confirmatory freeze"
+        )
         return 0
     if args.command == "validate-ablation":
         validate_ablation_config(load_yaml(args.config))
@@ -81,6 +114,19 @@ def main(argv: list[str] | None = None) -> int:
         validate_confirmatory_freeze(load_yaml(args.config))
         print(f"Valid confirmatory study freeze: {args.config}")
         return 0
+    if args.command == "convert-tartanair":
+        summary = convert_tartanair_v1(
+            args.raw_root,
+            args.output_root,
+            fps=args.fps,
+            link_mode=args.link_mode,
+            overwrite=args.overwrite,
+        )
+        print(
+            f"Converted TartanAir: sequences={summary.sequences} frames={summary.frames} "
+            f"root={summary.output_root}"
+        )
+        return 0
     if args.command == "preflight-tartanair":
         sequences = list(
             TartanAirDataset(args.root, axis_convention=args.axis_convention).sequences()
@@ -89,6 +135,16 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Valid TartanAir conversion: sequences={len(sequences)} frames={frames}")
         for sequence in sequences:
             print(f"  {sequence.sequence_id}: samples={len(sequence.timestamps)}")
+        return 0
+    if args.command == "freeze-tartanair":
+        summary = freeze_tartanair_cohort(args.converted_root, args.output_dir)
+        print(
+            f"Frozen TartanAir cohort: sequences={summary.sequences} frames={summary.frames} "
+            f"files={summary.files}"
+        )
+        print(f"  manifest_sha256={summary.manifest_sha256}")
+        print(f"  sequence_list_sha256={summary.sequence_list_sha256}")
+        print(f"  output={summary.output_dir}")
         return 0
     if args.command == "verify-package":
         verify_reproduction_package(args.root, load_yaml(args.spec))
