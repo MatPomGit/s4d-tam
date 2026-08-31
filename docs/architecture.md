@@ -43,7 +43,7 @@ flowchart TD
 The common evaluator boundary is shared, but the scientific comparison is deliberately split in two.
 
 ```mermaid
-flowchart LR
+flowchart TD
     D[SequenceData] --> X[External system comparison]
     D --> I[Internal mechanism study]
     X --> XC[S4D-TAM candidate]
@@ -85,7 +85,7 @@ The reference implementation has progressed beyond the original token-lifecycle 
 ## Reference pipeline
 
 ```mermaid
-flowchart LR
+flowchart TD
     A[Multimodal observations] --> B[Encoding / masking]
     B --> C[Token proposal]
     C --> D[Association]
