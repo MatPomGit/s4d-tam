@@ -50,8 +50,8 @@ def build_parser() -> argparse.ArgumentParser:
     convert_tartanair.add_argument(
         "--fps",
         type=float,
-        default=10.0,
-        help="sampling rate used to derive timestamps when the V1 source has no timestamp file",
+        required=True,
+        help="explicit sampling rate used to derive timestamps from V1 frame indices",
     )
     convert_tartanair.add_argument(
         "--link-mode",
