@@ -71,7 +71,7 @@ def test_converter_rejects_pose_image_count_mismatch(tmp_path: Path) -> None:
     _write_raw_sequence(raw, poses, [0, 1])
 
     with pytest.raises(ValueError, match="pose/image count mismatch"):
-        convert_tartanair_v1(raw, tmp_path / "converted", link_mode="copy")
+        convert_tartanair_v1(raw, tmp_path / "converted", fps=10.0, link_mode="copy")
 
 
 def test_converter_rejects_missing_frame_index(tmp_path: Path) -> None:
@@ -83,7 +83,16 @@ def test_converter_rejects_missing_frame_index(tmp_path: Path) -> None:
     _write_raw_sequence(raw, poses, [0, 2])
 
     with pytest.raises(ValueError, match="frame indices are missing or out of order"):
-        convert_tartanair_v1(raw, tmp_path / "converted", link_mode="copy")
+        convert_tartanair_v1(raw, tmp_path / "converted", fps=10.0, link_mode="copy")
+
+
+def test_converter_rejects_invalid_sampling_rate(tmp_path: Path) -> None:
+    raw = tmp_path / "raw"
+    poses = [[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]]
+    _write_raw_sequence(raw, poses, [0])
+
+    with pytest.raises(ValueError, match="fps must be finite and positive"):
+        convert_tartanair_v1(raw, tmp_path / "converted", fps=0.0, link_mode="copy")
 
 
 def test_tartanair_identity_axis_preserves_identity_orientation(tmp_path: Path) -> None:
