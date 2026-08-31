@@ -5,7 +5,6 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -36,9 +35,9 @@ def validate_and_freeze_baseline_evidence(
 ) -> BaselineEvidenceSummary:
     """Validate one frozen baseline cohort and emit an immutable evidence manifest.
 
-    This function deliberately does not execute the external algorithm. It validates the outputs
-    of an actual pinned run and refuses to create publication evidence when the run metadata does
-    not match the pinned repository specification.
+    The generated JSON is deterministic for identical inputs: validation time is deliberately not
+    inserted into the hashed payload. Any execution timestamp that is scientifically relevant must
+    be recorded in the run metadata produced by the real baseline execution environment.
     """
     if baseline not in WRAPPERS:
         raise ValueError(f"Unsupported external baseline: {baseline}")
@@ -54,7 +53,9 @@ def validate_and_freeze_baseline_evidence(
         raise ValueError("Baseline config container does not match the executable wrapper contract")
 
     sequence_list_file = Path(sequence_list)
-    sequence_ids = [line.strip() for line in sequence_list_file.read_text(encoding="utf-8").splitlines()]
+    sequence_ids = [
+        line.strip() for line in sequence_list_file.read_text(encoding="utf-8").splitlines()
+    ]
     sequence_ids = [sequence_id for sequence_id in sequence_ids if sequence_id]
     if not sequence_ids:
         raise ValueError("Baseline sequence list is empty")
@@ -67,7 +68,11 @@ def validate_and_freeze_baseline_evidence(
 
     dataset_result_root = Path(result_root) / dataset
     expected = {f"{sequence_id}.npz" for sequence_id in sequence_ids}
-    present = {path.name for path in dataset_result_root.glob("*.npz")} if dataset_result_root.is_dir() else set()
+    present = (
+        {path.name for path in dataset_result_root.glob("*.npz")}
+        if dataset_result_root.is_dir()
+        else set()
+    )
     missing = sorted(expected - present)
     unexpected = sorted(present - expected)
     if missing:
@@ -92,7 +97,6 @@ def validate_and_freeze_baseline_evidence(
         "schema": "s4dtam-baseline-reproduction-evidence/v1",
         "baseline": baseline,
         "dataset": dataset,
-        "generated_utc": datetime.now(timezone.utc).isoformat(),
         "wrapper": {
             "upstream": wrapper.upstream,
             "revision": wrapper.commit,
