@@ -19,8 +19,11 @@ The adapter architecture exists, but public dataset and baseline validation must
 
 - [x] define an executable dataset/sensor/baseline/metric readiness matrix
 - [x] add a strict TartanAir conversion preflight and CI regression fixture
-- [ ] run the TartanAir preflight on pinned real upstream sequences and freeze checksums
-- [ ] complete TartanAir conversion with frame and calibration checks on the frozen real cohort
+- [x] implement deterministic TartanAir V1 raw ingestion from `pose_left.txt` and `image_left`
+- [x] implement TartanAir cohort freeze evidence with sequence-list and file-manifest SHA-256 hashes
+- [x] transform both TartanAir position and orientation ground truth consistently from NED to ENU
+- [ ] run the TartanAir converter and preflight on pinned real upstream sequences
+- [ ] freeze checksums for the selected real TartanAir cohort
 - [ ] complete Blackbird ROS bag conversion and time-synchronization validation
 - [ ] complete MARSIM scenario export with deterministic seed control
 - [ ] verify AeroVerse release identity, licensing and conversion path

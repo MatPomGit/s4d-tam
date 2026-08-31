@@ -31,7 +31,7 @@ A pair has one of three states:
 | MARSIM | not applicable | not applicable | blocked, LiDAR+IMU compatible | blocked, LiDAR+IMU compatible |
 | AeroVerse | blocked pending release audit | not applicable until IMU is verified | not applicable until LiDAR+IMU is verified | not applicable until LiDAR+IMU is verified |
 
-This means the final external paper table does **not** need every baseline to run on every dataset. Comparisons should be reported by compatible sensor regime, with unavailable cells reported explicitly rather than filled with an unfair surrogate.
+The final external paper table does **not** need every baseline to run on every dataset. Comparisons are reported by compatible sensor regime, with unavailable cells recorded explicitly rather than filled with an unfair surrogate.
 
 ## Metric availability
 
@@ -39,13 +39,59 @@ The readiness file also declares metric-family availability per dataset as `supp
 
 ## Baseline reproduction state
 
-A pinned `revision` or container digest is a specification, not evidence that a baseline has been reproduced. Each mandatory baseline configuration therefore has a `validation` block. It remains `pending_reproduction` until the method has run on its frozen compatible cohort and the normalized result artifact has been checked by the common evaluators. The evidence manifest must then identify the exact input hashes, executable/container identity, hardware policy, output artifacts and validation result.
+A pinned `revision` or container digest is a specification, not evidence that a baseline has been reproduced. Each mandatory baseline configuration therefore has a `validation` block and remains `pending_reproduction` until the method has actually run on its frozen compatible cohort.
+
+After a real run, validate the complete artifact set with:
+
+```bash
+s4dtam-bench validate-baseline-evidence \
+  BASELINE \
+  DATASET \
+  path/to/sequence-list.txt \
+  path/to/result-root \
+  configs/algorithms/BASELINE.yaml \
+  path/to/run-metadata.json \
+  path/to/evidence-output
+```
+
+The gate requires:
+
+- the exact repository-pinned revision and container;
+- the frozen input-manifest SHA-256;
+- hardware and exact command metadata from the real execution;
+- one normalized result artifact for every sequence in the frozen cohort;
+- no extra result artifacts outside that cohort;
+- successful parsing of every `s4dtam-algorithm-result-npz/v1` artifact.
+
+The evidence JSON is deterministic for identical inputs so repeating validation does not create a different evidence SHA merely because the validator was run later.
 
 ## TartanAir first vertical slice
 
-TartanAir is the first converter gate because it provides a low-friction visual benchmark for validating coordinate transforms, calibration metadata, trajectory alignment and evaluator behavior.
+TartanAir is the first real-data gate because it provides a low-friction visual benchmark for checking coordinate transforms, calibration metadata, trajectory alignment and evaluator behavior.
 
-The strict converted-sequence preflight is:
+### Raw V1 ingestion
+
+The executable converter accepts canonical V1-style trajectories containing `pose_left.txt` and `image_left`:
+
+```bash
+s4dtam-bench convert-tartanair \
+  data/upstream/tartanair \
+  data/raw/tartanair-converted \
+  --fps VERIFIED_SOURCE_FPS \
+  --link-mode symlink
+```
+
+The frame rate is intentionally mandatory. The V1 pose file does not carry per-frame timestamps, so the timing assumption must be verified for the selected source material and recorded explicitly rather than hidden as a converter default.
+
+The converter validates frame continuity, pose/image count, finite pose values and unit quaternions. It writes provenance into every `sequence.json` and then loads the whole generated cohort through the production adapter.
+
+### Coordinate convention
+
+TartanAir source poses are represented in NED. The adapter transforms both translation and orientation into ENU. Applying the basis change only to positions would make translational and rotational ground truth internally inconsistent, so this behavior is regression-tested.
+
+### Strict preflight
+
+Run:
 
 ```bash
 s4dtam-bench preflight-tartanair data/raw/tartanair-converted
@@ -58,14 +104,35 @@ It rejects:
 - non-finite or non-increasing timestamps;
 - incomplete calibration metadata;
 - unsupported units;
-- malformed positions or quaternions;
+- malformed or non-finite positions and quaternions;
+- non-unit quaternions;
 - unsupported coordinate-axis conventions.
 
-The CI test suite includes a minimal end-to-end TartanAir adapter fixture so the conversion contract cannot regress silently. This is a **contract vertical slice**, not evidence that a real public sequence has already been validated. Publication readiness still requires running the same gate against pinned upstream files and freezing their checksums.
+### Cohort freeze
+
+After preflight, freeze the exact converted cohort:
+
+```bash
+s4dtam-bench freeze-tartanair \
+  data/raw/tartanair-converted \
+  artifacts/manifests/tartanair/frozen
+```
+
+The command produces:
+
+```text
+sequence-list.txt
+files.sha256
+freeze.json
+```
+
+`files.sha256` covers every descriptor and every referenced RGB frame. `freeze.json` records the cohort counts and stable hashes of the file manifest and sequence list.
+
+This completes the software path needed for real TartanAir ingestion, but it is not evidence that public TartanAir sequences have already been processed. The readiness state remains blocked until a pinned real cohort is acquired, converted, validated and frozen.
 
 ## Confirmatory freeze gate
 
-The internal H1-H7 study must not begin merely because model files happen to exist. The repository now includes an immutable freeze contract. Start from:
+The internal H1-H7 study must not begin merely because model files happen to exist. Start from:
 
 ```text
 configs/reproduction/confirmatory_freeze.template.yaml
@@ -91,16 +158,19 @@ The supplied template intentionally has `study_state: draft` and cannot pass the
 
 ## Next executable gates
 
-The order is:
+The order is now:
 
-1. run TartanAir preflight on pinned real sequences and freeze the selected sequence list;
-2. reproduce ORB-SLAM3 on those exact visual sequences and normalize the result artifact;
-3. validate Blackbird bag synchronization, then reproduce ORB-SLAM3 and VINS-Mono;
-4. freeze MARSIM commit/scenarios/seeds, then reproduce FAST-LIO2 and LIO-SAM;
-5. audit the actual AeroVerse release before enabling any pair;
-6. train and validate the learned S4D-TAM model on train/calibration data only;
-7. freeze the learned `full` artifact and H1-H7 artifacts;
-8. populate and validate the confirmatory freeze manifest;
-9. only then expose the sealed test cohort and execute the external and internal studies as separate analyses.
+1. acquire a pinned real TartanAir V1 cohort and verify its sampling rate;
+2. run `convert-tartanair`, `preflight-tartanair` and `freeze-tartanair`;
+3. reproduce ORB-SLAM3 on exactly the frozen sequence list;
+4. run `validate-baseline-evidence` for the TartanAir/ORB-SLAM3 cohort;
+5. run the first TartanAir-only development comparison through the common evaluator;
+6. validate Blackbird bag synchronization, then reproduce ORB-SLAM3 and VINS-Mono;
+7. freeze MARSIM commit/scenarios/seeds, then reproduce FAST-LIO2 and LIO-SAM;
+8. audit the actual AeroVerse release before enabling any pair;
+9. train and validate the learned S4D-TAM model on train/calibration data only;
+10. freeze the learned `full` artifact and H1-H7 artifacts;
+11. populate and validate the confirmatory freeze manifest;
+12. only then expose the sealed test cohort and execute the external and internal studies as separate analyses.
 
-The learned-model work can proceed in parallel, but the sealed confirmatory test cohort must remain inaccessible until both the data/baseline gates and the model freeze are complete.
+The learned-model work may proceed in parallel, but the sealed confirmatory test cohort must remain inaccessible until both the data/baseline gates and the model freeze are complete.
