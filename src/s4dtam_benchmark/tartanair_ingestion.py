@@ -65,16 +65,16 @@ def convert_tartanair_v1(
     raw_root: str | Path,
     output_root: str | Path,
     *,
-    fps: float = 10.0,
+    fps: float,
     link_mode: str = "symlink",
     overwrite: bool = False,
 ) -> TartanAirConversionSummary:
     """Convert V1-style trajectories into the strict one-level ``sequence.json`` contract.
 
     Raw TartanAir V1 trajectories do not carry per-frame timestamps in the canonical pose file.
-    Timestamps are therefore generated deterministically from the frame index and the explicitly
-    recorded sampling rate. The default is 10 Hz, but callers can override it and the assumption is
-    persisted in every descriptor.
+    Timestamps are therefore generated deterministically from the frame index and an explicitly
+    supplied sampling rate. The rate is persisted in every descriptor so the timing assumption is
+    never hidden inside the converter.
     """
     if not np.isfinite(fps) or fps <= 0:
         raise ValueError("TartanAir fps must be finite and positive")
