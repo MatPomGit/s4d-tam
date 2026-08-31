@@ -61,7 +61,7 @@ Those claims require the protocols described under **Evaluation protocols**.
 ## Research progression
 
 ```mermaid
-flowchart LR
+flowchart TD
     A[Software contracts] --> B[Synthetic regression]
     B --> C[Public dataset conversion]
     C --> D[Baseline reproduction]
