@@ -67,7 +67,7 @@ The project provides one auditable evaluation path for S4D-TAM and external navi
 ## Evaluation pipeline
 
 ```mermaid
-flowchart LR
+flowchart TD
     A[Dataset or manifest] --> B[Dataset adapter]
     B --> C[SequenceData]
     C --> D[S4D-TAM reference]
@@ -104,7 +104,7 @@ This separation keeps upstream implementations intact while standardizing timest
 ## From code to scientific evidence
 
 ```mermaid
-flowchart LR
+flowchart TD
     A[Unit tests] --> B[Synthetic smoke]
     B --> C[Dataset validation]
     C --> D[Baseline reproduction]
