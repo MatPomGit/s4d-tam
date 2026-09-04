@@ -105,7 +105,9 @@ class AlgorithmResult:
     mappings are keyed by horizon in seconds; occupancy predictions parameterize
     Bernoulli distributions while flow prediction/uncertainty pairs parameterize
     axis-independent Gaussian distributions. Forecast masks identify valid
-    spatiotemporal evaluation regions. Pose
+    spatiotemporal regions and have the occupancy shape (equivalently, the flow
+    shape without its final vector axis). Non-zero estimated quaternions are
+    normalized to unit length. Pose
     covariance matrices are required to be symmetric positive definite because
     uncertainty evaluation uses their inverse and log determinant.
     """
@@ -147,6 +149,16 @@ class AlgorithmResult:
             np.isfinite(self.estimated_positions)
         ):
             raise ValueError("estimated_positions must be a finite array with shape [N,3]")
+        if self.estimated_quaternions is not None:
+            quaternions = np.asarray(self.estimated_quaternions, dtype=float)
+            if quaternions.shape != (count, 4):
+                raise ValueError("estimated_quaternions must have shape [N,4]")
+            if not np.all(np.isfinite(quaternions)):
+                raise ValueError("estimated_quaternions must be finite")
+            norms = np.linalg.norm(quaternions, axis=1)
+            if np.any(norms == 0):
+                raise ValueError("estimated_quaternions must not contain zero-norm quaternions")
+            self.estimated_quaternions = quaternions / norms[:, None]
         if self.pose_covariances is not None:
             covariance = np.asarray(self.pose_covariances, dtype=float)
             if covariance.shape != (count, 3, 3):
@@ -163,6 +175,92 @@ class AlgorithmResult:
             if scores.shape != (count,) or not np.all(np.isfinite(scores)):
                 raise ValueError("ood_scores must be a finite vector with one value per estimate")
             self.ood_scores = scores
+        if self.semantic_pred is not None:
+            semantic = np.asarray(self.semantic_pred)
+            if semantic.ndim == 0 or semantic.shape[0] != count:
+                raise ValueError("semantic_pred must have N samples on its first axis")
+            if not np.issubdtype(semantic.dtype, np.number) or not np.all(np.isfinite(semantic)):
+                raise ValueError("semantic_pred must contain finite numeric values")
+            self.semantic_pred = semantic
+
+        def normalize_forecasts(
+            name: str, values: dict[float, np.ndarray], *, probability: bool = False
+        ) -> dict[float, np.ndarray]:
+            normalized: dict[float, np.ndarray] = {}
+            for raw_horizon, raw_value in values.items():
+                horizon = float(raw_horizon)
+                if not np.isfinite(horizon) or horizon <= 0:
+                    raise ValueError(f"{name} horizons must be positive and finite")
+                value = np.asarray(raw_value, dtype=float)
+                if value.ndim == 0 or value.shape[0] != count:
+                    raise ValueError(f"{name}[{horizon:g}] must have N samples on its first axis")
+                if not np.all(np.isfinite(value)):
+                    raise ValueError(f"{name}[{horizon:g}] must be finite")
+                if probability and np.any((value < 0) | (value > 1)):
+                    raise ValueError(f"{name}[{horizon:g}] probabilities must be in [0, 1]")
+                if name.endswith("uncertainty") and np.any(value < 0):
+                    raise ValueError(f"{name}[{horizon:g}] must be non-negative")
+                normalized[horizon] = value
+            return normalized
+
+        self.occupancy_pred = normalize_forecasts(
+            "occupancy_pred", self.occupancy_pred, probability=True
+        )
+        self.flow_pred = normalize_forecasts("flow_pred", self.flow_pred)
+        self.occupancy_uncertainty = normalize_forecasts(
+            "occupancy_uncertainty", self.occupancy_uncertainty
+        )
+        self.flow_uncertainty = normalize_forecasts("flow_uncertainty", self.flow_uncertainty)
+        for name, uncertainties, predictions in (
+            ("occupancy_uncertainty", self.occupancy_uncertainty, self.occupancy_pred),
+            ("flow_uncertainty", self.flow_uncertainty, self.flow_pred),
+        ):
+            for horizon in uncertainties.keys() & predictions.keys():
+                if uncertainties[horizon].shape != predictions[horizon].shape:
+                    raise ValueError(f"{name}[{horizon:g}] shape must match its prediction exactly")
+        masks: dict[float, np.ndarray] = {}
+        for raw_horizon, raw_mask in self.forecast_observable_mask.items():
+            horizon = float(raw_horizon)
+            if not np.isfinite(horizon) or horizon <= 0:
+                raise ValueError("forecast_observable_mask horizons must be positive and finite")
+            mask = np.asarray(raw_mask)
+            if mask.dtype != np.bool_:
+                raise ValueError(f"forecast_observable_mask[{horizon:g}] must be boolean")
+            if mask.ndim == 0 or mask.shape[0] != count:
+                raise ValueError(
+                    f"forecast_observable_mask[{horizon:g}] must have N samples on its first axis"
+                )
+            allowed = []
+            if horizon in self.occupancy_pred:
+                allowed.append(self.occupancy_pred[horizon].shape)
+            if horizon in self.flow_pred and self.flow_pred[horizon].ndim > 1:
+                allowed.append(self.flow_pred[horizon].shape[:-1])
+            if allowed and mask.shape not in allowed:
+                raise ValueError(
+                    f"forecast_observable_mask[{horizon:g}] shape {mask.shape} must be one of "
+                    f"{allowed}"
+                )
+            masks[horizon] = mask
+        self.forecast_observable_mask = masks
+
+        if self.risk_pred is not None:
+            risk = np.asarray(self.risk_pred, dtype=float)
+            if risk.shape != (count,):
+                raise ValueError("risk_pred must have shape [N]")
+            if not np.all(np.isfinite(risk)) or np.any((risk < 0) | (risk > 1)):
+                raise ValueError("risk_pred must contain finite probabilities in [0, 1]")
+            self.risk_pred = risk
+        if self.latency_ms is not None:
+            latency = np.asarray(self.latency_ms, dtype=float)
+            if latency.shape != (count,):
+                raise ValueError("latency_ms must have shape [N]")
+            if not np.all(np.isfinite(latency)) or np.any(latency < 0):
+                raise ValueError("latency_ms must contain finite non-negative values")
+            self.latency_ms = latency
+        resources = {str(key): float(value) for key, value in self.resource.items()}
+        if not all(np.isfinite(value) and value >= 0 for value in resources.values()):
+            raise ValueError("resource values must be finite non-negative scalars")
+        self.resource = resources
         if self.planned_trajectory is not None:
             trajectory = np.asarray(self.planned_trajectory, dtype=float)
             if (

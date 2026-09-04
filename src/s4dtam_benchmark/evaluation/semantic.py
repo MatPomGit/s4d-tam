@@ -4,6 +4,15 @@ import numpy as np
 
 
 def semantic_metrics(target: np.ndarray, prediction: np.ndarray) -> dict[str, float]:
+    target = np.asarray(target)
+    prediction = np.asarray(prediction)
+    if target.shape != prediction.shape:
+        raise ValueError(
+            f"semantic target and prediction shapes must match exactly: "
+            f"{target.shape} != {prediction.shape}"
+        )
+    if target.size == 0:
+        raise ValueError("semantic target and prediction must not be empty")
     labels = np.union1d(target, prediction)
     ious, f1s = [], []
     metrics: dict[str, float] = {}
