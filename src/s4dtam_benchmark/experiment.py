@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +15,7 @@ from s4dtam_benchmark.algorithms.s4dtam import (
     S4DTAMReference,
     ModalityNoiseModel,
 )
-from s4dtam_benchmark.config import load_yaml
+from s4dtam_benchmark.config import load_yaml, resolve_from_config
 from s4dtam_benchmark.contracts import RunContext
 from s4dtam_benchmark.datasets import (
     AeroVerseDataset,
@@ -131,12 +132,44 @@ def _algorithm(spec: dict[str, Any]):
 def run_experiment(config_path: str | Path) -> Path:
     config = load_yaml(config_path)
     seed = int(config.get("seed", 7))
-    output_dir = Path(config.get("output_dir", "outputs/run"))
-    if not output_dir.is_absolute():
-        output_dir = Path.cwd() / output_dir
+    output_value = config.get("output_dir", "outputs/run")
+    output_dir = resolve_from_config(config, output_value)
+    assert output_dir is not None
+
+    # Keep the user-authored configuration untouched and give adapters a separate,
+    # fully resolved copy.  The two representations are recorded together below.
+    resolved_config = deepcopy(config)
+    resolved_paths: dict[str, Any] = {
+        "policy": "relative paths are resolved against the experiment YAML directory",
+        "config_directory": str(Path(config["_config_path"]).parent),
+        "output_dir": {
+            "provided": config.get("output_dir"),
+            "effective": output_value,
+            "resolved": str(output_dir),
+        },
+        "datasets": [],
+        "algorithms": [],
+    }
+    for index, spec in enumerate(resolved_config["datasets"]):
+        paths: dict[str, Any] = {"index": index}
+        for field in ("root", "manifest"):
+            if field in spec:
+                resolved = resolve_from_config(config, spec[field])
+                paths[field] = {"provided": spec[field], "resolved": str(resolved) if resolved else None}
+                spec[field] = resolved
+        resolved_paths["datasets"].append(paths)
+    for index, spec in enumerate(resolved_config["algorithms"]):
+        paths = {"index": index}
+        for field in ("reference_map", "result_root"):
+            if field in spec:
+                resolved = resolve_from_config(config, spec[field])
+                paths[field] = {"provided": spec[field], "resolved": str(resolved) if resolved else None}
+                spec[field] = resolved
+        resolved_paths["algorithms"].append(paths)
+
     context = RunContext(output_dir=output_dir, seed=seed, config=config)
-    datasets = [(_dataset(spec, seed), spec) for spec in config["datasets"]]
-    algorithms = [_algorithm(spec) for spec in config["algorithms"]]
+    datasets = [(_dataset(spec, seed), spec) for spec in resolved_config["datasets"]]
+    algorithms = [_algorithm(spec) for spec in resolved_config["algorithms"]]
     records: list[dict[str, Any]] = []
     unavailable: list[dict[str, str]] = []
     failures: list[dict[str, str]] = []
@@ -206,7 +239,14 @@ def run_experiment(config_path: str | Path) -> Path:
 
     if not records:
         raise RuntimeError(f"No successful runs. Failures: {failures}")
-    write_paper_assets(records, output_dir, config, executions)
+    original_config = {key: value for key, value in config.items() if key != "_config_path"}
+    write_paper_assets(
+        records,
+        output_dir,
+        original_config,
+        executions,
+        path_resolution=resolved_paths,
+    )
     (output_dir / "unavailable_metrics.json").write_text(
         json.dumps(unavailable, indent=2), encoding="utf-8"
     )
