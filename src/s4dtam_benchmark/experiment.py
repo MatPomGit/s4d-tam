@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 from copy import deepcopy
+from enum import Enum
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Any
 
 from s4dtam_benchmark.algorithms.dead_reckoning import DeadReckoning
@@ -27,6 +29,61 @@ from s4dtam_benchmark.datasets import (
 )
 from s4dtam_benchmark.evaluation import evaluate_result
 from s4dtam_benchmark.reporting import write_paper_assets
+
+
+class AlgorithmExecutionState(Enum):
+    """Lifecycle state used to isolate failures between algorithm adapters."""
+
+    READY = "ready"
+    CALIBRATION_FAILED = "calibration_failed"
+    EXECUTION_FAILED = "execution_failed"
+
+
+def _write_json_atomic(path: Path, payload: Any) -> None:
+    """Write JSON without exposing a partially written report at ``path``."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path: Path | None = None
+    try:
+        with NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary:
+            json.dump(payload, temporary, indent=2)
+            temporary.write("\n")
+            temporary.flush()
+            temporary_path = Path(temporary.name)
+        temporary_path.replace(path)
+    finally:
+        if temporary_path is not None and temporary_path.exists():
+            temporary_path.unlink()
+
+
+def _failure_record(
+    *,
+    phase: str,
+    algorithm: Any,
+    error: Exception,
+    calibration_data_id: str,
+    dataset: str | None = None,
+    sequence: str | None = None,
+) -> dict[str, str]:
+    record = {
+        "phase": phase,
+        "algorithm": algorithm.name,
+        "exception_type": type(error).__name__,
+        "message": str(error),
+        "calibration_data_id": calibration_data_id,
+    }
+    if dataset is not None:
+        record["dataset"] = dataset
+    if sequence is not None:
+        record["sequence"] = sequence
+    return record
 
 
 def _dataset(spec: dict[str, Any], seed: int):
@@ -174,6 +231,9 @@ def run_experiment(config_path: str | Path) -> Path:
     unavailable: list[dict[str, str]] = []
     failures: list[dict[str, str]] = []
     executions: list[dict[str, Any]] = []
+    algorithm_states = {
+        id(algorithm): AlgorithmExecutionState.READY for algorithm in algorithms
+    }
 
     calibration_sequences = [
         sequence
@@ -188,13 +248,28 @@ def run_experiment(config_path: str | Path) -> Path:
         for algorithm in algorithms:
             calibrate = getattr(algorithm, "calibrate", None)
             if calibrate is not None:
-                calibrate(calibration_sequences, context, calibration_id)
+                try:
+                    calibrate(calibration_sequences, context, calibration_id)
+                except Exception as error:  # isolate adapters just as execution does
+                    algorithm_states[id(algorithm)] = (
+                        AlgorithmExecutionState.CALIBRATION_FAILED
+                    )
+                    failures.append(
+                        _failure_record(
+                            phase="calibration",
+                            algorithm=algorithm,
+                            error=error,
+                            calibration_data_id=calibration_id,
+                        )
+                    )
 
     for dataset, spec in datasets:
         if spec.get("split") == "calibration":
             continue
         for sequence in dataset.sequences():
             for algorithm in algorithms:
+                if algorithm_states[id(algorithm)] is not AlgorithmExecutionState.READY:
+                    continue
                 try:
                     result = algorithm.run(sequence, context)
                     executions.append(
@@ -228,15 +303,19 @@ def run_experiment(config_path: str | Path) -> Path:
                 except (
                     Exception
                 ) as error:  # isolate baseline failures and keep the benchmark auditable
+                    algorithm_states[id(algorithm)] = AlgorithmExecutionState.EXECUTION_FAILED
                     failures.append(
-                        {
-                            "dataset": sequence.dataset,
-                            "sequence": sequence.sequence_id,
-                            "algorithm": algorithm.name,
-                            "error": f"{type(error).__name__}: {error}",
-                        }
+                        _failure_record(
+                            phase="execution",
+                            algorithm=algorithm,
+                            error=error,
+                            calibration_data_id=calibration_id,
+                            dataset=sequence.dataset,
+                            sequence=sequence.sequence_id,
+                        )
                     )
 
+    _write_json_atomic(output_dir / "failures.json", failures)
     if not records:
         raise RuntimeError(f"No successful runs. Failures: {failures}")
     original_config = {key: value for key, value in config.items() if key != "_config_path"}
@@ -247,8 +326,5 @@ def run_experiment(config_path: str | Path) -> Path:
         executions,
         path_resolution=resolved_paths,
     )
-    (output_dir / "unavailable_metrics.json").write_text(
-        json.dumps(unavailable, indent=2), encoding="utf-8"
-    )
-    (output_dir / "failures.json").write_text(json.dumps(failures, indent=2), encoding="utf-8")
+    _write_json_atomic(output_dir / "unavailable_metrics.json", unavailable)
     return output_dir
