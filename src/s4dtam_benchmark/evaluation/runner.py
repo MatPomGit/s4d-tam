@@ -17,10 +17,42 @@ from .uncertainty import (
     selective_risk_metrics,
 )
 
+# Absolute tolerance for comparing dataset and result timestamps, in seconds.
+TIMESTAMP_ATOL_SECONDS = 1e-6
+
+
+def validate_time_contract(
+    sequence: SequenceData,
+    result: AlgorithmResult,
+    *,
+    timestamp_atol_seconds: float = TIMESTAMP_ATOL_SECONDS,
+) -> None:
+    """Require a one-to-one timestamp match; no interpolation is performed."""
+    expected = sequence.timestamps
+    actual = result.timestamps
+    overlap = min(len(expected), len(actual))
+    max_difference = (
+        float(np.max(np.abs(expected[:overlap] - actual[:overlap])))
+        if overlap
+        else float("inf")
+    )
+    same_count = len(expected) == len(actual)
+    timestamps_match = same_count and np.allclose(
+        expected, actual, rtol=0.0, atol=timestamp_atol_seconds
+    )
+    if not timestamps_match:
+        raise ValueError(
+            "timestamp contract mismatch: "
+            f"dataset={sequence.dataset!r}, sequence_id={sequence.sequence_id!r}, "
+            f"algorithm={result.algorithm!r}, dataset_samples={len(expected)}, "
+            f"result_samples={len(actual)}, max_time_difference_s={max_difference:g}"
+        )
+
 
 def evaluate_result(
     sequence: SequenceData, result: AlgorithmResult
 ) -> tuple[dict[str, float], list[str]]:
+    validate_time_contract(sequence, result)
     metrics = trajectory_metrics(sequence.gt_positions, result.estimated_positions)
     unavailable: list[str] = []
     metrics.update(
