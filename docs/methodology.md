@@ -45,6 +45,20 @@ Jednostką analizy pozostaje sekwencja/misja. Klatki nie są traktowane jako nie
 6. Zmaterializować jeden wiersz na wynik, przeprowadzić audyt kompletności, a dopiero potem odślepić warianty i wykonać właściwą analizę statystyczną.
 7. Opublikować surowe dozwolone dane, braki, awarie, kod analizy, środowisko, provenance, raport incydentów po anonimizacji oraz wynik `sha256sum -c`.
 
+### Polityka częściowych awarii
+
+Runner izoluje awarie na poziomie algorytmu. Błąd kalibracji oznacza algorytm jako
+`calibration_failed`: nie jest on uruchamiany na żadnej sekwencji ewaluacyjnej, ale
+kalibracja i wykonanie pozostałych algorytmów trwają dalej. Analogicznie błąd podczas
+wykonania oznacza algorytm jako `execution_failed` i wyłącza jego kolejne uruchomienia.
+Każda awaria trafia do `failures.json` z fazą, nazwą algorytmu, typem wyjątku,
+komunikatem oraz identyfikatorem danych kalibracyjnych; dla awarii wykonania raport
+zawiera też zbiór i sekwencję. Raporty JSON są publikowane atomowo. Jeżeli nie powstał
+żaden poprawny rekord metryki, runner najpierw zapisuje `failures.json`, a dopiero
+potem zgłasza końcowy `RuntimeError`. Wyniki algorytmów, które zakończyły pracę
+poprawnie, pozostają raportowane jako wynik częściowy i muszą być interpretowane wraz
+z rejestrem awarii.
+
 ## Replikacja i granice wnioskowania
 
 Replikator nie odtwarza lokalnego środowiska autora, lecz buduje je z dostarczonych wheelów przy wyłączonej sieci. Replikacja jest ścisła, gdy zgadzają się hashe wejść i wyniki deterministyczne; jest obliczeniowa, gdy wartości mieszczą się w z góry ustalonej tolerancji numerycznej; jest inferencyjna, gdy kierunek i decyzja pozostają zgodne mimo innego sprzętu. Każdy poziom raportuje się osobno. Wyniki symulacyjne nie dowodzą bezpieczeństwa lotniczego, a real-flight pozostaje ograniczony do zatwierdzonej obwiedni operacyjnej.
