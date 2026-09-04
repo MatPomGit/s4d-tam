@@ -78,14 +78,33 @@ def test_blackbird_rejects_missing_topic_and_bad_time(tmp_path):
         next(adapter.sequences())
 
 
-def test_marsim_export_is_seeded_and_deterministic(tmp_path):
+def test_marsim_export_round_trip_is_seeded_sorted_and_deterministic(tmp_path):
     samples = [{"timestamp": 2, "position_m": [2, 0, 0]},
                {"timestamp": 1, "position_m": [1, 0, 0]}]
     manifest = MARSIMExporter(tmp_path, seed=42).export(samples, simulator_version="abc")
     spec = json.loads(manifest.read_text())
     assert spec["random_seed"] == 42
     assert spec["sequences"][0]["file"] == "sequence_seed_0000000042_000000.npz"
-    np.testing.assert_array_equal(next(MARSIMDataset(tmp_path).sequences()).timestamps, [1, 2])
+    sequence = next(MARSIMDataset(tmp_path).sequences())
+    np.testing.assert_array_equal(sequence.timestamps, [1, 2])
+    np.testing.assert_array_equal(sequence.gt_positions, [[1, 0, 0], [2, 0, 0]])
+
+
+@pytest.mark.parametrize(("samples", "message"), [
+    ([], "must not be empty"),
+    ([{"timestamp": np.nan, "position_m": [0, 0, 0]}], "timestamps must be finite"),
+    ([{"timestamp": 1, "position_m": [0, 0, 0]},
+      {"timestamp": 1, "position_m": [1, 0, 0]}], "timestamps must not contain duplicates"),
+    ([{"timestamp": 1, "position_m": [0, np.inf, 0]}],
+     "position_m coordinates must be finite"),
+    ([{"timestamp": 1, "position_m": [0, 0]}],
+     "position_m must contain three coordinates"),
+])
+def test_marsim_export_rejects_invalid_samples(tmp_path, samples, message):
+    with pytest.raises(ValueError, match=message):
+        MARSIMExporter(tmp_path, seed=42).export(samples, simulator_version="abc")
+    assert not (tmp_path / "manifest.json").exists()
+    assert not list(tmp_path.glob("*.npz"))
 
 
 def test_aeroverse_gates_license_version_and_completeness(tmp_path):

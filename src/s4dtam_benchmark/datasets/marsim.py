@@ -23,19 +23,23 @@ class MARSIMExporter:
         self.axis_convention = axis_convention
 
     def export(self, samples: Iterable[dict[str, Any]], *, simulator_version: str) -> Path:
-        """Export samples sorted by timestamp; seed controls stable tie ordering and names."""
+        """Export samples in deterministic timestamp order."""
         records = list(samples)
-        rng = np.random.default_rng(self.seed)
-        tie_breakers = rng.random(len(records))
-        ordered = [record for _, _, record in sorted(
-            zip((float(r["timestamp"]) for r in records), tie_breakers, records),
-            key=lambda item: (item[0], item[1]))]
-        timestamps = np.asarray([record["timestamp"] for record in ordered], float)
-        if not len(timestamps) or np.any(~np.isfinite(timestamps)) or np.any(np.diff(timestamps) < 0):
+        if not records:
+            raise ValueError("MARSIM samples must not be empty")
+        timestamps = np.asarray([record["timestamp"] for record in records], dtype=float)
+        if np.any(~np.isfinite(timestamps)):
             raise ValueError("MARSIM timestamps must be finite")
-        positions = np.asarray([record["position_m"] for record in ordered], float)
+        order = np.argsort(timestamps, kind="stable")
+        ordered = [records[index] for index in order]
+        timestamps = timestamps[order]
+        if np.any(np.diff(timestamps) <= 0):
+            raise ValueError("MARSIM timestamps must not contain duplicates")
+        positions = np.asarray([record["position_m"] for record in ordered], dtype=float)
         if positions.shape != (len(ordered), 3):
             raise ValueError("MARSIM position_m must contain three coordinates")
+        if np.any(~np.isfinite(positions)):
+            raise ValueError("MARSIM position_m coordinates must be finite")
         self.output_root.mkdir(parents=True, exist_ok=True)
         filename = f"sequence_seed_{self.seed:010d}_000000.npz"
         np.savez(self.output_root / filename, timestamps=timestamps, gt_positions=positions,
