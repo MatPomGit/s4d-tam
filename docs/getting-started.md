@@ -68,6 +68,13 @@ s4dtam-bench run <experiment.yaml>
 
 Experiment files connect dataset definitions, algorithm configurations, seeds and reporting settings. Scientific runs should use version-controlled configuration files rather than ad-hoc command-line parameters.
 
+All relative paths inside an experiment file—including `output_dir`, dataset `root` and
+`manifest`, and algorithm `reference_map` and `result_root`—are relative to the directory
+containing that YAML file. For example, `output_dir: results/test` in
+`/work/study/experiment.yaml` writes to `/work/study/results/test`, even when the command is
+launched elsewhere. Absolute paths such as `/mnt/datasets/flight` may also be used. See
+[Configuration paths](configuration.md) for examples and manifest provenance details.
+
 ## Validate an ablation configuration
 
 ```bash

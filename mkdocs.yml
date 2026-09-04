@@ -91,6 +91,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting started: getting-started.md
+  - Configuration paths: configuration.md
   - Benchmark:
       - Project status: project-status.md
       - Architecture: architecture.md

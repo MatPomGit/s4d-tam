@@ -37,14 +37,16 @@ def write_paper_assets(
     output_dir: Path,
     run_config: dict[str, Any],
     executions: list[dict[str, Any]] | None = None,
+    path_resolution: dict[str, Any] | None = None,
 ) -> None:
     """Write aggregate tables, figures, and an auditable run manifest.
 
     Args:
         records: Long-form metric records produced by sequence evaluation.
         output_dir: Destination directory for all report artifacts.
-        run_config: Fully resolved experiment configuration.
+        run_config: Original, user-authored experiment configuration.
         executions: Optional per-execution metadata, including calibration provenance.
+        path_resolution: Optional provided and absolute path provenance.
     """
     output_dir.mkdir(parents=True, exist_ok=True)
     frame = pd.DataFrame(records)
@@ -141,6 +143,7 @@ def write_paper_assets(
     calibration_by_artifact = {record["artifact"]: record for record in calibration_records}
     manifest = {
         "config": run_config,
+        "path_resolution": path_resolution or {},
         "python": sys.version,
         "platform": platform.platform(),
         "hardware": {
