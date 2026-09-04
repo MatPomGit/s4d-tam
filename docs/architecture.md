@@ -136,6 +136,14 @@ Required scalar telemetry includes `resource_peak_rss_mb` and `resource_cpu_time
 
 The parser rejects missing fields, incompatible shapes, non-finite values and timestamp collisions before evaluation. Quaternions are normalized at the contract boundary.
 
+Evaluation uses a strict one-to-one time synchronization policy. An algorithm result must
+contain exactly as many samples as its input sequence, in the same order, and every result
+timestamp must match the corresponding dataset timestamp with an absolute tolerance of
+`1e-6` seconds (and zero relative tolerance). The default evaluator rejects mismatches
+before computing any metric; it does not interpolate, resample, or otherwise align samples.
+Any future interpolation behavior must be introduced as a separate, explicitly documented
+evaluation mode rather than changing this default contract.
+
 ## Baseline provenance
 
 External wrappers should record:

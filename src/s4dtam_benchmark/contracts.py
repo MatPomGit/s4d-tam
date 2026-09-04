@@ -134,8 +134,14 @@ class AlgorithmResult:
         """Normalize arrays and reject malformed algorithm output early."""
         self.timestamps = np.asarray(self.timestamps, dtype=float)
         self.estimated_positions = np.asarray(self.estimated_positions, dtype=float)
-        if self.timestamps.ndim != 1 or not np.all(np.isfinite(self.timestamps)):
+        if self.timestamps.ndim != 1:
+            raise ValueError("result timestamps must be a one-dimensional array")
+        if self.timestamps.size == 0:
+            raise ValueError("result timestamps must not be empty")
+        if not np.all(np.isfinite(self.timestamps)):
             raise ValueError("result timestamps must be a finite one-dimensional array")
+        if np.any(np.diff(self.timestamps) <= 0):
+            raise ValueError("result timestamps must be strictly increasing")
         count = len(self.timestamps)
         if self.estimated_positions.shape != (count, 3) or not np.all(
             np.isfinite(self.estimated_positions)
