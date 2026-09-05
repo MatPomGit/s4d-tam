@@ -413,7 +413,10 @@ class TokenMemory:
             "discarded_proposals": len(result.discarded_candidates),
         }
         for key, value in increments.items():
-            self.association_summary[key] = int(self.association_summary[key]) + value
+            previous = self.association_summary[key]
+            if not isinstance(previous, int):
+                raise TypeError(f"association summary field {key!r} is not an integer")
+            self.association_summary[key] = previous + value
         self.association_summary["radial_fallback_used"] = bool(
             self.association_summary["radial_fallback_used"]
             or result.metadata.get("radial_fallback_used", False)
