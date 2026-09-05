@@ -123,9 +123,10 @@ def fit_calibration(
     )
     covariance_scale = max(float(np.mean(normalized_errors) / 3.0), minimum_covariance_scale)
     feature_scale = np.maximum(np.std(feature_array, axis=0), minimum_feature_scale)
+    feature_mean = np.mean(feature_array, axis=0)
     return CalibrationParameters(
-        feature_mean=tuple(float(value) for value in np.mean(feature_array, axis=0)),
-        feature_scale=tuple(float(value) for value in feature_scale),
+        feature_mean=(float(feature_mean[0]), float(feature_mean[1]), float(feature_mean[2])),
+        feature_scale=(float(feature_scale[0]), float(feature_scale[1]), float(feature_scale[2])),
         covariance_scale=covariance_scale,
         sample_count=sample_count,
     )

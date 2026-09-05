@@ -9,9 +9,9 @@ from typing import Any
 
 import yaml
 
-try:
+if sys.version_info >= (3, 11):
     import tomllib
-except ModuleNotFoundError:  # Python 3.10 compatibility
+else:  # Python 3.10 compatibility
     import tomli as tomllib
 
 SHA256 = re.compile(r"^[a-f0-9]{64}$")

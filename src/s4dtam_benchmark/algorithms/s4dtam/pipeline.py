@@ -434,7 +434,7 @@ class S4DTAMReference(AlgorithmAdapter):
                     config,
                 )
                 planned_trajectory = plan.trajectory
-                planner_cost = plan.cost_diagnostics
+                planner_cost = dict(plan.cost_diagnostics)
         if event_logger is not None:
             completion_fields: dict[str, object] = {
                 "token_count": len(memory.tokens),

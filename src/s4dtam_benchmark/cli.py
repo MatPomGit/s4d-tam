@@ -128,7 +128,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Valid confirmatory study freeze: {args.config}")
         return 0
     if args.command == "convert-tartanair":
-        summary = convert_tartanair_v1(
+        conversion_summary = convert_tartanair_v1(
             args.raw_root,
             args.output_root,
             fps=args.fps,
@@ -136,8 +136,8 @@ def main(argv: list[str] | None = None) -> int:
             overwrite=args.overwrite,
         )
         print(
-            f"Converted TartanAir: sequences={summary.sequences} frames={summary.frames} "
-            f"root={summary.output_root}"
+            f"Converted TartanAir: sequences={conversion_summary.sequences} "
+            f"frames={conversion_summary.frames} root={conversion_summary.output_root}"
         )
         return 0
     if args.command == "preflight-tartanair":
@@ -150,17 +150,17 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  {sequence.sequence_id}: samples={len(sequence.timestamps)}")
         return 0
     if args.command == "freeze-tartanair":
-        summary = freeze_tartanair_cohort(args.converted_root, args.output_dir)
+        freeze_summary = freeze_tartanair_cohort(args.converted_root, args.output_dir)
         print(
-            f"Frozen TartanAir cohort: sequences={summary.sequences} frames={summary.frames} "
-            f"files={summary.files}"
+            f"Frozen TartanAir cohort: sequences={freeze_summary.sequences} "
+            f"frames={freeze_summary.frames} files={freeze_summary.files}"
         )
-        print(f"  manifest_sha256={summary.manifest_sha256}")
-        print(f"  sequence_list_sha256={summary.sequence_list_sha256}")
-        print(f"  output={summary.output_dir}")
+        print(f"  manifest_sha256={freeze_summary.manifest_sha256}")
+        print(f"  sequence_list_sha256={freeze_summary.sequence_list_sha256}")
+        print(f"  output={freeze_summary.output_dir}")
         return 0
     if args.command == "validate-baseline-evidence":
-        summary = validate_and_freeze_baseline_evidence(
+        evidence_summary = validate_and_freeze_baseline_evidence(
             baseline=args.baseline,
             dataset=args.dataset,
             sequence_list=args.sequence_list,
@@ -170,11 +170,11 @@ def main(argv: list[str] | None = None) -> int:
             output_dir=args.output_dir,
         )
         print(
-            f"Valid baseline evidence: baseline={summary.baseline} dataset={summary.dataset} "
-            f"sequences={summary.sequences}"
+            f"Valid baseline evidence: baseline={evidence_summary.baseline} "
+            f"dataset={evidence_summary.dataset} sequences={evidence_summary.sequences}"
         )
-        print(f"  evidence={summary.evidence_path}")
-        print(f"  evidence_sha256={summary.evidence_sha256}")
+        print(f"  evidence={evidence_summary.evidence_path}")
+        print(f"  evidence_sha256={evidence_summary.evidence_sha256}")
         return 0
     if args.command == "verify-package":
         verify_reproduction_package(args.root, load_yaml(args.spec))

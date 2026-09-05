@@ -20,7 +20,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.6", "mypy>=1.11"]
+dev = [
+  "pytest>=8",
+  "pytest-cov>=5",
+  "ruff>=0.6",
+  "mypy>=1.11",
+  "pandas-stubs>=2.1",
+  "types-PyYAML>=6.0",
+]
 
 [project.scripts]
 s4dtam-bench = "s4dtam_benchmark.cli:main"
@@ -33,6 +40,21 @@ where = ["src"]
 line-length = 100
 target-version = "py310"
 
+[tool.mypy]
+python_version = "3.12"
+files = ["src"]
+packages = ["s4dtam_benchmark"]
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = ["scipy", "scipy.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["yaml", "pandas"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 addopts = "-q"

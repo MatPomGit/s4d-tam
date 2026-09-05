@@ -101,8 +101,8 @@ def parse_external_artifact(path: str | Path, name: str) -> AlgorithmResult:
             raise ValueError("Invalid field 'latency_ms': values must be non-negative")
         resource = {key.removeprefix("resource_"): float(np.asarray(data[key]))
                     for key in data.files if key.startswith("resource_")}
-        for field, value in resource.items():
-            if not np.isfinite(value) or value < 0:
+        for field, resource_value in resource.items():
+            if not np.isfinite(resource_value) or resource_value < 0:
                 raise ValueError(f"Invalid field 'resource_{field}': expected non-negative scalar")
         return AlgorithmResult(
             algorithm=name, timestamps=timestamps, estimated_positions=positions,

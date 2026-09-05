@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 import numpy as np
 
 from s4dtam_benchmark.contracts import MODALITIES, AvailabilityState
@@ -72,7 +74,9 @@ class MaskedFusion:
         return normalized
 
     @staticmethod
-    def _aggregate_unavailable(states: dict[str, int]) -> int:
+    def _aggregate_unavailable(
+        states: Mapping[str, AvailabilityState],
+    ) -> AvailabilityState:
         # More local failures take precedence over a globally absent stream.
         for state in (AvailabilityState.QUALITY_REJECTED, AvailabilityState.SAMPLE_MISSING):
             if state in states.values():
