@@ -48,10 +48,8 @@ warn_unused_configs = true
 
 [[tool.mypy.overrides]]
 module = ["scipy", "scipy.*"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["yaml", "pandas"]
+# scipy does not expose complete inline typing across every supported Python
+# version.  Keep this exception narrow rather than silencing typed dependencies.
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
