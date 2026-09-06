@@ -4,11 +4,12 @@ import json
 import platform
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.figure import Figure
 from scipy.stats import wilcoxon
 
 from s4dtam_benchmark.evaluation.statistics import holm_adjust, paired_bootstrap
@@ -96,10 +97,11 @@ def write_paper_assets(
     pairwise = pd.DataFrame(comparisons)
     if not pairwise.empty:
         pairwise["p_holm"] = np.nan
-        for _, indices in pairwise.groupby(["dataset", "metric"]).groups.items():
-            valid = [index for index in indices if not np.isnan(pairwise.at[index, "p_value"])]
+        numeric_p_values = pd.to_numeric(pairwise["p_value"], errors="coerce")
+        for indices in pairwise.groupby(["dataset", "metric"]).groups.values():
+            valid = [index for index in indices if pd.notna(numeric_p_values.loc[index])]
             if valid:
-                adjusted = holm_adjust([float(pairwise.at[index, "p_value"]) for index in valid])
+                adjusted = holm_adjust([float(numeric_p_values.loc[index]) for index in valid])
                 pairwise.loc[valid, "p_holm"] = adjusted
     pairwise.to_csv(output_dir / "pairwise.csv", index=False)
 
@@ -110,16 +112,18 @@ def write_paper_assets(
         )
         axis = pivot.plot(kind="bar", ylabel="ATE RMSE [m]", rot=20)
         axis.grid(axis="y", alpha=0.3)
-        axis.figure.tight_layout()
-        axis.figure.savefig(output_dir / "ate_rmse.pdf")
-        axis.figure.savefig(output_dir / "ate_rmse.png", dpi=200)
-        plt.close(axis.figure)
+        figure = cast(Figure, axis.figure)
+        figure.tight_layout()
+        figure.savefig(output_dir / "ate_rmse.pdf")
+        figure.savefig(output_dir / "ate_rmse.png", dpi=200)
+        plt.close(figure)
 
     calibration = frame[frame["metric"].str.startswith("calibration/coverage_")]
     if not calibration.empty:
         plot = calibration.copy()
         plot["nominal"] = plot["metric"].str.extract(r"(\d+)pct")[0].astype(float) / 100
-        plot = plot.groupby("nominal", as_index=False)["value"].mean().sort_values("nominal")
+        plot = plot.groupby("nominal", as_index=False).agg(value=("value", "mean"))
+        plot = plot.sort_values(by="nominal")
         figure, axis = plt.subplots()
         axis.plot([0, 1], [0, 1], "--", color="gray", label="ideal")
         axis.plot(plot["nominal"], plot["value"], marker="o", label="observed")
