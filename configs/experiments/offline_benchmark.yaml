@@ -1,5 +1,6 @@
 name: offline_multidataset
 comparison_level: external
+study_phase: confirmatory
 comparison_id: external-system-comparison-v1
 seed: 2026
 candidate_algorithm: s4d_tam_reference
