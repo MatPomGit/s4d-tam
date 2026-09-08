@@ -31,6 +31,18 @@ def test_minimal_artifact_parser_normalizes_every_wrapper(tmp_path, name):
     assert result.resource == {"peak_rss_mb": 128.0, "cpu_time_s": 2.5}
 
 
+def test_parser_preserves_tracking_mask_and_alignment_mode(tmp_path):
+    path = tmp_path / "result.npz"
+    artifact(
+        path,
+        tracking_valid=np.array([False, True], dtype=np.bool_),
+        alignment_mode=np.asarray("sim3"),
+    )
+    result = parse_external_artifact(path, "orb_slam3")
+    assert result.metadata["tracking_valid"] == [False, True]
+    assert result.metadata["alignment_mode"] == "sim3"
+
+
 def test_parser_names_missing_required_field(tmp_path):
     path = tmp_path / "result.npz"
     artifact(path)
@@ -58,3 +70,10 @@ def test_parser_rejects_incompatible_shapes(tmp_path, field, value):
     artifact(path, **{field: value})
     with pytest.raises(ValueError, match=f"Invalid field '{field}'"):
         parse_external_artifact(path, "fast_lio2")
+
+
+def test_parser_rejects_invalid_tracking_mask(tmp_path):
+    path = tmp_path / "result.npz"
+    artifact(path, tracking_valid=np.array([1, 0], dtype=np.int8))
+    with pytest.raises(ValueError, match="tracking_valid"):
+        parse_external_artifact(path, "orb_slam3")

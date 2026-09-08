@@ -1,30 +1,31 @@
 name: orb_slam3
 type: external_artifact
 upstream: https://github.com/UZ-SLAMLab/ORB_SLAM3
-revision: 4452a3c4d6d9d7333b30f1e6f2e67a4311a7c991
-container: ghcr.io/s4d-tam/orb-slam3@sha256:5c02f44e8738891a64056c44fe26fb90d1cf48f44c0f9c340fad22c80f4f78fb
+revision: 0df83dde1c85c7ab91a0d47de7a29685d046f637
+container: source-build:orb-slam3-v1.0@0df83dde1c85c7ab91a0d47de7a29685d046f637
 result_root: outputs/baselines/orb_slam3
 artifact_format: s4dtam-algorithm-result-npz/v1
+alignment_mode: sim3
 validation:
   status: pending_reproduction
   validated_datasets: []
   evidence_manifest: null
-  note: Revision and environment are pinned specifications; publication readiness requires execution on the frozen compatible cohort and normalized artifact verification.
+  note: >-
+    ORB-SLAM3 is built locally from the exact upstream v1.0 commit by
+    tools/orb_slam3/build_runner.sh. Publication readiness requires execution on
+    the frozen compatible cohort and normalized artifact verification.
 input_mapping:
-  camera: /camera/image_raw
-  imu: /imu
+  camera: TartanAir image_left
 calibration_required:
-- camera_intrinsics
-- camera_distortion
-- T_camera_imu
-- imu_noise
+  - camera_intrinsics
+  - camera_distortion
 hardware:
   cpu: x86_64, record model in run manifest
-  gpu: NVIDIA CUDA, record model and driver in run manifest
+  gpu: optional for this monocular CPU baseline; record if present
   ram_gb: 32
 warm_up:
-  discard_sequences: 1
-  discard_seconds: 10
+  discard_sequences: 0
+  discard_seconds: 0
 loop_closure:
   enabled: true
   vocabulary: ORBvoc.txt

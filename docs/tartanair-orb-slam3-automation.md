@@ -1,40 +1,38 @@
 # Automated TartanAir -> ORB-SLAM3 -> S4D-TAM workflow
 
-This document is the operational procedure for the first reproducible S4D-TAM development comparison. It complements the scientific protocol by defining exactly how data are converted, frozen, passed to ORB-SLAM3, validated and evaluated by the common benchmark.
+This document defines the operational procedure for the first reproducible S4D-TAM development comparison. The workflow converts and freezes TartanAir data, builds the exact ORB-SLAM3 baseline, executes it frame-by-frame, normalizes its output, validates the evidence package and finally runs the common evaluator.
 
-The automated entry point is:
+The automated benchmark entry point is:
 
 ```bash
 s4dtam-bench pipeline-tartanair-orb-slam3 \
   configs/pipelines/tartanair_orb_slam3_development.yaml
 ```
 
-The pipeline is intentionally conservative. It automates deterministic preparation and validation, but it never fabricates an ORB-SLAM3 result. The baseline stage is considered complete only after the configured external command has produced valid normalized artifacts for every frozen sequence.
+The pipeline never fabricates baseline output. ORB-SLAM3 evidence is accepted only after a real external execution has produced normalized artifacts for every frozen sequence and those artifacts pass the evidence validator.
 
 ## 1. Scientific purpose
-
-The workflow verifies one complete vertical slice:
 
 ```text
 TartanAir upstream cohort
         |
         v
-conversion to strict S4D-TAM sequence contract
-        |
-        v
-preflight validation
+strict S4D-TAM conversion + preflight
         |
         v
 immutable cohort freeze (SHA-256)
         |
         v
-ORB-SLAM3 mono_tum input generation
+deterministic ORB-SLAM3 input generation
         |
         v
-real ORB-SLAM3 execution
+verified ORB-SLAM3 v1.0 source build
         |
         v
-normalized NPZ artifacts
+frame-wise monocular execution
+        |
+        v
+normalized NPZ + tracking mask + resource measurements
         |
         v
 baseline evidence validation
@@ -43,12 +41,12 @@ baseline evidence validation
 S4D-TAM + ORB-SLAM3 common evaluator
         |
         v
-paper-ready development tables/plots
+development tables and plots
 ```
 
-This is a development experiment. It must not be reported as a confirmatory H1-H7 test.
+This remains a development experiment. It is not confirmatory H1-H7 evidence.
 
-## 2. One-time environment preparation
+## 2. Repository environment
 
 From a clean clone:
 
@@ -61,26 +59,68 @@ python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
 pytest
 s4dtam-bench doctor
-```
-
-Record the source revision used for the run:
-
-```bash
 git rev-parse HEAD
 ```
 
-The exact commit should be retained with the experiment evidence.
+Retain the repository commit SHA with every experiment package.
 
-## 3. Prepare the upstream TartanAir cohort
+## 3. Build the ORB-SLAM3 baseline once
 
-Place only the selected upstream trajectories below the path configured as:
+The repository uses the official ORB-SLAM3 v1.0 source revision:
 
-```yaml
-tartanair:
-  raw_root: data/upstream/tartanair
+```text
+0df83dde1c85c7ab91a0d47de7a29685d046f637
 ```
 
-The supported V1-style trajectory layout is:
+The previous placeholder revision and unverified GHCR digest are not used. The execution identity is now an exact source build produced by the repository script.
+
+Install the system dependencies required by the official ORB-SLAM3 build, including a C++ compiler, CMake, OpenCV, Eigen, Pangolin and Boost. Then run:
+
+```bash
+bash tools/orb_slam3/build_runner.sh
+```
+
+The script:
+
+1. clones the official upstream if needed;
+2. checks out the exact pinned revision in detached-HEAD mode;
+3. verifies `HEAD` against the pin;
+4. invokes the upstream build;
+5. adds and builds the S4D-TAM frame-wise runner;
+6. copies the runner and `ORBvoc.txt` into the benchmark artifact directory;
+7. records SHA-256 hashes and build metadata.
+
+Expected outputs:
+
+```text
+artifacts/baselines/orb_slam3/
+  ORBvoc.txt
+  build-manifest.json
+  bin/
+    s4dtam_orb_slam3_runner
+  source/
+    ... pinned upstream checkout ...
+```
+
+`build-manifest.json` is part of the scientific evidence. It binds the actual executable and vocabulary to the pinned source revision. `run_sequence.py` checks both hashes before every sequence run.
+
+The existing configuration field named `container` is retained for compatibility with the common external-baseline evidence schema. For ORB-SLAM3 it contains the immutable source-build identity:
+
+```text
+source-build:orb-slam3-v1.0@0df83dde1c85c7ab91a0d47de7a29685d046f637
+```
+
+It must not be interpreted as a Docker image digest. If a container image is later built and published, replace this identity only with the real immutable digest produced by that build.
+
+## 4. Prepare the TartanAir cohort
+
+Place only the selected upstream trajectories below:
+
+```text
+data/upstream/tartanair
+```
+
+The supported V1-style layout is:
 
 ```text
 <environment>/<Easy|Hard>/<trajectory>/
@@ -88,53 +128,21 @@ The supported V1-style trajectory layout is:
   pose_left.txt
 ```
 
-Do not modify image or pose files after the cohort is selected.
+Do not modify source images or poses after cohort selection.
 
 ### Sampling frequency
 
-`pose_left.txt` does not itself define per-frame timestamps. Therefore `tartanair.fps` is a scientific input, not a cosmetic option. Verify it for the exact upstream release/protocol and record the verified value in the pipeline YAML.
-
-The supplied example uses `10.0` only as a placeholder. It must not be accepted without source verification.
-
-## 4. Configure the pipeline
-
-Edit:
+`pose_left.txt` does not contain per-frame timestamps. Therefore `tartanair.fps` is a scientific parameter. Verify it for the exact selected release/protocol and record the value in:
 
 ```text
 configs/pipelines/tartanair_orb_slam3_development.yaml
 ```
 
-Important fields:
+The example value `10.0` is not evidence of the correct rate for every TartanAir source package.
 
-```yaml
-schema: s4dtam-tartanair-orb-pipeline/v1
-work_root: artifacts/runs/tartanair-orb-slam3-development
-experiment_config: configs/experiments/tartanair_orb_slam3_development.yaml
+## 5. Deterministic preparation without ORB execution
 
-tartanair:
-  raw_root: data/upstream/tartanair
-  fps: 10.0
-  link_mode: symlink
-
-orb_slam3:
-  vocabulary: artifacts/baselines/orb_slam3/ORBvoc.txt
-  command_template: ""
-```
-
-`work_root` is the checkpoint/evidence directory for one logical run. Use a new directory when intentionally changing the pipeline configuration or upstream cohort.
-
-## 5. Validate the orchestration without executing external software
-
-To inspect the command structure without doing work:
-
-```bash
-s4dtam-bench pipeline-tartanair-orb-slam3 \
-  configs/pipelines/tartanair_orb_slam3_development.yaml \
-  --dry-run \
-  --until prepare_orb_inputs
-```
-
-For a real deterministic preparation run that stops before ORB-SLAM3:
+To execute all deterministic preparation stages and stop before the baseline:
 
 ```bash
 s4dtam-bench pipeline-tartanair-orb-slam3 \
@@ -142,23 +150,15 @@ s4dtam-bench pipeline-tartanair-orb-slam3 \
   --until prepare_orb_inputs
 ```
 
-At this point the pipeline has performed the following stages.
+The stages are:
 
-### Step 1: `validate_protocol`
+1. `validate_protocol`: verifies the development comparison contract.
+2. `convert_tartanair`: generates strict sequence descriptors and timestamps.
+3. `preflight_tartanair`: rejects malformed/missing inputs.
+4. `freeze_tartanair`: writes immutable cohort evidence.
+5. `prepare_orb_inputs`: generates ORB-SLAM3 `rgb.txt`, `settings.yaml` and an input manifest for each sequence.
 
-Checks that the experiment configuration is an external development comparison containing both `s4d_tam_reference` and `orb_slam3`.
-
-### Step 2: `convert_tartanair`
-
-Creates the strict S4D-TAM sequence descriptors, deterministic timestamps, frame materialization and stored provenance.
-
-### Step 3: `preflight_tartanair`
-
-Rejects malformed timestamps, missing files, invalid calibration, inconsistent frame counts, non-finite pose values and coordinate-contract violations.
-
-### Step 4: `freeze_tartanair`
-
-Creates:
+Frozen cohort evidence:
 
 ```text
 artifacts/manifests/tartanair/frozen/
@@ -167,11 +167,7 @@ artifacts/manifests/tartanair/frozen/
   freeze.json
 ```
 
-These files define the exact cohort used by the baseline and candidate.
-
-### Step 5: `prepare_orb_inputs`
-
-Creates one ORB-SLAM3 input directory per frozen sequence:
+Prepared ORB-SLAM3 inputs:
 
 ```text
 artifacts/baseline-inputs/orb_slam3/tartanair/<sequence-id>/
@@ -180,133 +176,121 @@ artifacts/baseline-inputs/orb_slam3/tartanair/<sequence-id>/
   input-manifest.json
 ```
 
-Camera parameters are derived from the converted TartanAir contract. Unrelated TUM or EuRoC calibration must not be substituted.
+The camera model is derived from the TartanAir descriptor. TUM or EuRoC calibration is never substituted.
 
-## 6. Configure real ORB-SLAM3 execution
+## 6. Frame-wise ORB-SLAM3 runner
 
-The baseline configuration pins the scientific identity of ORB-SLAM3:
-
-```text
-configs/algorithms/orb_slam3.yaml
-```
-
-The pipeline configuration defines how that pinned implementation is executed on the local workstation/container environment.
-
-Required pipeline fields:
-
-```yaml
-orb_slam3:
-  vocabulary: /path/to/ORBvoc.txt
-  command_template: >-
-    /path/to/verified/orb_wrapper
-    --vocabulary {vocabulary}
-    --settings {settings}
-    --sequence {input_dir}
-    --output {result_path}
-```
-
-Available placeholders are:
-
-- `{sequence_id}`: frozen sequence ID;
-- `{input_dir}`: prepared `mono_tum` sequence directory;
-- `{settings}`: generated ORB-SLAM3 settings file;
-- `{vocabulary}`: vocabulary path;
-- `{result_path}`: required normalized NPZ output path.
-
-The command is executed once for every frozen sequence.
-
-### Required output contract
-
-Each command must create:
+`tools/orb_slam3/runner.cpp` is a non-interactive monocular runner linked against the pinned ORB-SLAM3 library. It processes every timestamp in `rgb.txt` and writes:
 
 ```text
-outputs/baselines/orb_slam3/tartanair/<sequence-id>.npz
+timestamp,tx,ty,tz,qx,qy,qz,qw,latency_ms,tracking_valid
 ```
 
-The NPZ must contain at least:
+The runner uses `TrackMonocular` and records the tracking state after every frame. When ORB-SLAM3 loses tracking, a finite hold-last-value pose is retained only to preserve the common timestamp grid; the frame is explicitly marked `tracking_valid=0` and is excluded from trajectory-accuracy calculations. Tracking loss is therefore measurable rather than hidden.
+
+The wrapper `tools/orb_slam3/run_sequence.py`:
+
+1. verifies `build-manifest.json`;
+2. verifies SHA-256 of the executable and vocabulary;
+3. invokes the runner;
+4. records process CPU time and peak RSS on Linux;
+5. converts the raw CSV to the common NPZ contract.
+
+It is normally invoked automatically by the pipeline, but a single prepared sequence can be tested manually:
+
+```bash
+python3 tools/orb_slam3/run_sequence.py \
+  --runner artifacts/baselines/orb_slam3/bin/s4dtam_orb_slam3_runner \
+  --vocabulary artifacts/baselines/orb_slam3/ORBvoc.txt \
+  --build-manifest artifacts/baselines/orb_slam3/build-manifest.json \
+  --settings artifacts/baseline-inputs/orb_slam3/tartanair/<sequence-id>/settings.yaml \
+  --sequence artifacts/baseline-inputs/orb_slam3/tartanair/<sequence-id> \
+  --output outputs/baselines/orb_slam3/tartanair/<sequence-id>.npz
+```
+
+## 7. Normalized result contract
+
+Each ORB-SLAM3 result contains at least:
 
 ```text
 timestamps
 estimated_positions
 estimated_quaternions
 latency_ms
+tracking_valid
+alignment_mode
 resource_peak_rss_mb
 resource_cpu_time_s
 ```
 
-This requirement is deliberate. A successful ORB-SLAM3 process exit without a valid normalized artifact does not count as a reproduced baseline.
+`alignment_mode` is `sim3` for the monocular ORB-SLAM3 baseline. Monocular vision does not observe absolute global metric scale, so evaluating it with only rigid SE(3) alignment would penalize an unobservable gauge freedom rather than localization quality. The evaluator therefore estimates one global similarity scale for the valid trajectory before ATE/RPE translation metrics.
 
-## 7. Run the complete workflow
+The estimated scale is reported as:
 
-After the vocabulary and command template are configured:
+```text
+trajectory/alignment_scale
+```
+
+Tracking robustness is reported independently through:
+
+```text
+tracking/valid_fraction
+tracking/failure_rate
+tracking/valid_samples
+tracking/total_samples
+tracking/longest_failure_run_frames
+tracking/final_frame_valid
+```
+
+This keeps scale handling and tracking failure transparent rather than silently repairing the trajectory.
+
+## 8. Run the complete pipeline
+
+After the one-time ORB-SLAM3 build and after verifying TartanAir FPS:
 
 ```bash
 s4dtam-bench pipeline-tartanair-orb-slam3 \
   configs/pipelines/tartanair_orb_slam3_development.yaml
 ```
 
-The program automatically executes the remaining stages.
-
-### Step 6: `run_orb_slam3`
-
-For each frozen sequence it:
-
-1. constructs the command from the template;
-2. executes the real external process;
-3. captures combined stdout/stderr;
-4. writes a sequence-specific log;
-5. checks the return code;
-6. checks that the required result file exists;
-7. records elapsed execution time;
-8. records sequence-level execution state in the pipeline checkpoint;
-9. creates baseline run metadata including hardware information and the exact command template.
-
-Sequence logs are stored below:
+The configured command template calls `run_sequence.py` once for every frozen sequence and requires a valid NPZ at:
 
 ```text
-<work_root>/logs/
+outputs/baselines/orb_slam3/tartanair/<sequence-id>.npz
 ```
 
-If `resume_results: true`, already existing result files can be reused after an interrupted run. They are still validated later and cannot bypass the evidence gate.
+The pipeline then performs:
 
-### Step 7: `validate_baseline_evidence`
+- `validate_baseline_evidence`;
+- `run_common_benchmark`.
 
-The existing evidence validator checks:
+A successful process exit alone is not accepted as reproduction evidence.
 
-- exact match with the frozen sequence list;
-- no missing baseline artifacts;
-- no unexpected artifacts outside the frozen cohort;
+## 9. Baseline evidence gate
+
+The validator checks:
+
+- exact frozen sequence membership;
+- no missing or unexpected result artifacts;
+- normalized NPZ structure;
 - pinned ORB-SLAM3 revision;
-- pinned container identity;
-- valid run metadata;
-- valid normalized NPZ structure;
-- SHA-256 for each result artifact.
+- immutable source-build identity;
+- valid hardware/run metadata;
+- per-artifact SHA-256 hashes.
 
-Evidence is stored under:
-
-```text
-<work_root>/baseline-evidence/
-```
-
-### Step 8: `run_common_benchmark`
-
-Only after baseline evidence passes, the normal experiment engine runs:
+Evidence is emitted below:
 
 ```text
-configs/experiments/tartanair_orb_slam3_development.yaml
+artifacts/runs/tartanair-orb-slam3-development/baseline-evidence/
 ```
 
-S4D-TAM and ORB-SLAM3 are then processed by the same metric and reporting code.
+## 10. Checkpoints and restart
 
-## 8. Checkpoints and safe restart
-
-The pipeline writes:
+Pipeline state is stored in:
 
 ```text
-<work_root>/pipeline-state.json
+artifacts/runs/tartanair-orb-slam3-development/pipeline-state.json
 ```
-
-Every stage is marked as `completed`, `failed` or `dry_run` with an update timestamp and elapsed time.
 
 Normal restart:
 
@@ -315,11 +299,9 @@ s4dtam-bench pipeline-tartanair-orb-slam3 \
   configs/pipelines/tartanair_orb_slam3_development.yaml
 ```
 
-Completed stages are skipped. A failed stage is retried.
+Completed stages are skipped; failed stages are retried. If the pipeline YAML hash changes, automatic resume is rejected to prevent mixing two experimental protocols.
 
-The state file also stores the SHA-256 of the pipeline YAML. If the configuration changes, automatic resume is rejected. This prevents a partially completed run from silently mixing two protocols.
-
-To intentionally initialize a new state in the same work directory:
+To intentionally start a new state:
 
 ```bash
 s4dtam-bench pipeline-tartanair-orb-slam3 \
@@ -327,11 +309,9 @@ s4dtam-bench pipeline-tartanair-orb-slam3 \
   --no-resume
 ```
 
-For publication work, using a new `work_root` is preferable to overwriting a prior experiment.
+For publication experiments prefer a new `work_root` instead of overwriting an old run.
 
-## 9. Run only to a selected checkpoint
-
-The supported ordered steps are:
+## 11. Ordered pipeline stages
 
 ```text
 validate_protocol
@@ -344,57 +324,55 @@ validate_baseline_evidence
 run_common_benchmark
 ```
 
-Example:
+Any stage can be selected as a stopping checkpoint using `--until`.
 
-```bash
-s4dtam-bench pipeline-tartanair-orb-slam3 \
-  configs/pipelines/tartanair_orb_slam3_development.yaml \
-  --until freeze_tartanair
-```
+## 12. Evidence to archive
 
-This is useful when dataset preparation and baseline execution occur on different machines.
-
-## 10. Reproducibility evidence to archive
-
-For every completed development run archive at least:
+Archive at least:
 
 ```text
+repository commit SHA
 pipeline YAML
 pipeline-state.json
-repository commit SHA
 TartanAir freeze.json
 TartanAir sequence-list.txt
 TartanAir files.sha256
+ORB-SLAM3 build-manifest.json
+ORB-SLAM3 runner SHA-256
+ORB-SLAM3 vocabulary SHA-256
 ORB-SLAM3 input manifests
 ORB-SLAM3 per-sequence logs
 ORB-SLAM3 run metadata
-ORB-SLAM3 baseline evidence JSON + SHA-256
 normalized ORB-SLAM3 NPZ artifacts
+baseline evidence JSON + SHA-256
 common benchmark configuration
 common evaluator outputs
 ```
 
-Do not archive upstream datasets in the public repository unless redistribution terms explicitly permit it.
+Do not publish upstream dataset files unless their redistribution terms explicitly permit it.
 
-## 11. Failure rules
+## 13. Hard failure rules
 
-The workflow must stop rather than silently repair the experiment when:
+Stop the workflow rather than silently modifying evidence when:
 
-- the upstream TartanAir layout is invalid;
-- FPS is missing or non-positive;
-- the converted cohort fails preflight;
-- a frozen input is missing;
-- the ORB-SLAM3 vocabulary is unavailable;
-- the external command returns a non-zero status;
-- the external command does not produce the expected NPZ;
-- any NPZ violates the normalized result contract;
-- baseline revision/container metadata do not match the pinned specification;
-- the pipeline YAML changes during a resumed run.
+- TartanAir source layout is invalid;
+- verified FPS is unavailable;
+- preflight fails;
+- a frozen file hash changes;
+- the pinned ORB-SLAM3 revision cannot be checked out;
+- the runner or vocabulary hash does not match the build manifest;
+- the vocabulary, settings or sequence input is missing;
+- ORB-SLAM3 returns a non-zero exit status;
+- the expected NPZ is absent;
+- timestamps are incomplete or non-monotonic;
+- an NPZ violates the normalized result contract;
+- baseline revision/environment identity does not match the pinned configuration;
+- a resumed pipeline uses a changed YAML protocol.
 
-These are scientific integrity constraints, not merely software errors.
+These rules are scientific-integrity constraints, not only software checks.
 
-## 12. Completion criterion
+## 14. Completion criterion
 
-The first vertical slice is complete when `pipeline-state.json` reports all eight stages as `completed` and the baseline evidence validator has emitted a valid evidence manifest.
+The development vertical slice is complete only when all eight pipeline stages are marked `completed`, all frozen sequences have validated ORB-SLAM3 artifacts, baseline evidence has been emitted, and the common evaluator has completed.
 
-Even then, the result remains development evidence. Confirmatory publication evidence requires the separately frozen multi-dataset baseline matrix, H1-H7 mechanism study and field/field-analog validation defined in `manuscript/PUBLICATION_PATH.md`.
+This still does not unlock confirmatory publication claims. The multi-dataset external comparison, H1-H7 ablations and field/field-analog validation remain separate gates defined in `manuscript/PUBLICATION_PATH.md`.

@@ -1,13 +1,11 @@
 schema: s4dtam-tartanair-orb-pipeline/v1
 
-# All relative paths are resolved from the repository root.
 work_root: artifacts/runs/tartanair-orb-slam3-development
 experiment_config: configs/experiments/tartanair_orb_slam3_development.yaml
 
 tartanair:
-  # Replace with the exact local path to the selected upstream cohort.
   raw_root: data/upstream/tartanair
-  # Must be verified against the exact upstream release/protocol. Do not guess.
+  # Verify this value against the exact selected upstream TartanAir cohort.
   fps: 10.0
   link_mode: symlink
   converted_root: data/raw/tartanair-converted
@@ -22,16 +20,12 @@ orb_slam3:
   overwrite_inputs: false
   resume_results: true
 
-  # The command is intentionally site-specific because the pinned ORB-SLAM3 image/wrapper
-  # must actually exist in the execution environment. The command is executed once per
-  # frozen sequence and MUST create {result_path} in the normalized NPZ contract.
-  # Available placeholders:
-  #   {sequence_id} {input_dir} {settings} {vocabulary} {result_path}
-  # Example wrapper shape (replace with the verified local/container command):
-  # command_template: >-
-  #   tools/orb_slam3_wrapper.sh
-  #   --vocabulary {vocabulary}
-  #   --settings {settings}
-  #   --sequence {input_dir}
-  #   --output {result_path}
-  command_template: ""
+  # tools/orb_slam3/build_runner.sh creates the executable, vocabulary and build manifest.
+  command_template: >-
+    python3 tools/orb_slam3/run_sequence.py
+    --runner artifacts/baselines/orb_slam3/bin/s4dtam_orb_slam3_runner
+    --vocabulary {vocabulary}
+    --build-manifest artifacts/baselines/orb_slam3/build-manifest.json
+    --settings {settings}
+    --sequence {input_dir}
+    --output {result_path}
