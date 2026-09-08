@@ -1,0 +1,51 @@
+name: Manuscript
+
+on:
+  push:
+    paths:
+      - "manuscript/**"
+      - ".github/workflows/manuscript.yml"
+  pull_request:
+    paths:
+      - "manuscript/**"
+      - ".github/workflows/manuscript.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  latex:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install LaTeX toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            latexmk \
+            texlive-fonts-recommended \
+            texlive-latex-base \
+            texlive-latex-extra \
+            texlive-science
+
+      - name: Build manuscript
+        working-directory: manuscript
+        run: latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
+
+      - name: Check unresolved references
+        working-directory: manuscript
+        run: |
+          if grep -E "(LaTeX Warning:.*undefined|Citation .* undefined|There were undefined references)" main.log; then
+            echo "Unresolved LaTeX references or citations detected."
+            exit 1
+          fi
+
+      - name: Upload manuscript PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: s4d-tam-manuscript
+          path: manuscript/main.pdf
+          if-no-files-found: error
