@@ -1,0 +1,28 @@
+name: tartanair_orb_slam3_development
+comparison_level: external
+study_phase: development
+comparison_id: external-tartanair-orb-slam3-development-v1
+seed: 2026
+candidate_algorithm: s4d_tam_reference
+bootstrap_resamples: 10000
+output_dir: outputs/tartanair_orb_slam3_development
+
+datasets:
+  - type: tartanair
+    name: tartanair
+    root: data/raw/tartanair-converted
+    axis_convention: tartanair_ned_to_enu
+
+algorithms:
+  - type: s4dtam_reference
+    name: s4d_tam_reference
+    role: candidate
+    association_radius_m: 0.35
+  - type: external_artifact
+    name: orb_slam3
+    role: baseline
+    result_root: outputs/baselines/orb_slam3
+
+# Development vertical slice only. This configuration must not be used as
+# confirmatory evidence until the dataset cohort and ORB-SLAM3 outputs have
+# passed the corresponding freeze/evidence validators.

@@ -12,10 +12,14 @@ The repository is designed to support publication-grade comparison of S4D-TAM wi
 
 ## Manuscript
 
-The current article draft is versioned together with the implementation so that the mathematical description, implementation status and experimental protocol remain synchronized:
+The canonical publication source is now the modular LaTeX manuscript in [`manuscript/`](manuscript/). The primary target is the **Journal of Field Robotics (Wiley)** as a full Regular Article, contingent on completion of confirmatory benchmark experiments and representative field or field-analog validation.
 
-- [PDF manuscript](paper/S4D_TAM_draft_0830.pdf) is the recommended reading format and preserves the mathematical equations and page layout;
-- [DOCX manuscript](paper/S4D_TAM_draft_0830.docx) is the editable source document.
+- [`manuscript/main.tex`](manuscript/main.tex) is the root LaTeX source;
+- [`manuscript/sections/`](manuscript/sections/) contains one `.tex` file per manuscript section;
+- [`manuscript/PUBLICATION_PATH.md`](manuscript/PUBLICATION_PATH.md) defines the journal choice, validation gates and publication route;
+- [`manuscript/SUBMISSION_CHECKLIST.md`](manuscript/SUBMISSION_CHECKLIST.md) defines the final submission readiness criteria.
+
+The older PDF, DOCX, XML and LaTeX material in `paper/` is retained as historical working material. New publication-facing edits should be made in `manuscript/`.
 
 The manuscript distinguishes two evaluation levels: external complete-system comparison of S4D-TAM with ORB-SLAM3, VINS-Mono, FAST-LIO2 and LIO-SAM, and internal mechanism analysis using the full model versus the preregistered H1-H7 single-component ablations.
 
@@ -106,7 +110,8 @@ Scientific experiments should use version-controlled configurations, immutable s
 ```text
 configs/                  experiment, dataset, readiness and algorithm configuration
 docs/                     MkDocs documentation and validation protocols
-paper/                    versioned manuscript in PDF and editable DOCX
+manuscript/               canonical modular LaTeX article and publication path
+paper/                    historical PDF, DOCX, XML and earlier LaTeX drafts
 src/s4dtam_benchmark/     benchmark core, algorithms, adapters and reporting
 tests/                    numerical, contract and regression tests
 tools/                    release and research-support utilities

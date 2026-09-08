@@ -9,6 +9,7 @@ from s4dtam_benchmark.config import load_yaml
 
 ROOT = Path(__file__).parents[1]
 EXTERNAL = ROOT / "configs/experiments/offline_benchmark.yaml"
+DEVELOPMENT = ROOT / "configs/experiments/tartanair_orb_slam3_development.yaml"
 INTERNAL = ROOT / "configs/experiments/ablation.yaml"
 
 
@@ -16,17 +17,33 @@ def test_external_comparison_protocol_is_valid() -> None:
     validate_comparison_config(load_yaml(EXTERNAL))
 
 
+def test_development_vertical_slice_is_valid() -> None:
+    validate_comparison_config(load_yaml(DEVELOPMENT))
+
+
 def test_internal_mechanism_protocol_is_valid() -> None:
     validate_comparison_config(load_yaml(INTERNAL))
 
 
-def test_external_comparison_requires_all_core_baselines() -> None:
+def test_confirmatory_external_comparison_requires_all_core_baselines() -> None:
     config = deepcopy(load_yaml(EXTERNAL))
+    config["study_phase"] = "confirmatory"
     config["algorithms"] = [
         item for item in config["algorithms"] if item.get("name") != "lio_sam"
     ]
     with pytest.raises(ValueError, match="lio_sam"):
         validate_comparison_config(config)
+
+
+def test_development_external_comparison_allows_baseline_subset() -> None:
+    config = deepcopy(load_yaml(EXTERNAL))
+    config["study_phase"] = "development"
+    config["algorithms"] = [
+        item
+        for item in config["algorithms"]
+        if item.get("name") in {"s4d_tam_reference", "orb_slam3"}
+    ]
+    validate_comparison_config(config)
 
 
 def test_external_comparison_rejects_internal_ablation_matrix() -> None:

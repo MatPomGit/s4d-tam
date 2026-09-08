@@ -5,6 +5,7 @@ from typing import Any
 from s4dtam_benchmark.ablation import validate_ablation_config
 
 COMPARISON_LEVELS = frozenset({"external", "internal"})
+STUDY_PHASES = frozenset({"development", "confirmatory"})
 CORE_EXTERNAL_BASELINES = frozenset({"orb_slam3", "vins_mono", "fast_lio2", "lio_sam"})
 
 
@@ -28,6 +29,10 @@ def validate_comparison_config(config: dict[str, Any]) -> None:
 
 def _validate_external(config: dict[str, Any]) -> None:
     errors: list[str] = []
+    phase = config.get("study_phase", "confirmatory")
+    if phase not in STUDY_PHASES:
+        errors.append("external comparison study_phase must be development or confirmatory")
+
     if "variants" in config or "components" in config:
         errors.append("external comparison must not contain internal ablation variants/components")
 
@@ -69,9 +74,13 @@ def _validate_external(config: dict[str, Any]) -> None:
     elif candidate_specs[0].get("name") != candidate_name:
         errors.append("candidate_algorithm must match the algorithm whose role is candidate")
 
-    missing = CORE_EXTERNAL_BASELINES - baseline_names
-    if missing:
-        errors.append("external comparison is missing core baselines: " + ", ".join(sorted(missing)))
+    if not baseline_names:
+        errors.append("external comparison requires at least one independent baseline")
+
+    if phase == "confirmatory":
+        missing = CORE_EXTERNAL_BASELINES - baseline_names
+        if missing:
+            errors.append("confirmatory external comparison is missing core baselines: " + ", ".join(sorted(missing)))
 
     if errors:
         raise ValueError("Invalid external comparison configuration:\n- " + "\n- ".join(errors))

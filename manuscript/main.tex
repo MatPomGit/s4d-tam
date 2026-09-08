@@ -1,0 +1,53 @@
+\documentclass[12pt,a4paper]{article}
+
+% Journal of Field Robotics initial-submission source.
+% JFR accepts free-format initial submissions and final LaTeX sources.
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsfonts,bm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{authblk}
+\usepackage[super,sort&compress]{natbib}
+\usepackage[hidelinks,unicode,pdfcreator={LaTeX}]{hyperref}
+
+\hypersetup{
+  pdftitle={Semantic 4D Token Attention Maps for Autonomous Navigation of Unmanned Aerial Vehicles in Global Navigation Satellite System-Degraded Environments},
+  pdfauthor={Mateusz Pomianek},
+  pdfkeywords={unmanned aerial vehicles, semantic SLAM, spatiotemporal world model, autonomous navigation, GNSS degradation, occupancy forecasting, field robotics}
+}
+
+\title{\textbf{Semantic 4D Token Attention Maps for Autonomous Navigation of Unmanned Aerial Vehicles in Global Navigation Satellite System-Degraded Environments}}
+\author{Mateusz Pomianek}
+\affil{Department of Computer and Control Engineering, Rzeszów University of Technology, Poland\\
+\texttt{m.pomianek@prz.edu.pl}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+S4D-TAM (Semantic 4D Token Attention Map) is a navigation architecture for unmanned aerial vehicles operating in Global Navigation Satellite System-degraded environments. The system converts multimodal observations into a persistent set of semantic four-dimensional tokens that encode geometry, semantics, dynamics, observation history, and calibrated uncertainty. A hierarchical spatiotemporal transformer updates this representation, supports alignment with reference maps, and predicts occupancy beyond the current field of view. The resulting world model is coupled to a planner that trades path risk, energy expenditure, and information value. The central hypothesis is that persistent tokenized spatial memory can reduce redundant image processing and improve robustness relative to navigation pipelines that rely predominantly on instantaneous observations. The manuscript formalizes the representation and inference process and defines a reproducible evaluation protocol covering trajectory accuracy, robustness under degraded positioning, map quality, predictive occupancy, computational cost, and mechanism-level ablations. External comparisons target established visual, visual-inertial, and lidar-inertial baselines on public aerial-robotics datasets. Confirmatory claims will be reported only after the frozen benchmark matrix and representative field or field-analog validation have been completed.
+\end{abstract}
+
+\noindent\textbf{Keywords:} unmanned aerial vehicles; semantic SLAM; spatiotemporal world model; autonomous navigation; GNSS degradation; occupancy forecasting; field robotics
+
+\input{sections/01_introduction}
+\input{sections/02_literature_review}
+\input{sections/03_research_gap}
+\input{sections/04_system_concept}
+\input{sections/05_mathematical_description}
+\input{sections/06_hypotheses}
+\input{sections/07_experimental_validation}
+\input{sections/08_discussion}
+\input{sections/09_conclusions}
+\input{sections/10_declarations}
+\input{sections/acknowledgements}
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+\end{document}
