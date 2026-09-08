@@ -21,7 +21,6 @@ from s4dtam_benchmark.experiment import run_experiment
 from s4dtam_benchmark.orb_slam3_tartanair import prepare_orb_slam3_tartanair_inputs
 from s4dtam_benchmark.tartanair_ingestion import convert_tartanair_v1, freeze_tartanair_cohort
 
-
 PIPELINE_SCHEMA = "s4dtam-tartanair-orb-pipeline/v1"
 STEPS = (
     "validate_protocol",
@@ -53,12 +52,7 @@ def run_tartanair_orb_pipeline(
     dry_run: bool = False,
     until: str | None = None,
 ) -> PipelineSummary:
-    """Execute the development vertical slice with immutable checkpoints.
-
-    The function never fabricates baseline results. The ORB-SLAM3 command template must create
-    normalized ``s4dtam-algorithm-result-npz/v1`` artifacts. Every such artifact is validated by
-    the existing baseline-evidence gate before the common benchmark can run.
-    """
+    """Execute the development vertical slice with immutable checkpoints."""
     config_file = Path(config_path).resolve()
     config = load_yaml(config_file)
     _validate_pipeline_config(config)
@@ -193,8 +187,7 @@ def _validate_pipeline_config(config: dict[str, Any]) -> None:
     fps = float(tartanair.get("fps", 0))
     if fps <= 0:
         raise ValueError("tartanair.fps must be positive and explicitly verified")
-    orb = config["orb_slam3"]
-    if not isinstance(orb, dict):
+    if not isinstance(config["orb_slam3"], dict):
         raise ValueError("orb_slam3 must be a mapping")
 
 
@@ -230,7 +223,6 @@ def _resolve(config_file: Path, value: str | Path) -> Path:
     path = Path(value)
     if path.is_absolute():
         return path
-    # Pipeline files normally live below configs/. Resolve repository-relative paths first.
     repo_root = config_file.parent
     while repo_root.parent != repo_root and not (repo_root / "pyproject.toml").exists():
         repo_root = repo_root.parent
@@ -263,6 +255,7 @@ def _run_orb_slam3(
     state_path: Path,
     state: dict[str, Any],
 ) -> None:
+    _verify_frozen_files(paths["converted_root"], paths["freeze_root"])
     orb = config["orb_slam3"]
     template = str(orb.get("command_template", "")).strip()
     if not template:
@@ -276,7 +269,9 @@ def _run_orb_slam3(
 
     sequence_list = [
         line.strip()
-        for line in (paths["freeze_root"] / "sequence-list.txt").read_text(encoding="utf-8").splitlines()
+        for line in (paths["freeze_root"] / "sequence-list.txt")
+        .read_text(encoding="utf-8")
+        .splitlines()
         if line.strip()
     ]
     result_dataset_root = paths["orb_result_root"] / "tartanair"
@@ -287,7 +282,9 @@ def _run_orb_slam3(
     for sequence_id in sequence_list:
         result_path = result_dataset_root / f"{sequence_id}.npz"
         if result_path.is_file() and bool(orb.get("resume_results", True)):
-            run_records.append({"sequence_id": sequence_id, "status": "reused", "result": str(result_path)})
+            run_records.append(
+                {"sequence_id": sequence_id, "status": "reused", "result": str(result_path)}
+            )
             continue
         input_dir = paths["orb_input_root"] / sequence_id
         if not input_dir.is_dir():
@@ -336,11 +333,12 @@ def _run_orb_slam3(
             )
 
     freeze = json.loads((paths["freeze_root"] / "freeze.json").read_text(encoding="utf-8"))
+    baseline_config = load_yaml(paths["orb_config"])
     metadata = {
         "baseline": "orb_slam3",
         "dataset": "tartanair",
-        "revision": load_yaml(paths["orb_config"])["revision"],
-        "container": load_yaml(paths["orb_config"])["container"],
+        "revision": baseline_config["revision"],
+        "container": baseline_config["container"],
         "input_manifest_sha256": freeze["file_manifest_sha256"],
         "hardware": _hardware_metadata(),
         "command": template,
@@ -354,6 +352,24 @@ def _run_orb_slam3(
     )
 
 
+def _verify_frozen_files(converted_root: Path, freeze_root: Path) -> None:
+    manifest_path = freeze_root / "files.sha256"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"Frozen TartanAir manifest is missing: {manifest_path}")
+    for line_number, line in enumerate(manifest_path.read_text(encoding="utf-8").splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            expected, relative = line.split("  ", 1)
+        except ValueError as exc:
+            raise ValueError(f"Malformed freeze manifest line {line_number}") from exc
+        path = converted_root / relative
+        if not path.is_file():
+            raise FileNotFoundError(f"Frozen TartanAir file is missing: {path}")
+        if _sha256_file(path) != expected:
+            raise ValueError(f"Frozen TartanAir file changed after freeze: {relative}")
+
+
 def _hardware_metadata() -> dict[str, Any]:
     metadata: dict[str, Any] = {
         "platform": platform.platform(),
@@ -363,7 +379,11 @@ def _hardware_metadata() -> dict[str, Any]:
     }
     try:
         result = subprocess.run(
-            ["nvidia-smi", "--query-gpu=name,driver_version,memory.total", "--format=csv,noheader"],
+            [
+                "nvidia-smi",
+                "--query-gpu=name,driver_version,memory.total",
+                "--format=csv,noheader",
+            ],
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
@@ -371,13 +391,17 @@ def _hardware_metadata() -> dict[str, Any]:
             timeout=5,
         )
         if result.returncode == 0 and result.stdout.strip():
-            metadata["nvidia_gpu"] = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+            metadata["nvidia_gpu"] = [
+                line.strip() for line in result.stdout.splitlines() if line.strip()
+            ]
     except (FileNotFoundError, subprocess.TimeoutExpired):
         metadata["nvidia_gpu"] = []
     return metadata
 
 
-def _load_or_initialize_state(state_path: Path, config_file: Path, *, resume: bool) -> dict[str, Any]:
+def _load_or_initialize_state(
+    state_path: Path, config_file: Path, *, resume: bool
+) -> dict[str, Any]:
     config_sha = _sha256_file(config_file)
     if state_path.is_file() and resume:
         state = json.loads(state_path.read_text(encoding="utf-8"))
@@ -424,7 +448,9 @@ def _write_state(path: Path, state: dict[str, Any]) -> None:
     temporary.replace(path)
 
 
-def _summary(state_path: Path, state: dict[str, Any], output_dir: Path | None) -> PipelineSummary:
+def _summary(
+    state_path: Path, state: dict[str, Any], output_dir: Path | None
+) -> PipelineSummary:
     completed = tuple(step for step in STEPS if _step_complete(state, step))
     return PipelineSummary(state_path=state_path, completed_steps=completed, output_dir=output_dir)
 
