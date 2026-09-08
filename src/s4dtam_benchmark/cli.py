@@ -11,6 +11,7 @@ from s4dtam_benchmark.comparison import validate_comparison_config
 from s4dtam_benchmark.config import load_yaml
 from s4dtam_benchmark.datasets import TartanAirDataset
 from s4dtam_benchmark.experiment import run_experiment
+from s4dtam_benchmark.orb_slam3_tartanair import prepare_orb_slam3_tartanair_inputs
 from s4dtam_benchmark.readiness import render_readiness_summary, validate_readiness_matrix
 from s4dtam_benchmark.reproduction import verify_reproduction_package
 from s4dtam_benchmark.study_freeze import validate_confirmatory_freeze
@@ -79,6 +80,14 @@ def build_parser() -> argparse.ArgumentParser:
     freeze_tartanair.add_argument("converted_root", type=Path)
     freeze_tartanair.add_argument("output_dir", type=Path)
 
+    orb_inputs = subparsers.add_parser(
+        "prepare-orb-slam3-tartanair",
+        help="prepare deterministic mono_tum inputs from converted TartanAir sequences",
+    )
+    orb_inputs.add_argument("converted_root", type=Path)
+    orb_inputs.add_argument("output_root", type=Path)
+    orb_inputs.add_argument("--overwrite", action="store_true")
+
     baseline = subparsers.add_parser(
         "validate-baseline-evidence",
         help="validate a reproduced external baseline cohort and freeze its evidence manifest",
@@ -106,7 +115,7 @@ def main(argv: list[str] | None = None) -> int:
         print("comparison levels: external, internal")
         print(
             "readiness gates: dataset-baseline matrix, TartanAir convert/preflight/freeze, "
-            "baseline evidence, confirmatory freeze"
+            "ORB-SLAM3 TartanAir input preparation, baseline evidence, confirmatory freeze"
         )
         return 0
     if args.command == "validate-ablation":
@@ -158,6 +167,17 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  manifest_sha256={freeze_summary.manifest_sha256}")
         print(f"  sequence_list_sha256={freeze_summary.sequence_list_sha256}")
         print(f"  output={freeze_summary.output_dir}")
+        return 0
+    if args.command == "prepare-orb-slam3-tartanair":
+        input_summary = prepare_orb_slam3_tartanair_inputs(
+            args.converted_root,
+            args.output_root,
+            overwrite=args.overwrite,
+        )
+        print(
+            f"Prepared ORB-SLAM3 TartanAir inputs: sequences={input_summary.sequences} "
+            f"frames={input_summary.frames} root={input_summary.output_root}"
+        )
         return 0
     if args.command == "validate-baseline-evidence":
         evidence_summary = validate_and_freeze_baseline_evidence(
