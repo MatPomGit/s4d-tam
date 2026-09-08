@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 
 
+ORB_SLAM3_V1_REVISION = "0df83dde1c85c7ab91a0d47de7a29685d046f637"
 RAW_COLUMNS = (
     "timestamp",
     "tx",
