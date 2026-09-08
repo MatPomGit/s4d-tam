@@ -1,10 +1,4 @@
-"""Strict adapters for immutable, containerised external SLAM baselines.
-
-The ROS/C++ launchers write a small, method-independent NPZ file.  Keeping the
-parser here (rather than in the evaluators) makes it impossible for a baseline
-to receive method-specific trajectory post-processing.
-"""
-
+"""Strict adapters for immutable external SLAM baseline artifacts."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -36,28 +30,32 @@ class ExternalWrapper:
 
 WRAPPERS = {
     "orb_slam3": ExternalWrapper(
-        "orb_slam3", "https://github.com/UZ-SLAMLab/ORB_SLAM3",
-        "4452a3c4d6d9d7333b30f1e6f2e67a4311a7c991",
-        "ghcr.io/s4d-tam/orb-slam3@sha256:5c02f44e8738891a64056c44fe26fb90d1cf48f44c0f9c340fad22c80f4f78fb",
-        {"camera": "/camera/image_raw", "imu": "/imu"},
-        ("camera_intrinsics", "camera_distortion", "T_camera_imu", "imu_noise"),
+        "orb_slam3",
+        "https://github.com/UZ-SLAMLab/ORB_SLAM3",
+        "0df83dde1c85c7ab91a0d47de7a29685d046f637",
+        "source-build:orb-slam3-v1.0@0df83dde1c85c7ab91a0d47de7a29685d046f637",
+        {"camera": "TartanAir image_left"},
+        ("camera_intrinsics", "camera_distortion"),
     ),
     "vins_mono": ExternalWrapper(
-        "vins_mono", "https://github.com/HKUST-Aerial-Robotics/VINS-Mono",
+        "vins_mono",
+        "https://github.com/HKUST-Aerial-Robotics/VINS-Mono",
         "90dabb5d09c326d23f83a1c2aa0e81f6f3f5ed12",
         "ghcr.io/s4d-tam/vins-mono@sha256:894f4600e68a7bc4a7821078b5e6758a421982daf99894d505ef474017efd648",
         {"camera": "/cam0/image_raw", "imu": "/imu0"},
         ("camera_intrinsics", "camera_distortion", "T_camera_imu", "imu_noise"),
     ),
     "fast_lio2": ExternalWrapper(
-        "fast_lio2", "https://github.com/hku-mars/FAST_LIO",
+        "fast_lio2",
+        "https://github.com/hku-mars/FAST_LIO",
         "7a7cf9b0df52c25f69e4c4f8e92d3552cbe59c29",
         "ghcr.io/s4d-tam/fast-lio2@sha256:29187acbe2282620ff673b241b3d2b5169279d53275aa000e791656c4fc95f10",
         {"lidar": "/points_raw", "imu": "/imu"},
         ("T_lidar_imu", "imu_noise", "lidar_model", "scan_period"),
     ),
     "lio_sam": ExternalWrapper(
-        "lio_sam", "https://github.com/TixiaoShan/LIO-SAM",
+        "lio_sam",
+        "https://github.com/TixiaoShan/LIO-SAM",
         "a4f2af6c7b6f61d8c4b5176d81e9cafe22b72cc8",
         "ghcr.io/s4d-tam/lio-sam@sha256:21d018ffd37a6480b427ec8267fd8d42219298b059536991a927adcc42ebc9a7",
         {"lidar": "/points_raw", "imu": "/imu", "gps": "/gps/odom"},
@@ -85,12 +83,20 @@ def parse_external_artifact(path: str | Path, name: str) -> AlgorithmResult:
         n = timestamps.size
         if n == 0 or not np.all(np.isfinite(timestamps)) or np.any(np.diff(timestamps) <= 0):
             raise ValueError("Invalid field 'timestamps': values must be finite and strictly increasing")
-        expected = {"estimated_positions": (n, 3), "estimated_quaternions": (n, 4),
-                    "latency_ms": (n,)}
-        for field, value in (("estimated_positions", positions),
-                             ("estimated_quaternions", quaternions), ("latency_ms", latency)):
+        expected = {
+            "estimated_positions": (n, 3),
+            "estimated_quaternions": (n, 4),
+            "latency_ms": (n,),
+        }
+        for field, value in (
+            ("estimated_positions", positions),
+            ("estimated_quaternions", quaternions),
+            ("latency_ms", latency),
+        ):
             if value.shape != expected[field]:
-                raise ValueError(f"Invalid field '{field}': expected shape {expected[field]}, got {value.shape}")
+                raise ValueError(
+                    f"Invalid field '{field}': expected shape {expected[field]}, got {value.shape}"
+                )
             if not np.all(np.isfinite(value)):
                 raise ValueError(f"Invalid field '{field}': values must be finite")
         norms = np.linalg.norm(quaternions, axis=1)
@@ -99,15 +105,37 @@ def parse_external_artifact(path: str | Path, name: str) -> AlgorithmResult:
         quaternions = quaternions / norms[:, None]
         if np.any(latency < 0):
             raise ValueError("Invalid field 'latency_ms': values must be non-negative")
-        resource = {key.removeprefix("resource_"): float(np.asarray(data[key]))
-                    for key in data.files if key.startswith("resource_")}
+
+        metadata: dict[str, Any] = {"artifact_format": "s4dtam-algorithm-result-npz/v1"}
+        if "tracking_valid" in data.files:
+            tracking_valid = np.asarray(data["tracking_valid"])
+            if tracking_valid.dtype != np.bool_ or tracking_valid.shape != (n,):
+                raise ValueError("Invalid field 'tracking_valid': expected boolean shape [N]")
+            metadata["tracking_valid"] = tracking_valid.tolist()
+        if "alignment_mode" in data.files:
+            alignment_mode = str(np.asarray(data["alignment_mode"]).item())
+            if alignment_mode not in {"se3", "sim3", "none"}:
+                raise ValueError("Invalid field 'alignment_mode': expected se3, sim3 or none")
+            metadata["alignment_mode"] = alignment_mode
+
+        resource = {
+            key.removeprefix("resource_"): float(np.asarray(data[key]))
+            for key in data.files
+            if key.startswith("resource_")
+        }
         for field, resource_value in resource.items():
             if not np.isfinite(resource_value) or resource_value < 0:
-                raise ValueError(f"Invalid field 'resource_{field}': expected non-negative scalar")
+                raise ValueError(
+                    f"Invalid field 'resource_{field}': expected non-negative scalar"
+                )
         return AlgorithmResult(
-            algorithm=name, timestamps=timestamps, estimated_positions=positions,
-            estimated_quaternions=quaternions, latency_ms=latency, resource=resource,
-            metadata={"artifact_format": "s4dtam-algorithm-result-npz/v1"},
+            algorithm=name,
+            timestamps=timestamps,
+            estimated_positions=positions,
+            estimated_quaternions=quaternions,
+            latency_ms=latency,
+            resource=resource,
+            metadata=metadata,
         )
 
 
@@ -130,10 +158,13 @@ class ExternalArtifactAlgorithm(AlgorithmAdapter):
             )
         result = parse_external_artifact(path, self.name)
         result.metadata["wrapper"] = {
-            "upstream": self.wrapper.upstream, "commit": self.wrapper.commit,
-            "container": self.wrapper.container, "inputs": self.wrapper.inputs,
+            "upstream": self.wrapper.upstream,
+            "commit": self.wrapper.commit,
+            "container": self.wrapper.container,
+            "inputs": self.wrapper.inputs,
             "calibration": self.wrapper.calibration,
             "loop_closure": self.config.get("loop_closure"),
-            "hardware": self.config.get("hardware"), "warm_up": self.config.get("warm_up"),
+            "hardware": self.config.get("hardware"),
+            "warm_up": self.config.get("warm_up"),
         }
         return result
