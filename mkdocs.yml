@@ -104,6 +104,7 @@ nav:
       - Artifact specification: artifact-specification.md
   - Evaluation protocols:
       - Reproducibility: reproducibility.md
+      - TartanAir + ORB-SLAM3 automation: tartanair-orb-slam3-automation.md
       - Preregistration: preregistration.md
       - SIL protocol: sil-protocol.md
       - HIL protocol: hil-protocol.md

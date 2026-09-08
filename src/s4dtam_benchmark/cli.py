@@ -16,6 +16,7 @@ from s4dtam_benchmark.readiness import render_readiness_summary, validate_readin
 from s4dtam_benchmark.reproduction import verify_reproduction_package
 from s4dtam_benchmark.study_freeze import validate_confirmatory_freeze
 from s4dtam_benchmark.tartanair_ingestion import convert_tartanair_v1, freeze_tartanair_cohort
+from s4dtam_benchmark.tartanair_orb_pipeline import STEPS, run_tartanair_orb_pipeline
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -88,6 +89,23 @@ def build_parser() -> argparse.ArgumentParser:
     orb_inputs.add_argument("output_root", type=Path)
     orb_inputs.add_argument("--overwrite", action="store_true")
 
+    pipeline = subparsers.add_parser(
+        "pipeline-tartanair-orb-slam3",
+        help="run the checkpointed TartanAir -> ORB-SLAM3 -> S4D-TAM development pipeline",
+    )
+    pipeline.add_argument("config", type=Path)
+    pipeline.add_argument(
+        "--no-resume",
+        action="store_true",
+        help="ignore an existing checkpoint and initialize a new state in the configured work root",
+    )
+    pipeline.add_argument("--dry-run", action="store_true")
+    pipeline.add_argument(
+        "--until",
+        choices=STEPS,
+        help="stop after the selected pipeline stage",
+    )
+
     baseline = subparsers.add_parser(
         "validate-baseline-evidence",
         help="validate a reproduced external baseline cohort and freeze its evidence manifest",
@@ -115,7 +133,8 @@ def main(argv: list[str] | None = None) -> int:
         print("comparison levels: external, internal")
         print(
             "readiness gates: dataset-baseline matrix, TartanAir convert/preflight/freeze, "
-            "ORB-SLAM3 TartanAir input preparation, baseline evidence, confirmatory freeze"
+            "ORB-SLAM3 TartanAir input preparation, checkpointed ORB pipeline, "
+            "baseline evidence, confirmatory freeze"
         )
         return 0
     if args.command == "validate-ablation":
@@ -178,6 +197,18 @@ def main(argv: list[str] | None = None) -> int:
             f"Prepared ORB-SLAM3 TartanAir inputs: sequences={input_summary.sequences} "
             f"frames={input_summary.frames} root={input_summary.output_root}"
         )
+        return 0
+    if args.command == "pipeline-tartanair-orb-slam3":
+        summary = run_tartanair_orb_pipeline(
+            args.config,
+            resume=not args.no_resume,
+            dry_run=args.dry_run,
+            until=args.until,
+        )
+        print(f"Pipeline state: {summary.state_path}")
+        print("Completed steps: " + ", ".join(summary.completed_steps))
+        if summary.output_dir is not None:
+            print(f"Benchmark output: {summary.output_dir}")
         return 0
     if args.command == "validate-baseline-evidence":
         evidence_summary = validate_and_freeze_baseline_evidence(
