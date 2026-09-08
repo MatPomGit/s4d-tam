@@ -17,7 +17,6 @@ from .uncertainty import (
     selective_risk_metrics,
 )
 
-# Absolute tolerance for comparing dataset and result timestamps, in seconds.
 TIMESTAMP_ATOL_SECONDS = 1e-6
 
 
@@ -81,12 +80,72 @@ def validate_time_contract(
         )
 
 
+def _tracking_mask(result: AlgorithmResult) -> np.ndarray:
+    raw = result.metadata.get("tracking_valid")
+    if raw is None:
+        return np.ones(len(result.timestamps), dtype=np.bool_)
+    mask = np.asarray(raw)
+    if mask.dtype != np.bool_ or mask.shape != (len(result.timestamps),):
+        raise ValueError("result metadata tracking_valid must be boolean with shape [N]")
+    return mask
+
+
+def _longest_false_run(mask: np.ndarray) -> int:
+    longest = current = 0
+    for value in mask:
+        if value:
+            current = 0
+        else:
+            current += 1
+            longest = max(longest, current)
+    return longest
+
+
+def _failed_trajectory_metrics() -> dict[str, float]:
+    return {
+        "trajectory/ate_rmse_m": float("nan"),
+        "trajectory/ate_median_m": float("nan"),
+        "trajectory/ate_p95_m": float("nan"),
+        "trajectory/rpe_translation_rmse_m": float("nan"),
+        "trajectory/final_drift_m": float("nan"),
+        "trajectory/final_drift_percent": float("nan"),
+        "trajectory/path_length_m": float("nan"),
+        "trajectory/alignment_scale": float("nan"),
+    }
+
+
 def evaluate_result(
     sequence: SequenceData, result: AlgorithmResult
 ) -> tuple[dict[str, float], list[str]]:
     validate_time_contract(sequence, result)
-    metrics = trajectory_metrics(sequence.gt_positions, result.estimated_positions)
+    valid = _tracking_mask(result)
+    alignment_mode = str(result.metadata.get("alignment_mode", "se3"))
     unavailable: list[str] = []
+
+    metrics: dict[str, float] = {
+        "tracking/valid_fraction": float(np.mean(valid)),
+        "tracking/failure_rate": float(1.0 - np.mean(valid)),
+        "tracking/valid_samples": float(np.count_nonzero(valid)),
+        "tracking/total_samples": float(len(valid)),
+        "tracking/longest_failure_run_frames": float(_longest_false_run(valid)),
+        "tracking/final_frame_valid": float(valid[-1]),
+    }
+    if np.count_nonzero(valid) >= 2:
+        try:
+            metrics.update(
+                trajectory_metrics(
+                    sequence.gt_positions[valid],
+                    result.estimated_positions[valid],
+                    alignment_mode=alignment_mode,
+                )
+            )
+        except ValueError as error:
+            metrics.update(_failed_trajectory_metrics())
+            unavailable.append(f"trajectory accuracy: {error}")
+    else:
+        metrics.update(_failed_trajectory_metrics())
+        unavailable.append("trajectory accuracy: fewer than two valid tracking samples")
+
     metrics.update(
         efficiency_metrics(result.latency_ms, result.resource, result.planner_cost_diagnostics)
     )
@@ -95,7 +154,7 @@ def evaluate_result(
             "quaternion", sequence.gt_quaternions, result.estimated_quaternions
         )
         metrics["trajectory/rpe_rotation_rmse_deg"] = rotation_rpe_deg(
-            quaternion_target, quaternion_prediction
+            quaternion_target, quaternion_prediction, valid_mask=valid
         )
     else:
         unavailable.append("trajectory rotation: quaternion ground truth or prediction absent")
@@ -103,12 +162,16 @@ def evaluate_result(
     if result.pose_covariances is not None:
         metrics.update(
             pose_uncertainty_metrics(
-                sequence.gt_positions, result.estimated_positions, result.pose_covariances
+                sequence.gt_positions[valid],
+                result.estimated_positions[valid],
+                result.pose_covariances[valid],
             )
         )
         metrics.update(
             pose_calibration_metrics(
-                sequence.gt_positions, result.estimated_positions, result.pose_covariances
+                sequence.gt_positions[valid],
+                result.estimated_positions[valid],
+                result.pose_covariances[valid],
             )
         )
     else:
