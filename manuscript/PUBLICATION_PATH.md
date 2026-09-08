@@ -15,7 +15,16 @@ The manuscript will be prepared as a **full Regular Article**, not as a conceptu
 
 The initial submission will use the journal's free-format route. The source of record is LaTeX. `main.tex` assembles independently maintained section files from `sections/`.
 
-## 3. Required evidence before submission
+## 3. Experimental phases
+
+The repository distinguishes two external-comparison phases explicitly:
+
+- `study_phase: development` is used for vertical slices, integration tests and methodological debugging. It may intentionally contain a sensor-compatible subset of independent baselines and its results must not be promoted to confirmatory evidence;
+- `study_phase: confirmatory` is used for the frozen publication study and requires the complete core baseline set defined by the repository protocol.
+
+The first implemented development vertical slice is `configs/experiments/tartanair_orb_slam3_development.yaml`. It evaluates TartanAir with S4D-TAM and ORB-SLAM3 through the same evaluator after dataset-freeze and baseline-evidence gates. The operational procedure is documented in `docs/tartanair-orb-slam3-development.md`.
+
+## 4. Required evidence before submission
 
 ### Gate A — frozen benchmark definition
 
@@ -71,7 +80,7 @@ JFR requires experimental evidence that is not limited to simulation. Before sub
 
 The validation must report platform, sensors, compute hardware, environment, scenario protocol, number of runs, failure criteria and safety constraints.
 
-## 4. Manuscript restructuring
+## 5. Manuscript restructuring
 
 The canonical article structure is:
 
@@ -88,7 +97,7 @@ The canonical article structure is:
 
 Each numbered section is stored as a separate `.tex` file. `main.tex` contains only document-level formatting, author metadata, abstract, keywords, section inclusion and bibliography commands.
 
-## 5. JFR-specific preparation rules
+## 6. JFR-specific preparation rules
 
 The working manuscript follows the following submission constraints:
 
@@ -104,13 +113,13 @@ The working manuscript follows the following submission constraints:
 - ORCID supplied in the Wiley submission system;
 - high-resolution final figure assets retained separately.
 
-## 6. Bibliography audit
+## 7. Bibliography audit
 
 Before submission, audit every cited work against a primary publisher page, DOI registry or official dataset/project page. In particular, dataset references for TartanAir, Blackbird, MARSIM and AeroVerse must point to the correct dataset publications or canonical project records. No placeholder, guessed, mismatched or AI-invented citation may remain.
 
 Acceptance criterion: every bibliography item used in the final manuscript has verified authorship, title, year, venue and DOI/URL where applicable.
 
-## 7. Reproducibility package
+## 8. Reproducibility package
 
 Before submission:
 
@@ -121,7 +130,7 @@ Before submission:
 5. generate manuscript figures and tables directly from those frozen results;
 6. include environment/container metadata sufficient to recreate the computational workflow.
 
-## 8. Submission decision gate
+## 9. Submission decision gate
 
 The manuscript is **GO for submission** only when all conditions below are satisfied:
 
@@ -139,6 +148,6 @@ The manuscript is **GO for submission** only when all conditions below are satis
 
 Until then, the manuscript remains a research draft and must not be submitted as a full empirical JFR article.
 
-## 9. Fallback outlets
+## 10. Fallback outlets
 
 If JFR becomes unsuitable after the empirical study is complete, reassess journals above the required ministerial threshold. IEEE Robotics and Automation Letters is a technically strong alternative but would require substantial compression and restructuring. The fallback decision must be based on the binding ministerial list and journal author guidelines valid on the actual submission date.
