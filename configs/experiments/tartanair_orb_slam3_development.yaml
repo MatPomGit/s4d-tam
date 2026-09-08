@@ -1,5 +1,6 @@
 name: tartanair_orb_slam3_development
 comparison_level: external
+study_phase: development
 comparison_id: external-tartanair-orb-slam3-development-v1
 seed: 2026
 candidate_algorithm: s4d_tam_reference
