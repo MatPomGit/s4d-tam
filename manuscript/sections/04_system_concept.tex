@@ -1,0 +1,56 @@
+\section{S4D-TAM System Concept}
+\label{sec:system_concept}
+
+\subsection{Definition of the 4D Token}
+\label{subsec:token_definition}
+
+A standard 3D token represents a spatial fragment or object at a given position:
+\begin{equation}
+  t_i = [x_i, y_i, z_i]
+\end{equation}
+However, it cannot capture environmental changes or observation history. In an autonomous system, it is essential to distinguish a permanent structure (building, tree, or terrain) from dynamic or movable objects (persons, vehicles) that may change their position over time~\cite{pomianek2026s4dtam}.
+
+A 4D token incorporates the temporal dimension alongside geometric, semantic, dynamic, and uncertainty attributes:
+\begin{equation}
+  T_i(t) = [\mathbf{p}_i, \mathbf{\Sigma}_i, \mathbf{g}_i, \mathbf{s}_i, \mathbf{v}_i, \mathbf{h}_i, u_i, r_i]
+\end{equation}
+where the individual elements denote:
+\begin{enumerate}
+  \item $\mathbf{p}_i \in \mathbb{R}^3$ -- position in 3D space,
+  \item $\mathbf{\Sigma}_i \in \mathbb{R}^{3 \times 3}$ -- position covariance matrix (geometric uncertainty),
+  \item $\mathbf{g}_i \in \mathbb{R}^{d_g}$ -- geometric descriptor (surface normals, curvature, local geometric features),
+  \item $\mathbf{s}_i \in \mathbb{R}^{d_s}$ -- semantic embedding (features from a deep neural network or open-vocabulary foundation model),
+  \item $\mathbf{v}_i \in \mathbb{R}^3$ -- estimated velocity and motion vector,
+  \item $\mathbf{h}_i \in \mathbb{R}^{d_h}$ -- observation history (observation count, timestamps, sensor modality sources),
+  \item $u_i \in [0, 1]$ -- overall token uncertainty (scalar reliability measure),
+  \item $r_i \in [0, 1]$ -- local risk indicator (hazard probability).
+\end{enumerate}
+
+The fourth dimension does not merely append time as an extra coordinate; the token encodes persistence, observation chronology, rate of change, and the forecasted future state of the object~\cite{pomianek2026s4dtam, zheng2024gaussianad, wang2024occsora, ma2023cam4docc, chen2024riskoccupancy}.
+
+\subsection{System Architecture}
+\label{subsec:architecture}
+
+The S4D-TAM system is organized into nine functional layers:
+\begin{itemize}
+  \item \textbf{Layer 1: Sensor Fusion} -- Integration of data from RGB and thermal cameras, IMU, GNSS, altimeter, and optionally LiDAR, radar, and prior reference maps. Each measurement is associated with a timestamp, coordinate frame transformation, and sensor reliability measure~\cite{pomianek2026s4dtam}.
+  \item \textbf{Layer 2: SLAM Front-End} -- A lightweight visual-inertial front-end performing feature tracking, depth estimation, landmark detection, and feature vector extraction. The geometric SLAM constructs a local point cloud and tracks the UAV trajectory. The factor graph incorporates visual odometry, inertial, GNSS, altimeter, semantic loop-closure, and reference-map alignment factors~\cite{liu2024slideslam, tao2024active, liu2022largescale}.
+  \item \textbf{Layer 3: Tokenization and Hierarchical Representation} -- The SLAM point cloud is partitioned into superpoints, object segments, adaptive octree cells, local surface patches, and dynamic instances. Each segment is encoded into one or more tokens. Large regular surfaces are stored at lower resolution, while edges, obstacles, and dynamic objects are retained at higher resolution~\cite{li2024hislam, tian2024same, xiang2021customizable, zhang2021you, he2024efficient}.
+  \item \textbf{Layer 4: Spatiotemporal Transformer} -- A hierarchical attention mechanism combining local scope (tokens within a spatial radius, predicted flight corridor, sensor field of view) and global scope (landmarks, major terrain obstacles, dynamic objects, high-uncertainty regions, elevated-risk locations)~\cite{yu2025driveoccworld, silva2024s2tpvformer, liao2025i2world, pcpnet2024}.
+  \item \textbf{Layer 5: Object Memory and Semantics} -- Upon detecting a landmark or object, an instance token is instantiated storing class probability distributions, observation history, open-vocabulary embeddings, and spatial relations with neighboring objects~\cite{li2024hislam, cai2024neusis, haghighi2024ovoslam}.
+  \item \textbf{Layer 6: Reference Map Alignment} -- Maintenance and alignment of the online map $M_t$ with an a priori reference map $M_{\mathrm{ref}}$ (elevation maps, prior mission clouds) via a three-stage procedure: global topological descriptor matching, landmark token matching, and local geometric optimization~\cite{liu2022largescale, yue2025airground, radwan2024uav}.
+  \item \textbf{Layer 7: Occupancy and Risk Forecasting} -- Prediction of future space occupancy and hazard probability in partially observable areas (inferring occluded regions behind building edges, terrain trails leading to unseen objects, and dynamic object trajectories)~\cite{yu2025driveoccworld, mei2025irwm, liao2025i2world, zheng2024gaussianad, liu2025hybrid}.
+  \item \textbf{Layer 8: Trajectory Planning} -- A risk-aware planner optimizing an objective function balancing path length, energy consumption, collision probability, predicted environmental risk, and uncertainty penalty~\cite{cai2024neusis, yue2025airground, tordesillas2022faster}.
+  \item \textbf{Layer 9: Active Perception} -- Dynamic control of sensor orientation, processing frequency, and sensory modality based on expected information gain (uncertainty reduction) relative to operational cost~\cite{pomianek2026s4dtam, tao2024active, tian2024same}.
+\end{itemize}
+
+\subsection{Current Reference Implementation and Target Research Modules}
+\label{subsec:implementation_status}
+
+The S4D-TAM concept is accompanied by an executable Python research reference. The implementation is modular so that individual mechanisms can be tested, replaced, and ablated without altering evaluator contracts.
+
+Implemented reference components include persistent token state and lifecycle management (\texttt{token.py}, \texttt{memory.py}), token proposal and data association (\texttt{proposal.py}, \texttt{association.py}), modality-oriented encoder interfaces and masked fusion (\texttt{encoders/}), attention-related processing (\texttt{attention.py}), calibration and uncertainty utilities (\texttt{calibration.py}), reference-map and topological support (\texttt{reference\_map.py}, \texttt{topology.py}), causal probabilistic occupancy and motion forecasting (\texttt{forecasting.py}), deterministic risk-, energy-, time-, progress-, and information-aware planning (\texttt{planner.py}), structured event telemetry (\texttt{telemetry.py}), and the integrated \texttt{S4DTAMReference} pipeline (\texttt{pipeline.py}).
+
+The reference implementation favors strict causality, deterministic replay, explicit uncertainty, and auditability over raw throughput. During early numerical validation, observed differences can be traced to defined mechanisms rather than stochastic non-determinism.
+
+Formulations in Sections~\ref{subsec:bayesian_inference}--\ref{subsec:resource_management} specify target research extensions alongside the reference implementation, including learned hierarchical transformer backends, multimodal DBN/particle filters, MPPI stochastic trajectory sampling, adaptive octree Level-of-Detail (LOD) memory management, and real-time EDF scheduling.
